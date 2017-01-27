@@ -1,1 +1,46 @@
-{"url": "https://docs.google.com/open?id=1dAa9idoXjnRJBiPNUizMZysWZSVKFPMLkyqeo2LHcZ4tJClrJ0zgLMq1", "doc_id": "1dAa9idoXjnRJBiPNUizMZysWZSVKFPMLkyqeo2LHcZ4tJClrJ0zgLMq1", "email": "elm956@gmail.com", "resource_id": "document:1dAa9idoXjnRJBiPNUizMZysWZSVKFPMLkyqeo2LHcZ4tJClrJ0zgLMq1"}
+function gmailStats(){
+  Logger.clear();
+  var start = +new Date();
+  var props = PropertiesService.getScriptProperties();
+  if (props.getKeys().length == 0){
+    props.setProperties({'threadIndex':0, 'rowIndex':2});
+    if (ScriptApp.getProjectTriggers().length == 0){
+      ScriptApp.newTrigger('gmailStats').timeBased().everyMinutes(5).create();
+    }
+  }
+  var sheet = SpreadsheetApp.openById('1vNX7dfILoamf1YMG8mQukvKsbMASA2afTkn4bj2C81U').getSheetByName('Sheet1');
+  var tStart = Number(props.getProperty('threadIndex'));
+  var rowCount = Number(props.getProperty('rowIndex'));
+  var isFinished = false;
+  while (!isFinished && (+new Date() - start) < 240000){
+    var threads = GmailApp.getInboxThreads(tStart, 100);
+    if (threads.length == 0){
+      isFinished = true;
+      break;
+    }
+    for (t = 0; t < threads.length; t++){
+      var messages = threads[t].getMessages();
+      for (m = 0; m < messages.length; m++){
+        var msg = messages[m];
+        var mStats = [[
+          msg.getDate(),
+          msg.getReplyTo(),
+          msg.getFrom(),
+          msg.getTo(),
+          msg.getSubject(),
+          /unsubscribe/im.test(msg.getRawContent())
+        ]];
+        sheet.getRange(rowCount, 1, 1, 6).setValues(mStats);
+        rowCount = rowCount + 1;
+      }
+	}
+    tStart += 100;
+    props.setProperty('threadIndex', tStart);
+    props.setProperty('rowIndex', rowCount);
+  }
+  if (isFinished){
+    props.deleteAllProperties();
+    var trigger = ScriptApp.getProjectTriggers()[0];
+    ScriptApp.deleteTrigger(trigger);
+  }
+}
