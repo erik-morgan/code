@@ -1,0 +1,46 @@
+' Compares drawing revisions, and colors cells whose revisions are different
+
+Sub CompDWGRevs()
+Dim ws As Worksheet
+Dim x, y, z As Integer
+Dim newstr, oldstr As String
+Dim tf As Boolean
+
+Set ws = Excel.Worksheets("COMPARE")
+
+z = ws.UsedRange.Rows.count
+
+Application.ScreenUpdating = False
+
+x = 1
+
+For y = 1 To z
+    newstr = ws.Cells(y, x)
+    oldstr = ws.Cells(y, x + 4)
+    tf = newstr Like oldstr
+    If tf = False Then
+        ws.Cells(y, x).Interior.Color = RGB(255, 199, 206)
+    End If
+    newstr = ""
+    oldstr = ""
+Next y
+
+x = 3
+
+For y = 1 To z
+    newstr = ws.Cells(y, x)
+    oldstr = ws.Cells(y, x + 4)
+    tf = newstr Like oldstr
+'    If y < 4 Then
+'        MsgBox "I have parts list " & ws.Cells(y, 2) & " at rev " & oldstr & vbNewLine & "it is supposed to be at rev " & newstr
+'    End If
+    If tf = False Then
+        ws.Cells(y, x).Interior.Color = RGB(255, 199, 206)
+    End If
+    newstr = ""
+    oldstr = ""
+Next y
+
+Application.ScreenUpdating = True
+
+End Sub

@@ -1,0 +1,120 @@
+function bmToText(){
+    var bmRoot = this.bookmarkRoot;
+    var bmNames = [], bmLevels = [], count;
+    count = 0;
+    for (var i = 0; i < bmRoot.children.length; i++){
+        var bm1 = bmRoot.children[i];
+        bmLevels[count] = 0;
+        bmNames[count] = bm1.name;
+        count+=1;
+        for (var j = 0; j < (bm1.children.length; j++){
+            var bm2 = bm1.children[j];
+            bmLevels[count] = 1;
+            bmNames[count] = bm2.name;
+            count+=1;
+            for (var k = 0; k < (bm2.children.length; k++{
+                var bm3 = bm2.children[k];
+                bmLevels[count] = 2;
+                bmNames[count] = bm3.name;
+                count+=1;
+                for (var m = 0; m < bm3.children.length; m++){
+                    var bm4 = bm3.children[m];
+                    bmLevels[count] = 3;
+                    bmNames[count] = bm4.name;
+                    count+=1;
+                    for (var n = 0; n < bm4.children.length; n++){
+                        var bm5 = bm4.children[n];
+                        bmLevels[count] = 4;
+                        bmNames[count] = bm5.name;
+                        count+=1;
+                        for (var p = 0; p < bm5.children.length; p++){
+                            var bm6 = bm5.children[p];
+                            bmLevels[count] = 5;
+                            bmNames[count] = bm6.name;
+                            count+=1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var filePath = "/c/Users/Erik/Desktop/File\ Structure/Active\ Files/A+/Bookmarks.txt";
+    var bmLog = new File(filePath);
+    var bmLogFile = filePath.open("w", undefined, undefined);
+    bmLogFile.encoding = "UTF-8";
+    bmLogFile.lineFeed = "Windows";
+    for (var x = 0; x < bmNames.length; x++){
+        tempString = bmNames[x];
+        for (y = 0; y < bmLevels[x]; y++){
+            tempString = "\t" & tempString;
+        }
+        bmLogFile.writeln(tempString & "\n");
+    }
+    bmLogFile.close();
+}
+
+function DumpBookmark(bm, nLevel){
+// Build indents to illustrate the level
+var s = "";
+for (var i = 0; i < nLevel; i++) s += " ";
+// Print out the bookmark’s name:
+console.println(s + "+-" + bm.name);
+// Recursively print out the bookmark’s children:
+if (bm.children != null)/* List all Bookmarks */ 
+for (var i = 0; i < bm.children.length; i++)
+DumpBookmark(bm.children[i], nLevel+1);
+}
+// Open the console to begin:
+console.clear(); console.show();
+// Recursively print out the bookmark tree
+DumpBookmark(this.bookmarkRoot, 0);
+/* Recursively work through bookmark tree */ 
+(nLevel != 0) { // don't print the root 
+bmReport.absIndent=bmTab*(nLevel-1); 
+bmReport.writeText(util.printf("%s",bm.name)); 
+} 
+
+if (bm.children != null) 
+for (var i = 0; i < bm.children.length; i++) 
+PrintBookmarks(bm.children[i], nLevel + 1); 
+} 
+
+// Set up the parameters to write a report 
+bmTab = 20; 
+bmReport = new Report(); 
+bmReport.size = 2 // Large font size for title 
+bmReport.writeText(this.title); 
+bmReport.writeText(" "); // Skip a line 
+bmReport.size = 1.5; // Slightly smaller for heading 
+bmReport.writeText("Listing of Bookmarks"); 
+bmReport.writeText(" "); 
+bmReport.size = 1; // Default size for everything else 
+PrintBookmarks(this.bookmarkRoot, 0); // Start moving through bookmarks 
+// Make it global so the object will be "remembered" after batch is done. 
+global.bmRep = bmReport; 
+// Make global for next step 
+/* 
+We now want to open our report (Report.open), but in Acrobat 6 and earlier we cannot open or save (Report.save) a report while a modal dialog box 
+is open, as there is while the batch is running. So, if the version is 6 or 
+earlier, wait until the batch is done, then open the report. 
+*/ 
+if ( app.viewerVersion < 7 ) { 
+
+global.wrtDoc = app.setInterval( 
+'try {' 
++' reportDoc = global.bmRep.open("Listing of Bookmarks");' 
++' console.println("Executed Report.open");' 
++' app.clearInterval(global.wrtDoc);' 
++' delete global.wrtDoc;' 
++' console.println("Executed App.clearInterval");' 
++' reportDoc.info.title = "Bookmark Listings";' 
++' reportDoc.info.Author = "A. C. Robat";' 
++'} catch (e) {console.println("Waiting...: " + e);}' 
+, 100); // Check every 1/10th of a second. You can adjust this 
+} else { 
+
+reportDoc = global.bmRep.open("Listing of Bookmarks"); 
+console.println("Executed Report.open"); 
+reportDoc.info.title = "Bookmark Listings"; 
+reportDoc.info.Author = "A. C. Robat"; 
+} 

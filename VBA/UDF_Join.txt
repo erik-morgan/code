@@ -1,0 +1,15 @@
+' Joins a range of cells together using an optional delimiter
+
+Function JOIN(cellRange As Range, delim As Variant) As String
+    Dim cell As Range, joinedString As String, firstCell As Boolean
+    If IsMissing(delim) Then delim = ""
+    firstCell = True
+    For Each cell In cellRange
+        If firstCell Then
+            JOIN = cell.Value
+            firstCell = False
+        ElseIf Len(cell.Value) Then
+            JOIN = JOIN & delim & cell.Value
+        End If
+    Next cell
+End Function

@@ -1,0 +1,96 @@
+' Creates a log of every procedure used in a project, and adds it to an excel spreadsheet, so I could calculate which procedures were most used in the last 5 years
+
+Public Function procname(currentstring As String) As String
+    Dim tabmark As Integer
+    tabmark = InStr(currentstring, Chr(9))
+    procname = Left(currentstring, tabmark - 1)
+End Function
+Sub word2excel()
+
+Dim P As Paragraph
+Dim tempstring, nextp As String
+Dim isproc, blankline, isdwg, illstrn As Boolean
+Dim row, col, tabcount As Integer
+
+tabcount = 0
+col = 0
+
+With ActiveDocument.Range.Find
+    .Forward = True
+    .Wrap = wdFindStop
+    .MatchWildcards = False
+    .Execute FindText:=Chr(9)
+    Do While .Execute = True
+        tabcount = tabcount + 1
+    Loop
+End With
+
+Public clipboard(tabcount, tabcount) As String
+
+For Each P In ActiveDocument.Paragraphs
+    tempstring = P.Range.Text
+    nextp = P.Next.Range.Text
+    isproc = Left(tempstring, 6) Like "[0-9A-Z][0-9A-Z][0-9A-Z]###"
+    blankline = nextp Like Chr(10)
+    If isproc = True & blankline = True Then
+        clipboard(0, col) = procname(tempstring)
+        col = col + 1
+    End If
+    tempstring = ""
+    nextp = ""
+Next P
+
+col = 0
+row = 1
+
+For Each P In ActiveDocument.Paragraphs
+    tempstring = P.Range.Text
+    nextp = P.Next.Range.Text
+    isdwg = Left(tempstring, 8) Like "#-######" Or "######-#" Or "[A-Z][A-Z]?#####"
+    illstrn = Left(tempstring, 10) Like "#-[A-Z][A-Z]-#####"
+    blankline = nextp Like Chr(10)
+    If illstrn = True And blankline = False Then
+        clipboard(row, col) = procname(tempstring)
+        row = row + 1
+    ElseIf illstrn = True And blankline = True Then
+        clipboard(row, col) = procname(tempstring)
+        col = col + 1
+    ElseIf isdwg = True And blankline = False Then
+        clipboard(row, col) = P.Range.Text
+        row = row + 1
+    ElseIf isdwg = True And blankline = True Then
+        clipboard(row, col) = P.Range.Text
+        row = 1
+        col = col + 1
+    End If
+    tempstring = ""
+    nextp = ""
+Next P
+End Sub
+Sub excel()
+
+Dim xl As New excel.Application
+Dim ws, wb As Object
+Dim row, col As Integer
+Dim xlcol As String
+
+'Set xl = CreateObject("Excel.Application")
+Set wb = xl.Workbooks.Add
+Set ws = wb.Worksheets("Sheet1")
+xl.Visible = True
+With ws
+    For col = 0 To UBound(clipboard, 2)
+        xlcol = Chr(65 + col)
+        For row = 0 To UBound(clipboard, 1)
+            ws.Range(row + 1, xlcol).Value2 = clipboard(row, col)
+            row = row + 1
+        Next row
+    Next col
+End With
+xl.Workbooks.Add.SaveAs (xltemp.xls)
+Stop
+Set ws = Nothing
+Set wb = Nothing
+Set xl = Nothing
+
+End Sub

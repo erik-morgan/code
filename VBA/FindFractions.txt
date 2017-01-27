@@ -1,0 +1,29 @@
+' Finds and lists all fractions contained in data set
+
+Sub FindFractions()
+
+Dim path, str, fract As String
+Dim row, newrow, i As Integer
+Dim ws As Worksheet
+
+Set ws = Excel.Worksheets("Sheet1")
+
+Application.ScreenUpdating = False
+
+newrow = 1
+
+For row = 1 To ws.UsedRange.Rows.Count
+    path = ws.Cells(row, 1)
+    i = InStrRev(path, ":")
+    If i > 0 Then
+        fract = Mid(path, (i - 1), 3)
+    End If
+    If IsNumeric(Left(fract, 1)) And IsNumeric(Right(fract, 1)) Then
+        ws.Cells(newrow, "Q") = fract
+        newrow = newrow + 1
+    End If
+Next row
+
+Application.ScreenUpdating = True
+
+End Sub

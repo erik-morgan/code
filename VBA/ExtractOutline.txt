@@ -1,0 +1,118 @@
+' Cleans outline text using find and replace with wildcards
+
+Option Explicit
+Sub ExtractOutline()
+	Dim doc As Document
+	Set doc = Application.ActiveDocument
+	Dim sFind, sReplace, tmpStr, str, linesArray, arr() As String
+	Dim l, x, y, z As Integer
+	Dim rText, rFind, r As Range
+'	Dim linesArray() As Variant
+
+	l = ActiveDocument.BuiltInDocumentProperties("NUMBER OF LINES").Value
+
+	ReDim arr(1 To l)
+	
+	linesArray = Split(ActiveDocument.Range.Text, Chr(13))
+
+	sFind = "Rev ##;[^13][^13];min ID;[^9][\[]*^13;RLD;BBII;[^44] BigBore;Space-out; X ; & ;CHSART;SART;BB2;1st;2nd; Pos ;LIT;Max OD;LDS;[”];OLR; Cam;Acme;X-[Oo]ver;Mill and Flush;420056-02*[^13];420295-02*[^13]"
+	sReplace = ";[^13];Min. ID;[^13];Rigid Lockdown;BB II;[^44] BB;Space-Out; x ; and ;Casing Hanger and Seal Assembly Running Tool;Seal Assembly Running Tool;BB II;First;Second; Position ;Lead Impression Tool;Max. OD;Lockdown Sleeve;^34;Outer Lock Ring;-Cam;ACME;Crossover;Mill & Flush;420056-02[^9]18-3/4[^22] Jet Sub;420295-02[^9]18-3/4[^22] Jet Sub"
+
+	Set rText = doc.Content
+
+	With rText.Find
+		.ClearFormatting
+		.Replacement.ClearFormatting
+		.Format = True
+		.MatchWholeWord = False
+		.MatchAllWordForms = False
+		.MatchWildcards = True
+		.Font.StrikeThrough = True
+		.Execute FindText:="*[^13]", ReplaceWith:="[^13]", Replace:=wdReplaceAll
+	End With
+
+	Set rText = doc.Range
+
+	For z = 0 To UBound(Split(sFind, ";"))
+		Set rFind = rText.Duplicate
+		With rFind.Find
+			.ClearFormatting
+			.Replacement.ClearFormatting
+			.Format = False
+			.MatchWildcards = True
+			.Execute FindText:=Split(sFind, ";")(z), ReplaceWith:=Split(sReplace, ";")(z), Replace:=wdReplaceAll
+		End With
+	Next z
+
+	For x = LBound(linesArray) To UBound(linesArray)
+		str = linesArray(x)
+		If x = 0 Then
+			arr(1) = Left(str, (InStr(str, vbTab) - 1))
+		ElseIf x = 1 Then
+			arr(2) = Mid(str, 11, (InStr(str, "(") - 12))
+			arr(3) = Mid(str, (InStr(str, "(") + 1), (Len(str) - InStr(str, "(") - 2))
+		ElseIf x = 2 Then
+			arr(4) = Mid(str, 11, (Len(str) - 11))
+		ElseIf x = 3 Then
+			arr(0) = Mid(str, 17, 4)
+		ElseIf x = 5 Then
+			arr(5) = "TABLE OF CONTENTS"
+			arr(6) = "INTRODUCTION"
+			arr(7) = "DRILLING"
+			y = 8
+		ElseIf x > 7 Then
+			If Left(str, 8) Like "#-######" Or Left(str, 9) Like "######-##" Or Left(str, 10) Like "?????#####" Or Left(str, 8) Like "[A-Z][A-Z]?#####" Then
+				arr(y) = str
+				y = y + 1
+			ElseIf Left(str, 6) Like "[A-Z][A-Z]?###" Then
+				arr(y) = ""
+				y = y + 1
+				arr(y) = Left(str, (InStr(str, vbTab) - 1))
+				y = y + 1
+			ElseIf str Like "STACK*DRAW*" Then
+				arr(y) = "Stack-Up Drawings"
+				y = y + 1
+			ElseIf InStr(str, "TEST BOP STACK") > 0 Then
+				arr(y) = "TEST BOP STACK"
+				arr(y + 1) = "BOP Test Options"
+				y = y + 2
+			ElseIf InStr(str, "CONTINGENCY") > 0 Then
+				arr(y) = "CONTINGENCY"
+				y = y + 1
+			ElseIf InStr(str, "ABANDONMENT") > 0 Then
+				arr(y) = "ABANDONMENT"
+				y = y + 1
+			ElseIf InStr(str, "EMERGENCY") > 0 Then
+				arr(y) = "EMERGENCY"
+				y = y + 1
+			ElseIf InStr(str, "L-H Torque") > 0 Then
+				arr(y) = "Advisory Sheet L-H Torque"
+				y = y + 1
+			ElseIf Left(trimAll(str), 7) Like "TP#####" Then
+				arr(y) = trimAll(str)
+				y = y + 1
+			ElseIf Left(trimAll(str), 7) Like "SD#####" Then
+				arr(y) = trimAll(str)
+				y = y + 1
+			ElseIf InStr(str, "BTC") > 0 Then
+				tmpStr = Left(str, (InStr(str, vbTab) - 1))
+				
+			End If
+		End If
+	Next x
+End Sub
+
+Public Function trimAll(ByVal str As String) As String
+	trimAll = Replace(str, " ", "")
+End Function
+
+Sub printArray(myArray() As String)
+	Dim newDoc As Document
+	Set newDoc = Application.Documents.Add
+	newDoc.Activate
+	Dim a As Integer
+	For a = LBound(myArray) To UBound(myArray)
+		newDoc.Range.InsertAfter myArray(a) & vbCrLf
+	Next a
+End Sub
+

@@ -1,0 +1,80 @@
+' Counts how many different projects a procedure was used in
+
+Sub FirstAttempt()
+
+Dim proc(75) As String, procnum(75) As Integer
+Dim col As Integer, ro As Integer, cnt As Integer, int1 As Integer, int2 As Integer, rownum As Integer, proccnt
+Dim emptycell As Boolean, emptyproc As Boolean, boo As Boolean
+Dim tempstr As String
+Dim loop1 As Integer, loop2 As Integer, str1 As String, str2 As String
+rownum = 2
+
+With Worksheets("Sheet1")
+    For col = 1 To 3                                                                        'ActiveSheet.UsedRange.Columns.count
+        For ro = 1 To 29
+            emptycell = IsEmpty(.Cells(ro, col))
+            If emptycell = False Then
+                For cnt = 0 To 75
+                    emptyproc = proc(cnt) Like ""
+                    tempstr = .Cells(ro, col)
+                    boo = tempstr Like proc(cnt)
+                    If emptyproc = True Then
+                        'MsgBox "This is where I should be, with the count at " & cnt & vbNewLine & "putting in " & tempstr
+                        proc(cnt) = tempstr
+                        procnum(cnt) = 1
+                     '   MsgBox proc(cnt) & " appears " & procnum(cnt) & " times!"
+                        Exit For
+                    End If
+                    If boo = True Then
+                        procnum(cnt) = procnum(cnt) + 1
+               '         MsgBox proc(cnt) & " has now appeared " & procnum(cnt) & " times!"
+                        Exit For
+                    End If
+                Next cnt
+            End If
+        Next ro
+    Next col
+End With
+
+With Worksheets("Sheet1")
+    For loop1 = 0 To UBound(proc)
+        For loop2 = loop1 To UBound(proc)
+            emptyproc = proc(loop2) Like ""
+            If proc(loop2) < proc(loop1) And emptyproc = False Then
+                str1 = proc(loop1)
+                str2 = proc(loop2)
+                int1 = procnum(loop1)
+                int2 = procnum(loop2)
+                proc(loop1) = str2
+                proc(loop2) = str1
+                procnum(loop1) = int2
+                procnum(loop2) = int1
+            End If
+        Next loop2
+    Next loop1
+End With
+
+'Range("L1:L" & UBound(proc) + 1) = WorksheetFunction.Transpose(proc)
+
+For proccnt = 0 To UBound(proc)
+    emptyproc = proc(proccnt) Like ""
+    If emptyproc = False Then
+        Worksheets("Sheet1").Range("L" & rownum).Activate
+        Worksheets("Sheet1").Range("M" & rownum).Activate
+        Worksheets("Sheet1").Range("L" & rownum) = proc(proccnt)
+        Worksheets("Sheet1").Range("M" & rownum) = procnum(proccnt)
+        rownum = rownum + 1
+    End If
+Next proccnt
+
+        
+Worksheets("Sheet1").Cells(1, 12) = "Procedures"
+Worksheets("Sheet1").Cells(1, 12).Font.Bold = True
+Worksheets("Sheet1").Cells(1, 12).Font.Size = 16
+Worksheets("Sheet1").Cells(1, 13) = "Times Used"
+Worksheets("Sheet1").Cells(1, 13).Font.Bold = True
+Worksheets("Sheet1").Cells(1, 13).Font.Size = 16
+Worksheets("Sheet1").Range("L:M").Columns.AutoFit
+
+End Sub
+

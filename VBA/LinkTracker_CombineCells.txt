@@ -1,0 +1,41 @@
+' Combines repeated data in rows after the title column
+
+Sub Combine()
+
+Dim count, row, rowlim As Integer
+Dim ws As Worksheet
+Dim rng As Range
+
+Set ws = ActiveSheet
+rowlim = ws.Cells(Rows.count, 1).End(xlUp).row
+Application.ScreenUpdating = False
+
+With ws
+	For row = 1 To rowlim
+		count = 1
+		Do While .Cells(row, 1) = .Cells(row + count, 1)
+			.Cells(row, 2 + count) = .Cells(row + count, 2)
+			.Cells(row + count, 2) = ""
+			count = count + 1
+		Loop
+	Next row
+End With
+Application.ScreenUpdating = True
+
+'Set rng = ws.Range("B1:B" & rowlim)
+'ws.AutoFilterMode = False
+
+'With rng
+'	.AutoFilter Field:=2, Criteria1:=""
+'	.Offset(1, 0).SpecialCells(xlCellTypeVisible).EntireRow.Delete
+'End With
+
+'ws.AutoFilterMode = False
+
+'Do While rowlim > 1
+'	If ws.Cells(n, 2) = "" Then
+'		ws.Rows(n).Delete
+'	End If
+'Next n
+
+End Sub

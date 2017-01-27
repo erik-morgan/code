@@ -1,0 +1,26 @@
+' Counts the number of procedures in a project outline
+
+Sub ProcedureCount()
+Dim r As Range, scount As Integer, ccount As Integer, MyArray() As String
+Set r = ActiveDocument.Range
+ccount = 0
+scount = 0
+With r.Find
+	.ClearFormatting
+	.Forward = True
+	.Wrap = wdFindStop
+	.MatchWildcards = False
+	.MatchCase = True
+	.MatchWholeWord = False
+	.MatchAllWordForms = False
+	.MatchSoundsLike = False
+	.Execute FindText:="SS"
+	Do While r.Find.Execute = True
+		If r.Text = "SS" Then
+		scount = scount + 1
+		End If
+	Loop
+End With
+'ReDim MyArray(1, (ccount + scount))
+MsgBox "There are " & scount & "SSs" + ccount + "CCs"
+End Sub

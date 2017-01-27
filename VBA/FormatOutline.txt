@@ -1,0 +1,114 @@
+' *Unfinished* Formats outline for easier information processing by another script
+
+
+
+
+Option Explicit
+
+Sub FormatOutline()
+	Dim doc As Document
+	Set doc = Application.ActiveDocument
+	Dim para, nextPara As Range
+	Dim p, tempNum, x, a As Integer
+	Dim tempStr, arr() As String
+	Dim boo As Boolean
+	
+	a = 1
+	
+'	For lns = 1 To doc.Characters.Last.Information(wdFirstCharacterLineNumber)
+	For p = 1 To doc.Paragraphs.Count
+		
+		ReDim Preserve arr(1 To a)
+		Set para = doc.Paragraphs(p).Range
+		
+		If p = 1 Then
+			arr(a) = Left(para.Text, InStr(para.Text, vbTab))
+			Debug.Print "a = " & a & vbCr & "arr(a=" & a & ") = " & arr(a)
+			a = a + 1
+		ElseIf p = 2 Then
+			tempNum = InStr(para.Text, "(")
+			arr(a) = Mid(para.Text, 11, (tempNum - 12))
+			Debug.Print "a = " & a & vbCr & "arr(a=" & a & ") = " & arr(a)
+			a = a + 1
+			ReDim Preserve arr(1 To a)
+			arr(a) = Mid(para.Text, (tempNum + 1), (Len(para.Text) - tempNum - 2))
+			Debug.Print "a = " & a & vbCr & "arr(a=" & a & ") = " & arr(a)
+			a = a + 1
+		ElseIf p = 3 Then
+			arr(a) = Mid(para.Text, 11, (Len(para.Text) - 11))
+			Debug.Print "a = " & a & vbCr & "arr(a=" & a & ") = " & arr(a)
+			a = a + 1
+		ElseIf p = 4 Then
+			arr(a) = Mid(para.Text, 17, 4)
+			Debug.Print "a = " & a & vbCr & "arr(a=" & a & ") = " & arr(a)
+			a = a + 1
+		Else
+			If para.Font.Bold And para.Font.Underline And Left(para.Text, 4) Like "[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]" Then
+				If InStr(para.Text, "TABLE OF CONTENTS") > 0 Then
+					arr(a) = "TABLE OF CONTENTS"
+					a = a + 1
+				ElseIf InStr(para.Text, "INTRODUCTION") > 0 Then
+					arr(a) = "INTRODUCTION"
+					a = a + 1
+				ElseIf InStr(para.Text, "DRILLING") > 0 Then
+					arr(a) = "DRILLING"
+					a = a + 1
+				ElseIf thisPara.Text Like "STACK*DRAW*" Then
+					arr(a) = "Stack-Up Drawings"
+					a = a + 1
+					tempNum = subCount(p)
+					For x = 1 To tempNum
+						tempStr = doc.Paragraphs(p + x).Range.Text
+						If doc.Paragraphs(p + x).Range.Font.StrikeThrough = False Then
+							ReDim Preserve arr(1 To a)
+							arr(a) = Left(tempStr, (InStr(tempStr, vbTab) - 1))
+							a = a + 1
+						End If
+					Next x
+				ElseIf InStr(para.Text, "TEST BOP STACK") > 0 Then
+					arr(a) = "TEST BOP STACK"
+					a = a + 1
+					ReDim Preserve arr(1 To a)
+					arr(a) = "BOP Test Options"
+					a = a + 1
+				ElseIf InStr(para.Text, "CONTINGENCY") > 0 Then
+					arr(a) = "CONTINGENCY"
+					a = a + 1
+				ElseIf InStr(para.Text, "ABANDONMENT") > 0 Then
+					arr(a) = "ABANDONMENT"
+					a = a + 1
+				ElseIf InStr(para.Text, "EMERGENCY") > 0 Then
+					arr(a) = "EMERGENCY"
+					a = a + 1
+				Else
+					nextPara = doc.Paragraphs(p + 1).Range
+					If Trim(Left(nextPara.Text, 6)) Like "[A-Z][A-Z]?###" Then
+						arr(a) = Left(nextPara.Text, (InStr(nextPara.Text, vbTab) - 1))
+						a = a + 1
+						For x = 1 To subCount(p + 1)
+						' I have no idea what was supposed to go here
+					End If
+				End If
+			End If
+		End If
+	Next p
+End Sub
+Public Function subCount(ByVal p As Integer)
+	Dim doc As Document
+	Set doc = Application.ActiveDocument
+	Dim tempStr, lastChar, nextLastChar As String
+	Dim z As Integer
+	lastChar = doc.Paragraphs(p).Range.Characters.Last.Text
+	nextLastChar = doc.Paragraphs(p).Range.Characters(Len(doc.Paragraphs(p).Range.Text) - 1).Text
+	
+	subCount = 0
+	
+	For z = (p + 1) To doc.Paragraphs.Count
+		If lastChar = Chr(13) And nextLastChar = Chr(13) Then
+			subCount = subCount + 1
+			Exit Function
+		Else
+			subCount = subCount + 1
+		End If
+	Next z
+End Function

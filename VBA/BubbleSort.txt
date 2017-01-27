@@ -1,0 +1,86 @@
+' Bubble sort macro for sorting procedure lists and a function that fixes doubles
+
+Sub BubbleSort()
+Dim ws As Worksheet
+Dim row, rowlim, col, collim As Integer
+Dim first, last, x, y, z As Integer
+Dim tempstring, list(), altlist() As String
+Dim test As Boolean
+
+Set ws = ActiveSheet
+rowlim = ws.Cells(Rows.count, 1).End(xlUp).row
+
+With ws
+    For row = 1 To rowlim
+        collim = .Cells(row, Columns.count).End(xlToLeft).Column
+        ' COLLIM IS # OF COLUMNS WITH DATA IN CURRENT ROW
+        ' IF COLLIM >= 3 MEANS IF THERE IS MORE THAN ONE PROCEDURE NAME TO MAKE SURE SORTING IS WORTH IT
+        If collim >= 3 Then
+            ReDim list(collim - 1)
+            ' LIST IS NOW AS LARGE AS HOWEVER MANY PROCS ARE IN IN CURRENT ROW
+            ' NEXT PART POPULATES THE ARRAY WITH CURRENT ROW'S CONTENTS
+            For col = 2 To collim
+                list(col - 2) = .Cells(row, col)
+            Next col
+            ' SORT ARRAY (PROC NAMES IN CURRENT ROW)
+            first = LBound(list)
+            last = UBound(list)
+            For x = first To (last - 1)
+                For y = (x + 1) To last
+                    If list(x) > list(y) Then
+                        tempstring = list(y)
+                        list(y) = list(x)
+                        list(x) = tempstring
+                    ElseIf list(x) = list(y) Then
+                        list(y) = ""
+                        ReDim filterlist(collim - 2)
+                        For z = 0 To UBound(filterlist)
+                            If Len(list(z)) > 2 Then
+                                filterlist(z) = list(z)
+                            End If
+                        Next z
+                        ReDim list(collim - 2)
+                    If list(x) = list(y) Then
+                        list(y) = ""
+                        ReDim altlist(UBound(list) - 1)
+                        For z = 0 To UBound(altlist)
+                            If Len(list(z)) >= 6 Then
+                                altlist(z) = list(z)
+                            End If
+                        Next z
+                        ReDim list(UBound(altlist))
+                        
+                Next y
+            Next x
+'            For count = 2 To collim
+'                .Cells(row, count) = sortarray(count - 2)
+'            Next count
+            Cells(row, 2).Resize(1, collim - 1).Value = sortarray()
+        End If
+    Next row
+End With
+End Sub
+
+Public Function FixDoubles(a() As String)
+Dim w, z, dubs, one, fin As Integer
+Dim tempstr As String
+Dim newlist() As String
+
+dbls = 0
+one = LBound(a)
+fin = UBound(a)
+
+For w = one To (fin - 1)
+    For z = (w + 1) To fin
+        If a(w) = a(z) Then
+            dbls = dbls + 1
+            a(z) = ""
+        End If
+    Next z
+Next w
+
+If dbls > 0 Then
+    ReDim newlist(fin - dbls)
+End If
+
+End Function
