@@ -1,1 +1,25 @@
-{"url": "https://docs.google.com/open?id=1upW6vfd-gdgTg1MFsgTCPjJFMK62-jzWAbmY6cQI6mvz75_l0ZVQKDVi", "doc_id": "1upW6vfd-gdgTg1MFsgTCPjJFMK62-jzWAbmY6cQI6mvz75_l0ZVQKDVi", "email": "elm956@gmail.com", "resource_id": "document:1upW6vfd-gdgTg1MFsgTCPjJFMK62-jzWAbmY6cQI6mvz75_l0ZVQKDVi"}
+var root = DriveApp.getRootFolder();
+var projectsFolder = root.getFoldersByName('Archive');
+var folder = projectsFolder.next().getFoldersByName('Misc DQ Files').next();
+Logger.log(folder);
+folder.createFile(Utilities.zip(getBlobs(folder, ''), 'TestArchive.zip'));
+//var zipped = Utilities.zip(getBlobs(folder, ''), folder.getName()+'.zip');
+//folder.getParents().next().createFile(zipped);
+
+function getBlobs(rootFolder, path) {
+  var blobs = [];
+  var files = rootFolder.getFiles();
+  while (files.hasNext()) {
+    var file = files.next().getBlob();
+    file.setName(path+file.getName());
+    blobs.push(file);
+  }
+  var folders = rootFolder.getFolders();
+  while (folders.hasNext()) {
+    var folder = folders.next();
+    var fPath = path+folder.getName()+'/';
+    blobs.push(Utilities.newBlob([]).setName(fPath)); //comment/uncomment this line to skip/include empty folders
+    blobs = blobs.concat(getBlobs(folder, fPath));
+  }
+  return blobs;
+}
