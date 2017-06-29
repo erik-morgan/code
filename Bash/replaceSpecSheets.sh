@@ -15,7 +15,7 @@ done
 
 dirpath=$(find "$dwgs" -path '*/~*' -name "${pl}*pdf" -exec mv "{}" "$hopper${pn}.pdf" \; -exec dirname "{}" \;)
 cd "$hopper"
-pgnum=$(pdftk "${pl}.pdf" dump_data | grep "NumberOfPages" | cut -d" " -f2)
-pdftk A="${pn}.pdf" B="${pl}.pdf" cat Arend-r$((pgnum+1)) B output "${dirpath}/$pdfname"
-rm *.pdf
+pgnum=$(/usr/local/bin/pdftk "${pl}.pdf" dump_data | grep "NumberOfPages" | cut -d" " -f2)
+/usr/local/bin/pdftk A="${pn}.pdf" B="${pl}.pdf" cat Arend-r$((pgnum+1)) B output "${dirpath}/$pdfname"
+rm ./*.pdf
 echo 'true'
