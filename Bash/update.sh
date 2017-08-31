@@ -5,8 +5,8 @@ logfile="/home/erik/scripts/AUR/update-logs/$(date +%F_%T)"
 
 exec > >(tee "$logfile") 2>&1
 
-builds='/home/erik/builds'
-cd "$builds"
+build='/home/erik/build'
+cd "$build"
 paclist="$(pacman -Qm)"
 
 echo -e "pacname\t\tpacver\t\taurver"
