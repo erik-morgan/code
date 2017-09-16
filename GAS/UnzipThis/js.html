@@ -1,0 +1,63 @@
+<script>
+  var devKey = 'AIzaSyClIfn435yQkQtiz4aX8jUkaXjg3F6Z5YQ';
+  var clientId = "122495330401-4jph3j5hkj05ocughh69o0bgoh2gnmq5.apps.googleusercontent.com";
+  var appId = "122495330401";
+  var authToken, scope = ['https://www.googleapis.com/auth/drive'];
+  
+  function loadPicker(){
+    gapi.load('picker', {'callback': function(){
+      google.script.run
+        .withSuccessHandler(makePicker)
+        .withFailureHandler(logError)
+        .getOAuthToken();
+    }});
+  }
+  
+  function makePicker(){
+    var zipView = new google.picker.DocsView(google.picker.ViewId.DOCS)
+      .setIncludeFolders(true)
+      .setMimeTypes('application/x-gzip,application/x-bzip2,application/x-tar,application/x-tar,application/zip,application/x-compressed-zip')
+      .setMode(google.picker.DocsViewMode.LIST)
+      .setSelectFolderEnabled(false);
+    var picker = new google.picker.PickerBuilder()
+      .addView(zipView)
+      .disableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)
+      .hideTitleBar()
+      .setAppId(appId)
+      .setCallback(pickerCallback)
+      .setDeveloperKey(devKey)
+      .setOAuthToken(authToken)
+      .setOrigin(google.script.host.origin)
+      .setSelectableMimeTypes('application/x-gzip,application/x-bzip2,application/x-tar,application/x-tar,application/zip,application/x-compressed-zip')
+      .setSize(598,423);
+    picker.build().setVisible(true);
+  }
+  
+  function pickerCallback(data){
+    if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED){
+      var doc = data[google.picker.Response.DOCUMENTS][0];
+      var zipId = doc.id;
+      var zipName = doc.name;
+      if (!zipId){
+        Logger.log('HAD TO USE LONG FORM FOR zipFile PROPERTIES: doc[google.picker.Document.ID]!!!');
+        console.log('HAD TO USE LONG FORM FOR zipFile PROPERTIES: doc[google.picker.Document.ID]!!!');
+        zipId = doc[google.picker.Document.ID];
+        zipName = doc[google.picker.Document.NAME];
+      }
+      google.script.run
+        .withSuccessHandler(function (){
+          alert('Successfully Extracted ' + zipName + '!');
+        })
+        .withFailureHandler(logError)
+        .unzipThis(zipId);
+    }
+    // Pass zipFile back to Code.gs
+    // Study/trace server-side vs client-side portions to understand
+  }
+  
+  function logError(err){
+    Logger.log(err.message);
+    console.log(err.message);
+  }
+</script>
