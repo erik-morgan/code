@@ -1,21 +1,75 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <!--
-  <div class="block form-group">
-    <button onclick="openPicker()" type="button" class="btn btn-primary">Select Files</button>
-    <button onclick="openUploader()" type="button" class="btn btn-primary">Upload Files</button>
-    <div id="message"></div>
-  </div>
-  -->
   <head>
     <base target="_top">
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Unzip Google Drive Picker</title>
+    <title>Unzip File Picker</title>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <?!= include("js"); ?>
-    <!-- <script src="http://apis.google.com/js/client.js"></script>
-         <script src="http://apis.google.com/js/api.js"></script>
-    <script>google.load("picker", "1");</script> -->
+    <script>
+      var API_KEY = 'AIzaSyDWDNS0TL5IAPnf8i5pYnOdl_LS9qP4_Sc';
+      var CLIENT_ID = '351314904804-sgisr80nulkvm2n5psifvj0lcb5al0h9.apps.googleusercontent.com';
+      var APP_ID = '351314904804';
+      var AUTH_TOKEN, SCOPE = ['https://www.googleapis.com/auth/drive'];
+      /*
+        gapi.load('auth2', {'callback': function (){
+          window.gapi.auth2.authorize(
+            {'client_id': CLIENT_ID, 'scope': SCOPE},
+            function (authResult){
+              AUTH_TOKEN = authResult.access_token;
+            }
+          );
+        });
+      */
+      function loadPicker(){
+        gapi.load('picker', {'callback': function(){
+          google.script.run
+            .withSuccessHandler(makePicker)
+            .getOAuthToken();
+        }});
+      }
+      function makePicker(AUTH_TOKEN){
+        var zipView = new google.picker.DocsView(google.picker.ViewId.DOCS)
+          .setIncludeFolders(true)
+          .setMimeTypes('application/zip')
+          .setMode(google.picker.DocsViewMode.LIST)
+          .setSelectFolderEnabled(false);
+        var picker = new google.picker.PickerBuilder()
+          .addView(zipView)
+          .disableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+          .enableFeature(google.picker.Feature.NAV_HIDDEN)
+          .hideTitleBar()
+          .setAPP_ID(APP_ID)
+          .setCallback(pickerCallback)
+          .setDeveloperKey(API_KEY)
+          .setOAUTH_TOKEN(AUTH_TOKEN)
+          .setOrigin(google.script.host.origin)
+          .setSelectableMimeTypes('application/x-gzip,application/x-bzip2,application/x-tar,application/x-tar,application/zip,application/x-compressed-zip')
+          .setSize(598,423);
+        picker.build().setVisible(true);
+      }
+      function pickerCallback(data){
+        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED){
+          var doc = data[google.picker.Response.DOCUMENTS][0];
+          var zipId = doc.id;
+          var zipName = doc.name;
+          if (!zipId){
+            console.log('HAD TO USE LONG FORM FOR zipFile PROPERTIES: doc[google.picker.Document.ID]!!!');
+            zipId = doc[google.picker.Document.ID];
+            zipName = doc[google.picker.Document.NAME];
+          }
+          google.script.run
+            .withSuccessHandler(function (){
+              alert('Successfully Extracted ' + zipName + '!');
+            })
+            .withFailureHandler(logError)
+            .unzipThis(zipId);
+        }
+      }
+      function logError(err){
+        console.log(err.message);
+        alert('Error: ' + err.message);
+      }
+    </script>
   </head>
   <body>
     <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>

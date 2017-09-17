@@ -16,7 +16,7 @@
   function makePicker(){
     var zipView = new google.picker.DocsView(google.picker.ViewId.DOCS)
       .setIncludeFolders(true)
-      .setMimeTypes('application/x-gzip,application/x-bzip2,application/x-tar,application/x-tar,application/zip,application/x-compressed-zip')
+      .setMimeTypes('application/zip')
       .setMode(google.picker.DocsViewMode.LIST)
       .setSelectFolderEnabled(false);
     var picker = new google.picker.PickerBuilder()
