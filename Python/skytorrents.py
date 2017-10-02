@@ -1,33 +1,35 @@
 from lxml import html
 import requests
-from helpers import testseeds, testsites, testlang, testname, testquery
-
-header = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/38.0'}
+from helpers import filtor
 
 def search(q):
-    names = sizes = seeds = peers = mags = [];
-    for pg in range(1, 4):
-        url = 'https://www.skytorrents.in/search/all/ed/{0}/{1}/'.format(
-            pg, q.replace(' ', '+'))
-        data = requests.get(url, headers=header)
-        tree = html.fromstring(data.content)
-        names.extend(tree.xpath('//tbody//a[@title]/text()'))
-        sizes.extend(tree.xpath('//tbody//td[2]/text()'))
-        seeds.extend(tree.xpath('//tbody//td[last()-1]/text()'))
-        peers.extend(tree.xpath('//tbody//td[last()]/text()'))
-        mags.extend(tree.xpath('//tbody//a[1]/@href'))
+    xpaths = {
+        'names': '//tbody//a[@title]/text()',
+        'sizes': '//tbody//td[2]/text()',
+        'seeds': '//tbody//td[last()-1]/text()',
+        'peers': '//tbody//td[last()]/text()',
+        'mags': '//tbody//a[1]/@href'
+    }
+    urls = [f'https://www.skytorrents.in/search/all/ed/{pg}/{q}'
+        for pg in range(1, 4)]
+    pages = [html.fromstring(requests.get(url).content) for url in urls]
+    names = [name for page in pages for name in page.xpath(xpaths['names'])]
+    sizes = [size for page in pages for size in page.xpath(xpaths['sizes'])]
+    seeds = [seed for page in pages for seed in page.xpath(xpaths['seeds'])]
+    peers = [peer for page in pages for peer in page.xpath(xpaths['peers'])]
+    mags = [mag for page in pages for mag in page.xpath(xpaths['mags'])]
     torrents = []
     results = zip(names, sizes, seeds, peers, mags)
     for name, size, seed, peer, mag in results:
-        if 'NEW' not in name and ('MB' in size or 'GB' in size):
-            if (testsites(name) and testname(name) and testlang(name)
-                and testquery(name, q) and testseeds(seed)):
-                torrents.append({
-                    'name': name,
-                    'size': size,
-                    'seeds': seed,
-                    'peers': peer,
-                    'magnet': mag,
-                    'hash': mag[20:60]
-                })
+        if 'NEW' not in name and (size[-2] in 'GM') and filtor(name, seed, q):
+            torrents.append({
+                'name': name,
+                'size': size,
+                'seeds': seed,
+                'peers': peer,
+                'magnet': mag,
+                'hash': mag[20:60]
+            })
     return torrents
+
+print(search('the+librarians'))

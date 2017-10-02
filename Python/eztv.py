@@ -1,12 +1,10 @@
 from lxml import html
 import requests
-from helpers import testseeds, testquery
-
-header = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/38.0'}
+from helpers import filtor
 
 def search(q):
-    url = 'https://eztv.ag/search/'.format(q.replace(' ', '+'))
-    data = requests.get(url, headers=header)
+    url = f'https://eztv.ag/search/{q}'
+    data = requests.get(url)
     tree = html.fromstring(data.content)
     results = zip(
         tree.xpath('//tr[@name="hover"]//a[@class="epinfo"]/@title'),
@@ -18,9 +16,9 @@ def search(q):
     torrents = []
     for name, size, seed, mag, cat in results:
         if mag.startswith('magnet') and 'Other' not in cat:
-            name = name.replace(' ({})'.format(size), '')
+            name = name.replace(f' ({size})', '')
             seed = seed.replace(',', '')
-            if testseeds(seed) and testquery(name, q):
+            if filtor(name, seed, q, ''):
                 torrents.append({
                     'name': name,
                     'size': size,
@@ -30,3 +28,5 @@ def search(q):
                     'hash': mag[20:60]
                 })
     return torrents
+
+print(search("the+librarians"))

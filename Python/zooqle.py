@@ -2,15 +2,13 @@ from lxml import html
 import requests
 from helpers import testseeds, testsites, testlang, testname, testquery
 
-header = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/38.0'}
-
 def search(q, cat):
     # not using &fmt=rss because it ignores categories and sorting params
-    names = sizes = seeds = peers = mags = [];
+    names = sizes = seeds = peers = mags = []
     for pg in range(1, 4):
-        url = 'https://zooqle.com/search?pg={0}&q={1}&v=t&s=ns&sd=d'.format(
-            pg, q.replace(' ', '+'))
-        data = requests.get(url, headers=header)
+        url = 'https://zooqle.com/search?pg={0}&q={1}+category%3A{2}&v=t&s=ns&sd=d'.format(
+            pg, q.replace(' ', '+'), cat)
+        data = requests.get(url)
         tree = html.fromstring(data.content)
         names.extend(tree.xpath('//a[@class=" small"]'))
         sizes.extend(tree.xpath('//td[@class="smaller"]//text()'))
@@ -32,3 +30,5 @@ def search(q, cat):
                 'hash': mag[20:60]
             })
     return torrents
+
+print(search('the librarians', 'tv'))
