@@ -14,11 +14,11 @@ def search(q):
         tree.xpath('//tr[@name="hover"]/td[1]/a/@title')
     )
     torrents = []
-    for name, size, seed, mag, cat in results:
-        if mag.startswith('magnet') and 'Other' not in cat:
+    for name, size, seed, mag, show in results:
+        if mag.startswith('magnet') and 'Other' not in show:
             name = name.replace(f' ({size})', '')
             seed = seed.replace(',', '')
-            if filtor(name, seed, q, ''):
+            if filtor(name, seed, q):
                 torrents.append({
                     'name': name,
                     'size': size,

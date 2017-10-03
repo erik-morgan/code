@@ -23,7 +23,7 @@ def search(q, cat):
     torrents = []
     results = zip(names, sizes, seeds, peers, links)
     for name, size, seed, peer, link in results:
-        if filtor(name, seed, q):
+        if filtor(name, seed, q, True, True, True):
             torrents.append({
                 'name': name,
                 'size': size,

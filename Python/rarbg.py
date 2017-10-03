@@ -24,7 +24,7 @@ def search(q, cat):
     torrents = []
     for tor in j['torrent_results']:
         name = tor['title']
-        if filtor(name, None, q, ''):
+        if filtor(name, None, q):
             torrents.append({
                 'name': name,
                 'size': bytesize(tor['size']),

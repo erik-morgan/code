@@ -22,7 +22,7 @@ def torsearch(query, cat):
         torlist.extend(eztv.search(query))
     torlist.extend(limetorrents.search(query, cat))
     torlist.extend(rarbg.search(query, cat))
-    torlist.extend(skytorrents.search(query, cat))
+    torlist.extend(skytorrents.search(query))
     torlist.extend(tpb.search(query, cat))
     torlist.extend(zooqle.search(query, cat))
     # if tors doesn't work, try tors[:]
@@ -34,10 +34,12 @@ def torsearch(query, cat):
 
 def torfilter(tors):
     seen = {}
-    for tor in torlist:
+    for tor in tors:
         thash, tseed = tor['hash'], int(tor['seeds'])
         if thash not in seen:
             seen[thash] = tor
         elif tseed > int(seen[thash]['seeds']):
             seen[thash] = tor
     return seen.values()
+
+# use if __name__ == '__main__': main()

@@ -21,7 +21,7 @@ def search(q):
     torrents = []
     results = zip(names, sizes, seeds, peers, mags)
     for name, size, seed, peer, mag in results:
-        if 'NEW' not in name and (size[-2] in 'GM') and filtor(name, seed, q):
+        if skyfiltor(name, q) and filtor(name, seed, None, True, True, True):
             torrents.append({
                 'name': name,
                 'size': size,
@@ -31,5 +31,15 @@ def search(q):
                 'hash': mag[20:60]
             })
     return torrents
+
+def skyfiltor(nm, q):
+    if 'NEW' not in nm:
+        nm = nm.lower()
+        terms = q.lower().split('+')
+        indexes = [nm.find(term) for term in terms]
+        if -1 in indexes or sorted(indexes) != indexes:
+            return False
+        return True
+    return False
 
 print(search('the+librarians'))

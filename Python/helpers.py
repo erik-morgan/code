@@ -1,22 +1,23 @@
 import re
 import math
 
-isbad = re.compile(r'(?i)\b(rus|fuck|anal|tits|xxx|porn)\b').search
+regx = re.compile(r'\b(rus|french|fuck|anal|tits|xxx|porn|split.scene.?)\b')
+isbad = regx.search
 
-def filtor(nm, sd=None, q=None, tests='lang name sites'):
+def filtor(nm, sd=None, q=None, lang=False, bad=False, site=False):
     nm = nm.lower()
     if sd and not(sd.isdigit() or int(sd) > 0):
         return False
     if q and any(term not in nm for term in q.lower().split('+')):
         return False
-    if 'lang' in tests:
+    if lang:
         try:
             nm.encode('ascii')
         except UnicodeEncodeError:
             return False
-    if 'name' in tests and isbad(nm):
+    if bad and isbad(nm):
         return False
-    if 'sites' in tests and any(st in nm for st in ['eztv', 'rarbg', 'rartv']):
+    if site and any(site in nm for site in ['eztv', 'rarbg', 'rartv']):
         return False
     return True
 
