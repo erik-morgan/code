@@ -1,25 +1,27 @@
 import re
 import math
 
-regx = re.compile(r'\b(rus|french|fuck|anal|tits|xxx|porn|split.scene.?)\b')
-isbad = regx.search
-
-def filtor(nm, sd=None, q=None, lang=False, bad=False, site=False):
+def okname(nm, q):
+    rx = re.compile(r'\b(rus|french|fuck|anal|tits|xxx|porn|split.scene.?)\b')
+    isbad = rx.search
     nm = nm.lower()
-    if sd and not(sd.isdigit() or int(sd) > 0):
+    if nm[0] is '[' or isbad(nm):
         return False
-    if q and any(term not in nm for term in q.lower().split('+')):
+    if any(site in nm for site in ['eztv', 'rarbg', 'rartv']):
         return False
-    if lang:
-        try:
-            nm.encode('ascii')
-        except UnicodeEncodeError:
-            return False
-    if bad and isbad(nm):
+    if any(term not in nm for term in q.lower().split('+')):
         return False
-    if site and any(site in nm for site in ['eztv', 'rarbg', 'rartv']):
+    try:
+        nm.encode('ascii')
+        return True
+    except UnicodeEncodeError:
         return False
-    return True
+
+def okseed(sd):
+    sd = sd.replace(',', '')
+    if sd.isdigit() and int(sd) > 0:
+        return True
+    return False
 
 def bytesize(n):
     b = int(n)

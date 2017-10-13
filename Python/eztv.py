@@ -3,6 +3,7 @@ import requests
 from helpers import filtor
 
 def search(q):
+#    Torrent = namedtuple('Torrent', ['name', 'size', 'seed', 'mag'])
     url = f'https://eztv.ag/search/{q}'
     data = requests.get(url)
     tree = html.fromstring(data.content)
