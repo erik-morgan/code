@@ -1,105 +1,60 @@
-
 function getGmail() {
-  var getIDs = function () {
+  if (FLAG == 1) {
     var ids = [];
-    while (!props.getProperty('g_ids_done') && timer < 300) {
-      try {
-        var nextPage = props.getProperty('next_page_token');
-        var response = Gmail.Users.Threads.list({
-          'userId': me,
-          'labelIds': ['INBOX'],
-          'pageToken': nextPage
-        });
+    var params = {
+      'labelIds': 'INBOX',
+      'maxResults': 500
+    }
+    if (props.getProperty('gnext')) {
+      getIDs(params, props.getProperty('gnext'));
+    }
+    else {
+      getIDs(params);
+    }
+    function getIDs(options, nextToken){
+      if (nextToken) {
+        options.pageToken = nextToken;
       }
-      catch (e) {
-        var response = Gmail.Users.Threads.list({
-          'userId': me,
-          'labelIds': ['INBOX']
-        });
+      var response = Gmail.Users.Messages.list('me', options);
+      var glist = response['messages'];
+      for (var m = 0; m < glist.length; m++) {
+        ids.push(glist[m]['id']);
+      }
+      if (response['nextPageToken']){
+        if (date() - start < 300){
+          getIDs(params, response['nextPageToken']);
+        }
+        else {
+          props.setProperty('gnext', response['nextPageToken']);
+        }
+      }
+      else {
+        FLAG++;
+        props.setProperty('progress', FLAG);
       }
     }
-    var r = ss_ids.getLastRow() + 1;
-    /*
-      var rng = ss_ids
-
-      on first run, time function execution; calculate number of requests in 5 minutes
-      when less than 100 ids are returned, set done prop to true
-      while getting ids AND threads, use a single property
-        to store info between runs, and make a function to handle that and the trigger
-
-    function listMessages(userId, query, callback) {
-      var getPageOfMessages = function(request, result) {
-        request.execute(function(resp) {
-          result = result.concat(resp.messages);
-          var nextPageToken = resp.nextPageToken;
-          if (nextPageToken) {
-            request = gapi.client.gmail.users.messages.list({
-              'userId': userId,
-              'pageToken': nextPageToken,
-              'q': query
-            });
-            getPageOfMessages(request, result);
-          }
-          else {
-            callback(result);
-          }
-        });
-      };
-    }
-    */
-  };
-  var getThreads = function () {};
-  if (props.getProperty('g_ids_done')) {
-    getThreads;
+    var rng = idss.getRange(idss.getLastRow() + 1, 1, ids.length, ids[0].length);
+    rng.setValues(ids);
   }
-  else {
-    getIDs;
-  }
-}
-
-function gmailStats() {
-  Logger.clear();
-  var start = +new Date();
-  var props = PropertiesService.getScriptProperties();
-  if (props.getKeys().length == 0) {
-    props.setProperties({'threadIndex':0, 'rowIndex':2});
-    if (ScriptApp.getProjectTriggers().length == 0) {
-      ScriptApp.newTrigger('gmailStats').timeBased().everyMinutes(5).create();
-    }
-  }
-  var sheet = SpreadsheetApp.openById('1vNX7dfILoamf1YMG8mQukvKsbMASA2afTkn4bj2C81U').getSheetByName('Sheet1');
-  var tStart = Number(props.getProperty('threadIndex'));
-  var rowCount = Number(props.getProperty('rowIndex'));
-  var isFinished = false;
-  while (!isFinished && (+new Date() - start) < 240000) {
-    var threads = GmailApp.getInboxThreads(tStart, 100);
-    if (threads.length == 0) {
-      isFinished = true;
-      break;
-    }
-    for (t = 0; t < threads.length; t++) {
-      var messages = threads[t].getMessages();
-      for (m = 0; m < messages.length; m++) {
-        var msg = messages[m];
-        var mStats = [[
-          msg.getDate(),
-          msg.getReplyTo(),
-          msg.getFrom(),
-          msg.getTo(),
-          msg.getSubject(),
-          /unsubscribe/im.test(msg.getRawContent())
-        ]];
-        sheet.getRange(rowCount, 1, 1, 6).setValues(mStats);
-        rowCount = rowCount + 1;
+  if (FLAG == 2){
+    var index = (props.getProperty('gindex')) ? props.getProperty('gindex') : 2;
+    var mids = idss.getRange(index, 1, idss.getLastRow() - index + 1).getValues();
+    var messages = [];
+    for (var i = 0; i < mids.length; i++){
+      var m = GmailApp.getMessageById(mids[i][0]);
+      var from = m.getFrom().split(' <');
+      messages.push(['Gmail', m.getDate(), m.getSubject(), from[0], from[1].substr(0, from[1].length - 1)]);
+      index++;
+      if (date() - start > 300){
+        props.setProperty('gindex', index + 1);
+        break;
       }
-  }
-    tStart += 100;
-    props.setProperty('threadIndex', tStart);
-    props.setProperty('rowIndex', rowCount);
-  }
-  if (isFinished) {
-    props.deleteAllProperties();
-    var trigger = ScriptApp.getProjectTriggers()[0];
-    ScriptApp.deleteTrigger(trigger);
+    }
+    if (i == mids.length){
+      FLAG++;
+      props.setProperty('progress', FLAG);
+    }
+    var rng = gss.getRange(gss.getLastRow() + 1, 1, messages.length, messages[0].length);
+    rng.setValues(messages);
   }
 }
