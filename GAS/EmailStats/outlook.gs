@@ -1,4 +1,5 @@
 function getOmail(token) {
+  Logger.log('processing outlook mail');
   var messages = [];
   var heads = {
     'Authorization': 'Bearer ' + token,
@@ -10,7 +11,7 @@ function getOmail(token) {
   else {
     getMessages();
   }
-  function getMessages(link){
+  function getMessages(link) {
     var request = link || props.getProperty('olink');
     var response = JSON.parse(UrlFetchApp.fetch(request, {headers: heads}).getContentText());
     var olist = response['value'];
@@ -30,8 +31,10 @@ function getOmail(token) {
     else {
       FLAG++;
       props.setProperty('progress', FLAG);
+      Logger.log('outlook mail complete');
     }
   }
   var rng = oss.getRange(oss.getLastRow() + 1, 1, messages.length, messages[0].length);
   rng.setValues(messages);
+  Logger.log('outlook messages logged to spreadsheet');
 }

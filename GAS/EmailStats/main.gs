@@ -14,20 +14,35 @@ var start = date();
 var props = PropertiesService.getScriptProperties();
 var FLAG = Number(props.getProperty('progress'));
 
+function run() {
+  try {
+    main();
+    logit();
+  }
+  catch (e) {
+    logit(e);
+  }
+}
+
 function main() {
   if (ScriptApp.getProjectTriggers().length == 0) {
     ScriptApp.newTrigger('main').timeBased().everyMinutes(7).create();
   }
+  Logger.log('trigger created');
   if (!FLAG) {
+    Logger.log('FLAG is 0');
     getAuth();
   }
   if (FLAG && date() - start < 300) {
+    Logger.log('FLAG > 0');
     getGmail();
   }
   if (FLAG == 3) {
+    Logger.log('FLAG = 3');
     var triggers = ScriptApp.getProjectTriggers();
-    for (var t = 0; t < triggers.length; t++){
+    for (var t = 0; t < triggers.length; t++) {
       ScriptApp.deleteTrigger(triggers[t]);
     }
+    Logger.log('triggers removed');
   }
 }

@@ -13,21 +13,26 @@ function getGraphService() {
 function getAuth() {
   var graph = getGraphService();
   if (graph.hasAccess()) {
+    Logger.log('access granted');
     getOmail(graph.getAccessToken());
   }
   else {
+    Logger.log('access denied');
     var authURL = graph.getAuthorizationUrl();
     Logger.log('Open the following URL and re-run the script: %s', authURL);
   }
 }
 
 function authCallback(request) {
+  Logger.log('authCallback reached');
   var service = getGraphService();
   var authorized = service.handleCallback(request);
   if (authorized) {
+    Logger.log('authorization successful');
     return HtmlService.createHtmlOutput('Success!');
   }
   else {
+    Logger.log('authorization failed');
     return HtmlService.createHtmlOutput('Denied.');
   }
 }

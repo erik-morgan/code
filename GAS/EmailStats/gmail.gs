@@ -11,7 +11,8 @@ function getGmail() {
     else {
       getIDs(params);
     }
-    function getIDs(options, nextToken){
+    function getIDs(options, nextToken) {
+      Logger.log('getting gmail ids');
       if (nextToken) {
         options.pageToken = nextToken;
       }
@@ -20,8 +21,8 @@ function getGmail() {
       for (var m = 0; m < glist.length; m++) {
         ids.push(glist[m]['id']);
       }
-      if (response['nextPageToken']){
-        if (date() - start < 300){
+      if (response['nextPageToken']) {
+        if (date() - start < 300) {
           getIDs(params, response['nextPageToken']);
         }
         else {
@@ -31,30 +32,34 @@ function getGmail() {
       else {
         FLAG++;
         props.setProperty('progress', FLAG);
+        Logger.log('gmail ids complete');
       }
     }
     var rng = idss.getRange(idss.getLastRow() + 1, 1, ids.length, ids[0].length);
     rng.setValues(ids);
+    Logger.log('gmail ids logged to spreadsheet');
   }
-  if (FLAG == 2){
+  if (FLAG == 2) {
     var index = (props.getProperty('gindex')) ? props.getProperty('gindex') : 2;
     var mids = idss.getRange(index, 1, idss.getLastRow() - index + 1).getValues();
     var messages = [];
-    for (var i = 0; i < mids.length; i++){
+    for (var i = 0; i < mids.length; i++) {
       var m = GmailApp.getMessageById(mids[i][0]);
       var from = m.getFrom().split(' <');
       messages.push(['Gmail', m.getDate(), m.getSubject(), from[0], from[1].substr(0, from[1].length - 1)]);
       index++;
-      if (date() - start > 300){
+      if (date() - start > 300) {
         props.setProperty('gindex', index + 1);
         break;
       }
     }
-    if (i == mids.length){
+    if (i == mids.length) {
       FLAG++;
       props.setProperty('progress', FLAG);
+      Logger.log('gmail messages complete');
     }
     var rng = gss.getRange(gss.getLastRow() + 1, 1, messages.length, messages[0].length);
     rng.setValues(messages);
+    Logger.log('gmail messages logged to spreadsheet');
   }
 }
