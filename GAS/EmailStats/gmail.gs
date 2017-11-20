@@ -1,4 +1,28 @@
 function getGmail() {
+  var getids = function (options, nextToken) {
+    Logger.log('getting gmail ids');
+    if (nextToken) {
+      options.pageToken = nextToken;
+    }
+    var response = Gmail.Users.Messages.list('me', options);
+    var glist = response['messages'];
+    for (var m = 0; m < glist.length; m++) {
+      ids.push([glist[m]['id']]);
+    }
+    if (response['nextPageToken']) {
+      if (date() - start < 300) {
+        getids(params, response['nextPageToken']);
+      }
+      else {
+        props.setProperty('gnext', response['nextPageToken']);
+      }
+    }
+    else if (response) {
+      FLAG++;
+      props.setProperty('progress', FLAG);
+      Logger.log('gmail ids complete');
+    }
+  }
   if (FLAG == 1) {
     var ids = [];
     var params = {
@@ -6,34 +30,10 @@ function getGmail() {
       'maxResults': 500
     }
     if (props.getProperty('gnext')) {
-      getIDs(params, props.getProperty('gnext'));
+      getids(params, props.getProperty('gnext'));
     }
     else {
-      getIDs(params);
-    }
-    function getIDs(options, nextToken) {
-      Logger.log('getting gmail ids');
-      if (nextToken) {
-        options.pageToken = nextToken;
-      }
-      var response = Gmail.Users.Messages.list('me', options);
-      var glist = response['messages'];
-      for (var m = 0; m < glist.length; m++) {
-        ids.push(glist[m]['id']);
-      }
-      if (response['nextPageToken']) {
-        if (date() - start < 300) {
-          getIDs(params, response['nextPageToken']);
-        }
-        else {
-          props.setProperty('gnext', response['nextPageToken']);
-        }
-      }
-      else {
-        FLAG++;
-        props.setProperty('progress', FLAG);
-        Logger.log('gmail ids complete');
-      }
+      getids(params);
     }
     var rng = idss.getRange(idss.getLastRow() + 1, 1, ids.length, ids[0].length);
     rng.setValues(ids);
@@ -45,8 +45,7 @@ function getGmail() {
     var messages = [];
     for (var i = 0; i < mids.length; i++) {
       var m = GmailApp.getMessageById(mids[i][0]);
-      var from = m.getFrom().split(' <');
-      messages.push(['Gmail', m.getDate(), m.getSubject(), from[0], from[1].substr(0, from[1].length - 1)]);
+      messages.push(['Gmail', m.getDate(), m.getSubject(), m.getFrom()]);
       index++;
       if (date() - start > 300) {
         props.setProperty('gindex', index + 1);

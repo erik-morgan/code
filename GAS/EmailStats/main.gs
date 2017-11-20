@@ -26,7 +26,7 @@ function run() {
 
 function main() {
   if (ScriptApp.getProjectTriggers().length == 0) {
-    ScriptApp.newTrigger('main').timeBased().everyMinutes(7).create();
+    ScriptApp.newTrigger('main').timeBased().everyMinutes(10).create();
   }
   Logger.log('trigger created');
   if (!FLAG) {
