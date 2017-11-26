@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Home Torrent Finder</title>
+        <link rel="stylesheet" type="text/css" href="styles.css" />
+        <!--
+            <script>
+                JS FOR SORTING + FILTERING
+            </script>
+        -->
+    </head>
+    <body>
+        <div id="page">
+            <h1>Home Torrent Finder Search Results</h1>
+            <section id="search">
+                <form id="searchForm" action="search.php" method="GET">
+                    <fieldset>
+                        <input id="searchBox" type="text" name="searchText" />
+                        <input type="submit" value="Search" name="submit" id="submitButton" />
+                    </fieldset>
+                </form>
+            </section>
+            <section id="results">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Seeds</th>
+                            <th>Peers</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- find out if its faster to do this in python -->
+                        {% for result in results %}
+                            <tr>
+                                <td><!-- checkbox --></td>
+                                {% for attr in result %}
+                                    <td> {{ attr }} </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </body>
+</html>
