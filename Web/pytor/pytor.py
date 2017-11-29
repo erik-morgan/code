@@ -162,7 +162,7 @@ def search (q, cat):
     try:
         torlist = filtor(torlist)
         print('execution complete!\n# of results = ' + str(len(torlist)))
-        return json.dumps(torlist)
+        return torlist
     except Exception as e:
         print('problem during filtor...')
         logging.exception(e)

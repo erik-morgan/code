@@ -1,17 +1,21 @@
 from flask import Flask, request as httpreq
+from pytor import search
 
 app = Flask(__name__)
 
 @app.route('/')
 def index ():
-    # return index page static http file
+    # return index http template
     pass
 
-@app.route('/<query>')
-def search (query):
+@app.route('/search')
+def search ():
     # return http template with search results
-    # call search with query after splitting it into query and cat
-    pass
+    # maybe make a /tv and /movies route to handle categories
+    query = httpreq.args.get('query')
+    category = httpreq.args.get('category')
+    search_results = search(query, category)
+    return search_results
 
 if __name__ == '__main__':
     app.run(debug=True)
