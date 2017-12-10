@@ -5,7 +5,7 @@ import json, logging
 
 logging.basicConfig(
     # this logging stuff MIGHT go into a different file
-    filename='pytor.log',
+    filename='docs/pytor.log',
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )

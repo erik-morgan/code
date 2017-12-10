@@ -1,0 +1,1612 @@
+2017-11-25 15:52:52,128 - __main__ - INFO - beginning search
+2017-11-25 15:52:52,135 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:52:52,570 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 15:52:52,595 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 15:52:53,807 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 15:52:54,047 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 15:52:54,565 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 15:52:54,615 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:52:55,153 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 15:52:55,167 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 15:53:00,277 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 15:54:05,175 - __main__ - INFO - beginning search
+2017-11-25 15:54:05,198 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:54:05,683 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 15:54:22,821 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 15:54:24,047 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 15:54:46,749 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 15:54:47,237 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 15:55:17,862 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:55:19,424 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 15:55:25,596 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 15:58:45,475 - __main__ - INFO - beginning search
+2017-11-25 15:58:45,492 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:58:45,999 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 15:58:48,382 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 15:58:49,619 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 15:58:52,576 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 15:58:53,244 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 15:58:56,469 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 15:58:56,997 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 15:59:01,681 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 15:59:03,276 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 15:59:03,644 - root - DEBUG - 'NoneType' object is not iterable
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 148, in search
+    ext(func())
+TypeError: 'NoneType' object is not iterable
+2017-11-25 15:59:08,426 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 15:59:09,768 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 15:59:09,919 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 15:59:10,395 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 15:59:10,556 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 15:59:10,946 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 15:59:11,127 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 16:03:21,717 - __main__ - INFO - beginning search
+2017-11-25 16:03:21,735 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 16:03:22,235 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 16:03:22,259 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 16:03:23,450 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 16:03:23,651 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 16:03:24,117 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 16:03:24,194 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 16:03:24,735 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 16:03:24,764 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 16:03:28,835 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 16:08:17,013 - __main__ - INFO - beginning search
+2017-11-25 16:08:17,018 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 16:08:17,458 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 16:08:17,468 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 16:08:18,692 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 16:08:18,858 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 16:08:19,306 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 16:08:19,451 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 16:08:19,979 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 16:08:19,992 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 16:08:21,073 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 16:08:21,440 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 16:08:21,968 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 16:08:22,106 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 16:08:22,584 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 16:08:22,721 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 16:08:23,242 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 16:08:23,370 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 17:00:55,676 - __main__ - INFO - beginning search
+2017-11-25 17:00:55,681 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:00:56,131 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 17:00:56,142 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 17:00:56,148 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 17:00:56,152 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:00:56,162 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:00:56,162 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 17:00:56,661 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 17:00:56,721 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 17:00:56,789 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 17:00:56,804 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:00:57,272 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 17:00:57,351 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 17:00:57,404 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:00:57,883 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 17:00:59,146 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 17:00:59,518 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 17:52:21,208 - __main__ - INFO - beginning search
+2017-11-25 17:52:21,213 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:52:21,661 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 17:52:21,717 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 17:52:21,723 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 17:52:21,730 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:52:21,731 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:52:21,731 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 17:52:22,151 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 17:52:22,287 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:52:22,319 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 17:52:22,635 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 17:52:22,708 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:52:22,942 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 17:52:23,075 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 17:52:25,254 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 17:52:39,895 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 17:52:40,297 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 17:56:27,431 - __main__ - INFO - beginning search
+2017-11-25 17:56:27,437 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:56:27,880 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 17:56:27,901 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 17:56:27,905 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 17:56:27,906 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 17:56:27,910 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 17:56:27,915 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:56:28,436 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 17:56:28,454 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=9xoq75snag HTTP/1.1" 200 None
+2017-11-25 17:56:28,517 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 17:56:28,573 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:56:29,073 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 17:56:29,165 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 17:56:29,289 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 17:56:29,822 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 17:56:30,586 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=2.5)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=2.5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 162, in run_funcs
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 88, in tpb
+    tree = htmlstr(req(url, timeout=2.5).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=2.5)
+2017-11-25 17:56:31,011 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 20:40:11,327 - __main__ - INFO - beginning search
+2017-11-25 20:40:11,333 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:40:11,807 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 20:40:11,825 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 20:40:11,833 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:40:11,833 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 20:40:11,842 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 20:40:11,843 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:40:12,291 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 20:40:12,297 - root - DEBUG - 'torrent_results'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 167, in run_funcs
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 79, in rarbg
+    items = json.loads(req(url, timeout=2.5, params=payload).text)['torrent_results']
+KeyError: 'torrent_results'
+2017-11-25 20:40:12,375 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 20:40:12,543 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:40:12,895 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 20:40:13,018 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:40:13,072 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 20:40:13,427 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 20:40:13,770 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 20:40:13,802 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 20:40:14,228 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 20:41:30,763 - __main__ - INFO - beginning search
+2017-11-25 20:41:30,768 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:41:31,218 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 20:41:31,237 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:41:31,239 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 20:41:31,244 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 20:41:31,248 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:31,249 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 20:41:31,652 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 20:41:31,809 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 20:41:31,821 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 20:41:31,974 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:32,449 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 20:41:32,467 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 20:41:32,606 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:32,953 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 20:41:34,418 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 167, in run_funcs
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 93, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 20:41:34,456 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 20:41:49,426 - __main__ - INFO - beginning search
+2017-11-25 20:41:49,431 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:41:49,876 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 20:41:49,893 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 20:41:49,900 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 20:41:49,905 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 20:41:49,908 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:49,909 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:41:50,297 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 20:41:50,365 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:50,430 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 20:41:50,470 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 20:41:50,824 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 20:41:50,968 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 20:41:51,028 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 20:41:51,075 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 20:41:51,537 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 20:41:51,712 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 20:58:19,772 - __main__ - INFO - beginning search
+2017-11-25 20:58:19,779 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:58:20,350 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 20:59:43,299 - __main__ - INFO - beginning search
+2017-11-25 20:59:43,304 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 20:59:44,154 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 21:11:47,391 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:11:47,870 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 21:11:47,875 - __main__ - INFO - beginning search
+2017-11-25 21:11:47,911 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 21:11:47,911 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 21:11:47,911 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 21:11:47,911 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:11:48,462 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 21:11:48,652 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 21:11:48,741 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:11:49,124 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 21:11:49,502 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 21:11:49,925 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:11:50,307 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 21:11:50,471 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:11:50,956 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 21:11:51,102 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 165, in run_funcs
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 91, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 21:11:51,318 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 21:12:02,693 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:12:03,163 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 21:12:03,169 - __main__ - INFO - beginning search
+2017-11-25 21:12:03,205 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 21:12:03,206 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 21:12:03,207 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:12:03,207 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 21:12:03,731 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 21:12:03,810 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 21:12:03,819 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:04,178 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 21:12:04,199 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 21:12:04,344 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:04,821 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 21:12:04,984 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:05,451 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 21:12:06,415 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 165, in run_funcs
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 91, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 21:12:06,514 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 21:12:14,337 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:12:14,789 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 21:12:14,795 - __main__ - INFO - beginning search
+2017-11-25 21:12:14,832 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 21:12:14,832 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 21:12:14,834 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:12:14,835 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 21:12:15,450 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 21:12:15,471 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:15,804 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 21:12:15,905 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 21:12:16,070 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 21:12:16,183 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:16,789 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 21:12:16,823 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 21:12:17,422 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 21:12:17,950 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 21:12:18,350 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 21:22:25,848 - __main__ - INFO - beginning search
+2017-11-25 21:22:25,853 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 21:22:26,318 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:24:05,823 - __main__ - INFO - beginning search
+2017-11-25 23:24:05,828 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:24:06,620 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:24:06,656 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:06,657 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:06,659 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:06,657 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:24:06,664 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:24:09,752 - root - DEBUG - HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 346, in _make_request
+    self._validate_conn(conn)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 850, in _validate_conn
+    conn.connect()
+  File "/usr/lib/python3.6/site-packages/urllib3/connection.py", line 326, in connect
+    ssl_context=context)
+  File "/usr/lib/python3.6/site-packages/urllib3/util/ssl_.py", line 329, in ssl_wrap_socket
+    return context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.6/ssl.py", line 407, in wrap_socket
+    _context=self, _session=session)
+  File "/usr/lib/python3.6/ssl.py", line 814, in __init__
+    self.do_handshake()
+  File "/usr/lib/python3.6/ssl.py", line 1068, in do_handshake
+    self._sslobj.do_handshake()
+  File "/usr/lib/python3.6/ssl.py", line 689, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:761: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 349, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 18, in eztv
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:24:42,447 - __main__ - INFO - beginning search
+2017-11-25 23:24:42,453 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:24:42,902 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:24:42,933 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:42,934 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:42,934 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:24:42,936 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:24:42,940 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:24:44,359 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:24:47,642 - root - DEBUG - HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out.
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 302, in _error_catcher
+    yield
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 601, in read_chunked
+    chunk = self._handle_chunk(amt)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 566, in _handle_chunk
+    returned_chunk = self._fp._safe_read(self.chunk_left)
+  File "/usr/lib/python3.6/http/client.py", line 612, in _safe_read
+    chunk = self.fp.read(min(amt, MAXAMOUNT))
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 745, in generate
+    for chunk in self.raw.stream(chunk_size, decode_content=True):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 432, in stream
+    for line in self.read_chunked(amt, decode_content=decode_content):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 626, in read_chunked
+    self._original_response.close()
+  File "/usr/lib/python3.6/contextlib.py", line 99, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 307, in _error_catcher
+    raise ReadTimeoutError(self._pool, None, 'Read timed out.')
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 18, in eztv
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 658, in send
+    r.content
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 823, in content
+    self._content = bytes().join(self.iter_content(CONTENT_CHUNK_SIZE)) or bytes()
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 752, in generate
+    raise ConnectionError(e)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='eztv.ag', port=443): Read timed out.
+2017-11-25 23:25:20,724 - __main__ - INFO - beginning search
+2017-11-25 23:25:20,729 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:25:21,425 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:25:21,465 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:25:21,465 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:25:21,466 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:25:21,468 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:25:21,471 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:25:22,795 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:31:28,587 - __main__ - INFO - beginning search
+2017-11-25 23:31:28,592 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:31:29,055 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:31:29,094 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:31:29,095 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:31:29,097 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:31:29,095 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:31:29,102 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:31:30,320 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:32:06,121 - __main__ - INFO - beginning search
+2017-11-25 23:32:06,126 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:32:06,836 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:32:06,873 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:06,873 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:32:06,874 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:06,876 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:06,881 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:32:08,094 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:32:08,885 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:32:53,899 - __main__ - INFO - beginning search
+2017-11-25 23:32:53,904 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:32:54,740 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:32:54,778 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:54,778 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:32:54,778 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:54,782 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:32:54,785 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:32:55,943 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:32:56,289 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:35:52,620 - __main__ - INFO - beginning search
+2017-11-25 23:35:52,626 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:35:53,352 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:35:53,390 - root - DEBUG - rarbg() missing 2 required positional arguments: 'cat' and 'token'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: rarbg() missing 2 required positional arguments: 'cat' and 'token'
+2017-11-25 23:35:53,390 - root - DEBUG - lime() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: lime() missing 1 required positional argument: 'cat'
+2017-11-25 23:35:53,392 - root - DEBUG - zoo() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: zoo() missing 1 required positional argument: 'cat'
+2017-11-25 23:35:53,393 - root - DEBUG - tpb() missing 1 required positional argument: 'cat'
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(args)
+TypeError: tpb() missing 1 required positional argument: 'cat'
+2017-11-25 23:35:53,397 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:35:54,657 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:35:54,898 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:37:06,243 - __main__ - INFO - beginning search
+2017-11-25 23:37:06,249 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:37:08,363 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:37:08,425 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:37:08,433 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:37:08,435 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:37:08,436 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:37:08,438 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:37:09,116 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:37:09,291 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:37:09,691 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:37:11,797 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:37:12,698 - root - DEBUG - HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 302, in _error_catcher
+    yield
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 601, in read_chunked
+    chunk = self._handle_chunk(amt)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 557, in _handle_chunk
+    value = self._fp._safe_read(amt)
+  File "/usr/lib/python3.6/http/client.py", line 612, in _safe_read
+    chunk = self.fp.read(min(amt, MAXAMOUNT))
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 745, in generate
+    for chunk in self.raw.stream(chunk_size, decode_content=True):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 432, in stream
+    for line in self.read_chunked(amt, decode_content=decode_content):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 626, in read_chunked
+    self._original_response.close()
+  File "/usr/lib/python3.6/contextlib.py", line 99, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 307, in _error_catcher
+    raise ReadTimeoutError(self._pool, None, 'Read timed out.')
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in zoo
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in <listcomp>
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 658, in send
+    r.content
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 823, in content
+    self._content = bytes().join(self.iter_content(CONTENT_CHUNK_SIZE)) or bytes()
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 752, in generate
+    raise ConnectionError(e)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+2017-11-25 23:37:13,350 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:37:46,907 - __main__ - INFO - beginning search
+2017-11-25 23:37:46,913 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:37:47,370 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:37:47,407 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:37:47,414 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:37:47,415 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:37:47,417 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:37:47,419 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:37:47,951 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:37:48,014 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:37:48,056 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:37:48,293 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:37:48,840 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:37:49,108 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:37:49,604 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:37:50,645 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 78, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:37:50,727 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:39:39,200 - __main__ - INFO - beginning search
+2017-11-25 23:39:39,206 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:39:39,661 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:39:39,698 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:39:39,707 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:39:39,707 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:39:39,709 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:39:39,708 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:39:40,211 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:39:40,258 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:39:40,410 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:39:40,479 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:39:41,034 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:39:41,239 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:39:41,599 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:39:42,690 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:39:43,117 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:40:26,533 - __main__ - INFO - beginning search
+2017-11-25 23:40:26,538 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:40:26,999 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:40:27,036 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 143, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:40:27,044 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:40:27,045 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:40:27,045 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:40:27,047 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:40:27,516 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:40:27,608 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:40:27,620 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:40:27,842 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:40:28,322 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:40:28,492 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:40:29,004 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:40:30,009 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:40:30,452 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:42:06,730 - __main__ - INFO - beginning search
+2017-11-25 23:42:06,735 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:42:07,294 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:42:07,331 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:42:07,340 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:42:07,341 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:42:07,342 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:42:07,343 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:42:07,974 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:42:08,203 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:42:08,214 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:42:09,341 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:42:11,377 - root - DEBUG - HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 302, in _error_catcher
+    yield
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 601, in read_chunked
+    chunk = self._handle_chunk(amt)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 557, in _handle_chunk
+    value = self._fp._safe_read(amt)
+  File "/usr/lib/python3.6/http/client.py", line 612, in _safe_read
+    chunk = self.fp.read(min(amt, MAXAMOUNT))
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 745, in generate
+    for chunk in self.raw.stream(chunk_size, decode_content=True):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 432, in stream
+    for line in self.read_chunked(amt, decode_content=decode_content):
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 626, in read_chunked
+    self._original_response.close()
+  File "/usr/lib/python3.6/contextlib.py", line 99, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/usr/lib/python3.6/site-packages/urllib3/response.py", line 307, in _error_catcher
+    raise ReadTimeoutError(self._pool, None, 'Read timed out.')
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in zoo
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in <listcomp>
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 658, in send
+    r.content
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 823, in content
+    self._content = bytes().join(self.iter_content(CONTENT_CHUNK_SIZE)) or bytes()
+  File "/usr/lib/python3.6/site-packages/requests/models.py", line 752, in generate
+    raise ConnectionError(e)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out.
+2017-11-25 23:42:11,456 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:42:24,681 - __main__ - INFO - beginning search
+2017-11-25 23:42:24,686 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:42:25,982 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:42:26,051 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:42:26,059 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:42:26,061 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:42:26,065 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:42:26,065 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:42:27,951 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:42:28,437 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:42:28,646 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:42:29,375 - root - DEBUG - HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in zoo
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 107, in <listcomp>
+    pages = [req(url + str(p), timeout=3).content for p in [1, 2, 3]]
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='zooqle.com', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:42:29,469 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:43:36,080 - __main__ - INFO - beginning search
+2017-11-25 23:43:36,086 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:43:36,565 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:43:36,610 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:43:36,611 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:43:36,612 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:43:36,615 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:43:36,616 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:43:37,097 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:43:37,173 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:43:37,369 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:43:37,416 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:43:37,843 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:43:37,937 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:43:38,485 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:43:39,299 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:43:40,562 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:43:41,729 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:44:29,991 - __main__ - INFO - beginning search
+2017-11-25 23:44:29,996 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:44:30,464 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:44:30,485 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:44:30,491 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:30,494 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:44:30,495 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:44:30,499 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:44:31,101 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:44:31,234 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:44:31,388 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:31,408 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:44:31,850 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:44:31,961 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:44:33,240 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:33,738 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:44:33,947 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 78, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:44:34,000 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:44:45,345 - __main__ - INFO - beginning search
+2017-11-25 23:44:45,350 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:44:46,076 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:44:46,093 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:44:46,102 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:44:46,103 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:44:46,108 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:44:46,113 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:46,633 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:44:46,692 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:44:46,736 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:44:47,019 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:47,275 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:44:47,624 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:44:47,858 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:44:48,375 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:44:50,123 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 78, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:44:50,205 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:45:39,653 - __main__ - INFO - beginning search
+2017-11-25 23:45:39,658 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:45:40,267 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:45:40,284 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:45:40,291 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:45:40,295 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:45:40,298 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:45:40,298 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:45:40,788 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:45:40,867 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:45:41,156 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:45:41,444 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:45:41,495 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:45:41,829 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:45:41,991 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:45:42,499 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:45:43,484 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 145, in run_func
+    return func(*args)
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 78, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-25 23:45:43,495 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:49:04,365 - __main__ - INFO - beginning search
+2017-11-25 23:49:04,370 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:49:04,924 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:49:04,943 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:49:04,952 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:49:04,953 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:49:04,954 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:49:04,959 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:49:05,491 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:49:05,519 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:49:05,568 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:49:05,735 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:49:06,119 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:49:06,240 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:49:06,263 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:49:06,380 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 152, in run_func
+    ext(func(*args))
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:49:06,783 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:49:07,954 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:49:08,353 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:50:22,327 - __main__ - INFO - beginning search
+2017-11-25 23:50:22,332 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:50:22,785 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-25 23:50:22,801 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-25 23:50:22,811 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-25 23:50:22,816 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:50:22,817 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-25 23:50:22,817 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:50:23,325 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-25 23:50:23,360 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-25 23:50:23,374 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-25 23:50:23,491 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:50:23,813 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-25 23:50:23,935 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-25 23:50:23,936 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-25 23:50:24,021 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-25 23:50:24,205 - root - DEBUG - eztv() takes 1 positional argument but 14 were given
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 152, in run_func
+    ext(func(*args))
+TypeError: eztv() takes 1 positional argument but 14 were given
+2017-11-25 23:50:24,426 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-25 23:50:24,605 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-25 23:51:37,896 - __main__ - INFO - beginning search
+2017-11-25 23:51:37,902 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-25 23:51:38,354 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-26 00:01:34,684 - __main__ - INFO - beginning search
+2017-11-26 00:01:34,689 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:01:35,145 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-26 00:01:35,163 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-26 00:01:35,171 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-26 00:01:35,171 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:01:35,175 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-26 00:01:35,179 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:01:35,598 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-26 00:01:35,705 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-26 00:01:35,858 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:01:36,112 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-26 00:01:36,321 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-26 00:01:36,416 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-26 00:01:36,463 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:01:36,807 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-26 00:01:38,368 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 150, in run_func
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 86, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-26 00:01:38,473 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-26 00:02:01,510 - __main__ - INFO - beginning search
+2017-11-26 00:02:01,515 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:01,975 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-26 00:02:01,991 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-26 00:02:02,000 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:02,001 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-26 00:02:02,006 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-26 00:02:02,011 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:02,406 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-26 00:02:02,537 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:02,554 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-26 00:02:02,673 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-26 00:02:03,004 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-26 00:02:03,137 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:03,163 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-26 00:02:03,615 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-26 00:02:05,035 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-26 00:02:05,503 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-26 00:02:20,606 - __main__ - INFO - beginning search
+2017-11-26 00:02:20,612 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:21,062 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-26 00:02:21,076 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-26 00:02:21,082 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:21,085 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-26 00:02:21,091 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:21,091 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-26 00:02:21,667 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-26 00:02:21,707 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-26 00:02:21,755 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-26 00:02:21,796 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:22,182 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-26 00:02:22,257 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:22,384 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-26 00:02:22,619 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-26 00:02:24,290 - root - DEBUG - HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 387, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 2, in raise_from
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 383, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.6/http/client.py", line 1331, in getresponse
+    response.begin()
+  File "/usr/lib/python3.6/http/client.py", line 297, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.6/http/client.py", line 258, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.6/ssl.py", line 1009, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 871, in read
+    return self._sslobj.read(len, buffer)
+  File "/usr/lib/python3.6/ssl.py", line 631, in read
+    v = self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3.6/site-packages/urllib3/util/retry.py", line 357, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/urllib3/packages/six.py", line 686, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/urllib3/connectionpool.py", line 309, in _raise_timeout
+    raise ReadTimeoutError(self, url, "Read timed out. (read timeout=%s)" % timeout_value)
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 150, in run_func
+    ext(f())
+  File "/home/erik/PycharmProjects/pytor/pytor.py", line 86, in tpb
+    tree = htmlstr(req(url, timeout=3).content)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 521, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='thepiratebay.org', port=443): Read timed out. (read timeout=3)
+2017-11-26 00:02:24,390 - __main__ - INFO - search complete, attempting to run filtor...
+2017-11-26 00:02:32,547 - __main__ - INFO - beginning search
+2017-11-26 00:02:32,553 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:32,995 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?get_token=get_token HTTP/1.1" 200 None
+2017-11-26 00:02:33,013 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): eztv.ag
+2017-11-26 00:02:33,019 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.limetorrents.cc
+2017-11-26 00:02:33,019 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): torrentapi.org
+2017-11-26 00:02:33,023 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): thepiratebay.org
+2017-11-26 00:02:33,028 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:33,574 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=1 HTTP/1.1" 200 None
+2017-11-26 00:02:33,595 - urllib3.connectionpool - DEBUG - https://www.limetorrents.cc:443 "GET /search/tv/the+librarians/seeds/1/ HTTP/1.1" 200 None
+2017-11-26 00:02:33,628 - urllib3.connectionpool - DEBUG - https://torrentapi.org:443 "GET /pubapi_v2.php?mode=search&search_string=the%2Blibrarians&category=tv&limit=100&sort=seeders&min_seeders=1&format=json_extended&token=o6q38d7r9c HTTP/1.1" 200 None
+2017-11-26 00:02:33,721 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:34,075 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=2 HTTP/1.1" 200 None
+2017-11-26 00:02:34,150 - urllib3.connectionpool - DEBUG - https://thepiratebay.org:443 "GET /search/the+librarians/0/7/200/ HTTP/1.1" 200 None
+2017-11-26 00:02:34,199 - urllib3.connectionpool - DEBUG - https://eztv.ag:443 "GET /search/the+librarians HTTP/1.1" 200 None
+2017-11-26 00:02:34,211 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): zooqle.com
+2017-11-26 00:02:34,668 - urllib3.connectionpool - DEBUG - https://zooqle.com:443 "GET /search?q=the+librarians+category%3Atv&sd=d&fmt=rss&pg=3 HTTP/1.1" 200 None
+2017-11-26 00:02:34,918 - __main__ - INFO - search complete, attempting to run filtor...
