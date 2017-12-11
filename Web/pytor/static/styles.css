@@ -1,139 +1,160 @@
-*{
-    margin:0;
-    padding:0;
+* {
+    margin: 0;
+    padding: 0;
+    /*box-sizing: border-box;*/
 }
 
-body{
-    font-size:13px;
-    color:#eee;
-    font-family:Arial, Helvetica, sans-serif;
-    background:url('images/bg.jpg') repeat-x #718693;
+body {
+    color: #718693;
 }
 
-#page{
-    /* The main container div */
-    width:100%;
-    margin:15% auto 0;
-}
-
-h1{
-    font-family:Corbel,'Myriad Pro',Arial, Helvetica, sans-serif;
+h1 {
+    font-family: Helvetica, sans-serif;
     color: white;
     text-align: center;
-    font-size:45px;
+    font-size: 45px;
 }
 
-#searchForm{
-    /* The search form. */
-    background-color:#4C5A65;
-    padding:50px 50px 30px;
-    margin:80px 0;
-    position:relative;
-
-    -moz-border-radius:16px;
-    -webkit-border-radius:16px;
-    border-radius:16px;
+#search {
+    color: #EBEBEB;
+    width: 100%;
+    margin: 10% auto 0;
 }
 
-fieldset{
-    border:none;
+#categories {
+
 }
 
-#searchBox{
-    /* The search text box. */
-
-    border:none;
-    color:#888888;
-    background:url("images/searchBox.png") no-repeat;
-
-    float:left;
-    font-family:Arial,Helvetica,sans-serif;
-    font-size:15px;
-    height:36px;
-    line-height:36px;
-    margin-right:12px;
-    outline:medium none;
-    padding:0 0 0 35px;
-    text-shadow:1px 1px 0 white;
-    width:385px;
+.cat {
+    /* style unselected button */
 }
+
+.cat.active {
+    /* style selected button */
+}
+
+#inputs {
+    width: 100%;
+}
+
+#search-form {
+    margin: 80px auto; /* look up what the second value is */
+    width: 100%;
+    position: relative; /* refresh on this attribute */
+    display: flex;
+    font-family: Helvetica;
+}
+
+input[type="text"] {
+    padding: 15px;
+    font-size: 18px; /* percentages? */
+    font-family: Helvetica;
+    border: 1.5px solid #AAAAAA;
+}
+
+#search-title {
+    display: flex;
+    width: 100%;
+}
+
+#search-shows, #submit-form {
+    display: inline-block;
+    width: 25%;
+}
+
+/*#searchBox {
+    background-color: #f7f7f7;
+    /*border: 1px solid #d4d9df;*/
+    border-radius: 10px;
+
+    float: left;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 15px;
+    height: 36px;
+    line-height: 36px;
+    margin-right: 12px;
+    outline: medium none;
+    padding: 0 0 0 35px;
+    text-shadow: 1px 1px 0 white;
+    width: 385px;
+}*/
 
 /* The UL that contains the search type icons */
 
-.icons{
-    list-style:none;
-    margin:10px 0 0 335px;
-    height:19px;
-    position:relative;
+.icons {
+    list-style: none;
+    margin: 10px 0 0 335px;
+    height: 19px;
+    position: relative;
 }
 
-.icons li{
-    background:url("images/icons.png") no-repeat;
-    float:left;
-    height:19px;
-    text-indent:-9999px;
-    cursor:pointer;
-    margin-right:5px;
+.icons li {
+    background: url("images/icons.png") no-repeat;
+    float: left;
+    height: 19px;
+    text-indent: -9999px;
+    cursor: pointer;
+    margin-right: 5px;
 }
 
 /* The submit button */
 
 
-#submitButton{
-    background:url('images/buttons.png') no-repeat;
-    width:83px;
-    height:36px;
-    text-indent:-9999px;
-    overflow:hidden;
-    text-transform:uppercase;
-    border:none;
-    cursor:pointer;
+#submitButton {
+    background: url('images/buttons.png') no-repeat;
+    width: 83px;
+    height: 36px;
+    text-indent: -9999px;
+    overflow: hidden;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
 }
 
-#submitButton:hover{
-    background-position:left bottom;
+#submitButton: hover {
+    background-position: left bottom;
 }
 
 
 /* Styling the search results */
 
 
-.pageContainer{
+.pageContainer {
     /* Holds each page with search results. Has an inset bottom border. */
-    border-bottom:1px solid #5e7481;
-    margin-bottom:50px;
+    border-bottom: 1px solid #5e7481;
+    margin-bottom: 50px;
 
     /* Adding a dark bottom border with box shadow */
 
-    -moz-box-shadow:0 1px 0 #798e9c;
-    -webkit-box-shadow:0 1px 0 #798e9c;
-    box-shadow:0 1px 0 #798e9c;
+    -moz-box-shadow: 0 1px 0 #798e9c;
+    -webkit-box-shadow: 0 1px 0 #798e9c;
+    box-shadow: 0 1px 0 #798e9c;
 }
 
 
-p.notFound{
-    text-align:center;
-    padding:0 0 40px;
+p.notFound {
+    text-align: center;
+    padding: 0 0 40px;
 }
 
 
 /* Web & news results */
 
 
-.webResult{ text-shadow:1px 1px 0 #586a75;margin-bottom:50px;}
-.webResult h2{
-    background-color:#5D6F7B;
-    font-size:18px;
-    font-weight:normal;
-    padding:8px 20px;
+.webResult { text-shadow: 1px 1px 0 #586a75;margin-bottom: 50px;}
+.webResult h2 {
+    background-color: #5D6F7B;
+    font-size: 18px;
+    font-weight: normal;
+    padding: 8px 20px;
 
     /* Applying CSS3 rounded corners */
-    -moz-border-radius:18px;
-    -webkit-border-radius:18px;
-    border-radius:18px;
+    -moz-border-radius: 18px;
+    -webkit-border-radius: 18px;
+    border-radius: 18px;
 }
-.webResult h2 b{ color:#fff; }
-.webResult h2 a{ color:#eee;border:none;}
-.webResult p{ line-height:1.5;padding:15px 20px;}
-.webResult p b{ color:white;}
-.webResult > a{ margin-left:20px;}
+.webResult h2 b { color: #fff; }
+.webResult h2 a { color: #eee;border: none;}
+.webResult p { line-height: 1.5;padding: 15px 20px;}
+.webResult p b { color: white;}
+.webResult > a { margin-left: 20px;}

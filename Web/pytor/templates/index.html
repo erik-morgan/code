@@ -1,19 +1,31 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Home Torrent Finder</title>
-    <link rel="stylesheet" type="text/css" href="styles.css" />
-  </head>
-  <body>
-    <div id="page">
-      <h1>Home Torrent Finder</h1>
-      <form id="searchForm" action="search.php" method="GET">
-        <fieldset>
-          <input id="searchBox" type="text" name="searchText" />
-          <input type="submit" value="Search" name="submit" id="submitButton" />
-        </fieldset>
-      </form>
-    </div>
-  </body>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Home Torrent Finder</title>
+        <link rel="stylesheet" type="text/css" href="../static/styles.css" />
+    </head>
+    <body>
+        <h1>Home Torrent Finder</h1>
+        <section id="search">
+            <div id="categories">
+                <button class="cat active" onclick="pickCat(event, 'tv')" id="tab-tv">TV Show</button>
+                <button class="cat" onclick="tab(event, 'movie')" id="tab-movie">Movie</button>
+            </div>
+            <div id="inputs">
+                <form id="search-form" action="/search" method="GET">
+                    <input id="search-title" type="text" name="title" placeholder="Title..." required/>
+                    <input id="search-shows" type="text" name="show" placeholder="Show Info (Season #/S##/S##E##)..." />
+                    <input id="submit-form" type="submit" value="Search" name="submit" />
+                </form>
+            </div>
+        </section>
+        <section id="result">
+            <h2>Search Results</h2>
+            <div id="loading-placeholder">
+            </div>
+            <table id="table-placeholder">
+            </table>
+        </section>
+    </body>
 </html>
