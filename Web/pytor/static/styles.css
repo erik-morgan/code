@@ -1,60 +1,86 @@
+/*
+    blue gray:    #607D8B    96,125,139
+    light gray:   #F1F1F1    241,241,241
+    dark gray:    #616161    97,97,97
+    cursor: progress/wait for spinning wheel
+*/
+
 * {
-    margin: 0;
-    padding: 0;
-    /*box-sizing: border-box;*/
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-    color: #718693;
+    background: #607D8B;
 }
 
-h1 {
-    font-family: Helvetica, sans-serif;
-    color: white;
-    text-align: center;
-    font-size: 45px;
-}
-
-#search {
-    color: #EBEBEB;
-    width: 100%;
-    margin: 10% auto 0;
+section {
+    width: 75%;
+    border: 2px solid #F1F1F1;
+    margin: 16px auto;
+    padding: 16px;
 }
 
 #categories {
-
+    width: 75%;
+    max-width: 810px; /* ? */
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .cat {
-    /* style unselected button */
+    width: 33%;
+    padding: 16px 32px;
+    border: 2px solid #616161;
+    /*
+    margin: 6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    -webkit-box-shadow: inset 0 -2px #2f2e2e;
+    box-shadow: inset 0 -2px #2f2e2e;
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+    */
+    font-size: 24px;
+    text-align: center;
+    cursor: pointer;
+    cursor: pointer;
 }
 
-.cat.active {
-    /* style selected button */
+.cat.sel {
+    background-color: #616161;
+    color: #F1F1F1;
 }
 
-#inputs {
-    width: 100%;
+.cat.desel {
+    background: #F1F1F1;
+    color: #616161;
 }
 
-#search-form {
-    margin: 80px auto; /* look up what the second value is */
-    width: 100%;
-    position: relative; /* refresh on this attribute */
+.cat.desel:hover {
+    background-color: #00BFFF;
+    color: #F1F1F1;
+}
+
+#search {
+    width: 75%;
     display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     font-family: Helvetica;
+    border: 2px solid #616161;
 }
 
-input[type="text"] {
-    padding: 15px;
+#search-bar {
+    width: 100%;
+    max-width: 800px;
+    margin: 5% auto;
     font-size: 18px; /* percentages? */
     font-family: Helvetica;
     border: 1.5px solid #AAAAAA;
-}
-
-#search-title {
-    display: flex;
-    width: 100%;
 }
 
 #search-shows, #submit-form {
@@ -62,99 +88,6 @@ input[type="text"] {
     width: 25%;
 }
 
-/*#searchBox {
-    background-color: #f7f7f7;
-    /*border: 1px solid #d4d9df;*/
-    border-radius: 10px;
-
-    float: left;
-    font-family: Arial,Helvetica,sans-serif;
-    font-size: 15px;
-    height: 36px;
-    line-height: 36px;
-    margin-right: 12px;
-    outline: medium none;
-    padding: 0 0 0 35px;
-    text-shadow: 1px 1px 0 white;
-    width: 385px;
-}*/
-
-/* The UL that contains the search type icons */
-
-.icons {
-    list-style: none;
-    margin: 10px 0 0 335px;
-    height: 19px;
-    position: relative;
+#result {
+    display: none;
 }
-
-.icons li {
-    background: url("images/icons.png") no-repeat;
-    float: left;
-    height: 19px;
-    text-indent: -9999px;
-    cursor: pointer;
-    margin-right: 5px;
-}
-
-/* The submit button */
-
-
-#submitButton {
-    background: url('images/buttons.png') no-repeat;
-    width: 83px;
-    height: 36px;
-    text-indent: -9999px;
-    overflow: hidden;
-    text-transform: uppercase;
-    border: none;
-    cursor: pointer;
-}
-
-#submitButton: hover {
-    background-position: left bottom;
-}
-
-
-/* Styling the search results */
-
-
-.pageContainer {
-    /* Holds each page with search results. Has an inset bottom border. */
-    border-bottom: 1px solid #5e7481;
-    margin-bottom: 50px;
-
-    /* Adding a dark bottom border with box shadow */
-
-    -moz-box-shadow: 0 1px 0 #798e9c;
-    -webkit-box-shadow: 0 1px 0 #798e9c;
-    box-shadow: 0 1px 0 #798e9c;
-}
-
-
-p.notFound {
-    text-align: center;
-    padding: 0 0 40px;
-}
-
-
-/* Web & news results */
-
-
-.webResult { text-shadow: 1px 1px 0 #586a75;margin-bottom: 50px;}
-.webResult h2 {
-    background-color: #5D6F7B;
-    font-size: 18px;
-    font-weight: normal;
-    padding: 8px 20px;
-
-    /* Applying CSS3 rounded corners */
-    -moz-border-radius: 18px;
-    -webkit-border-radius: 18px;
-    border-radius: 18px;
-}
-.webResult h2 b { color: #fff; }
-.webResult h2 a { color: #eee;border: none;}
-.webResult p { line-height: 1.5;padding: 15px 20px;}
-.webResult p b { color: white;}
-.webResult > a { margin-left: 20px;}
