@@ -6,22 +6,19 @@
         <link rel="stylesheet" type="text/css" href="styles.css" />
     </head>
     <body>
-        <section>
-            <div id="categories">
-                <button class="cat sel" onclick="pickCat(event, 'tv')" id="cat-tv">TV Show</button>
-                <button class="cat desel" onclick="pickCat(event, 'movie')" id="cat-movie">Movie</button>
-            </div>
-            <form id="search" action="/search" method="POST">
-                <input id="search-bar" type="text" name="query" placeholder="Title (Season ##/S##/S##E##)..." required/>
-                <input id="submit" type="submit" value="Search" name="submit" />
+        <div class="categories">
+            <button type="button" class="cat sel" id="cat-tv" onclick="setCat(event, 'tv')">TV Show</button>
+            <button type="button" class="cat desel" id="cat-movie" onclick="setCat(event, 'movie')">Movie</button>
+        </div>
+        <div class="search-form">
+            <form id="search" name="search-form" action="/search-tv" method="POST">
+                <input id="search-bar" type="search" name="query" placeholder=" Title (Season ##/S##/S##E##)..." required/>
+                <button id="submit" type="submit" name="submit">Search</button>
             </form>
-        </section>
-        <section id="result">
+        </div>
+        <div id="loading-placeholder" class="results">
             <h2>Search Results</h2>
-            <div id="loading-placeholder">
-            </div>
-            <table id="table-placeholder">
-            </table>
-        </section>
+            <div id="table-placeholder">table</div>
+        </div>
     </body>
 </html>
