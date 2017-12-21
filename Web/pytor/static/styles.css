@@ -1,96 +1,100 @@
 /*
-    blue gray:    #607D8B    96,125,139
-    https://jsfiddle.net/L4ogrcyc/
-    either lock the search part, or make JUST the results scrollable
-    put in some max-widths
+    svg fiddle: https://jsfiddle.net/uqmn4b1o/37/
+    https://jsfiddle.net/87o3y8r4/14/
+    https://jsfiddle.net/anv9rhqx/9/ for text ratio
+    Pytor @ 16px in Arial Black:
+        width = 46.203125
+        height = 23
+    For a given font-size, the input height will be 2.5px taller
+
+    for a floating look (box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15))
+
+    BUTTON:
+        BTDB:
+            search-area (div): h|41.19 w|700 maxwidth|700 width|90%
+            form: h|41.19 w|700
+            input: h|39.19 w|708.77 maxlen|2048 lpad|10.78
+            button: h|35.19 w|20.91 hpad|12.544 vmargin|2 fontsize|1.4em (padding: 0 0.64em; right: 2px; z-index: 2)
+            button-icon: h|18.2 w|19 (font-family: FontAwesome; font-size:19.6px font-weight: 400; ::before content: \f002)
+        Google: (uses svg path for mag glass, like my inspiration; also no actual form)
+            container: 536x44 hmargin|48 maxwidth|584 height|44
+            button: w|46 h|44 float|right height|44 pad|1-16-1-6 position|relative
+            button-svg: 24x24
+            div/input: 490x44 pad|5-9-0-16 zindex|6 position-div/input|relative/absolute left|0
 */
 
 :root {
-    --litegray: #F1F1F1;
-    --darkgray: #616161;
+    --dark: #3F3F3F;
+    --lite: #F0F1F5;
+    --green: #44B74C;
+    --blue: #3F51B5;
     font-size: 16px;
 }
-
 * {
     box-sizing: border-box;
     font-family: Helvetica;
 }
-
 body {
-    background-color: var(--litegray);
+    margin: 0;
+    background-color: var(--lite);
+}
+header {
+    /*
     display: grid;
-    grid-template-columns: auto;
-    grid-template-rows: 1fr 1fr 3fr;
-    grid-template-areas: 'cats' 'search' 'results';
-}
-
-.categories {
-    grid-area: cats;
-    display: flex;
-    justify-content: space-between;
-    margin: 1% auto;
-    width: 60%;
-}
-
-.cat {
-    border: 2px solid var(--darkgray);
-    border-radius: 4px;
-    flex-basis: 33%;
-    padding: 1% 2%;
-    font-size: 2rem;
-    text-align: center;
-    cursor: pointer;
-}
-
-.cat.sel {
-    background-color: var(--darkgray);
-    color: var(--litegray);
-}
-
-.cat.desel {
-    background: none;
-    color: var(--darkgray);
-}
-
-.cat.desel:hover {
-    background-color: #00BFFF;
-}
-
-.search-form {
-    grid-area: search;
+    grid-template-columns: 10rem calc(100% - 10rem);
+    align-items: center;
+    */
+    background-color: var(--dark);
+    padding: 1.5rem;
     margin: 0 auto;
-    width: 60%;
+    width: 90%;
+    border-radius: 0 0 3rem 3rem;
 }
-
-#search {
-    display: flex;
-    flex-flow: row nowrap;
-    border: 1px solid var(--darkgray);
-    margin: 1% auto;
-    padding: 1%;
+h1 {
+    /*
+    */
+    margin: 0;
+    color: var(--green);
+    font-family: Arial Black;
+    font-size: 3rem;
+    text-align: center;
 }
-
+.search-area {
+    width: calc(100% - 6rem);
+    margin: 1rem auto;
+}
+#search-form {
+    /*
+    display: flex; ?
+    */
+    display: grid;
+    grid-template-columns: 1fr 3rem 3rem;
+    grid-column-gap: 0.5rem;
+    border: 2px solid var(--green);
+    padding: 0.3rem;
+    background-color: var(--lite);
+    align-items: center;
+}
 #search-bar {
     background: none;
-    color: var(--darkgray);
-    /*margin: 1% auto;*/
+    color: var(--dark);
+    padding: 0;
     border: none;
-    flex-grow: 3;
     font-size: 2rem;
+    /*
+    border-radius: ;
+    */
 }
-
-#submit {
-    flex-basis: 15%;
-    padding: 1rem;
-    background-color: var(--darkgray);
-    color: var(--litegray);
-    font-size: 2rem;
+.submit {
+    border: none;
+    border-radius: 0;
+    padding: 0;
     text-align: center;
     cursor: pointer;
-
+    align-self: stretch;
+    /*
+    */
 }
-
-.results {
-    grid-area: results;
-    margin: 0 auto;
+main {
+    margin: 0 5%;
 }
