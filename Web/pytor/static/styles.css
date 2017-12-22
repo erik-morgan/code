@@ -9,19 +9,14 @@
 
     for a floating look (box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15))
 
-    BUTTON:
-        BTDB:
-            search-area (div): h|41.19 w|700 maxwidth|700 width|90%
-            form: h|41.19 w|700
-            input: h|39.19 w|708.77 maxlen|2048 lpad|10.78
-            button: h|35.19 w|20.91 hpad|12.544 vmargin|2 fontsize|1.4em (padding: 0 0.64em; right: 2px; z-index: 2)
-            button-icon: h|18.2 w|19 (font-family: FontAwesome; font-size:19.6px font-weight: 400; ::before content: \f002)
-        Google: (uses svg path for mag glass, like my inspiration; also no actual form)
-            container: 536x44 hmargin|48 maxwidth|584 height|44
-            button: w|46 h|44 float|right height|44 pad|1-16-1-6 position|relative
-            button-svg: 24x24
-            div/input: 490x44 pad|5-9-0-16 zindex|6 position-div/input|relative/absolute left|0
+    column-width tests:
+        https://jsfiddle.net/4jmosqty/19/
+        size/seed/leech 6.8/5/6.5rem;
+    using css grid:
+        https://jsfiddle.net/4jmosqty/17/
+
 */
+@import url("https://fonts.googleapis.com/css?family=Abel");
 
 :root {
     --dark: #3F3F3F;
@@ -32,7 +27,7 @@
 }
 * {
     box-sizing: border-box;
-    font-family: Helvetica;
+    font-family: Abel;
 }
 body {
     margin: 0;
@@ -40,9 +35,6 @@ body {
 }
 header {
     /*
-    display: grid;
-    grid-template-columns: 10rem calc(100% - 10rem);
-    align-items: center;
     */
     background-color: var(--dark);
     padding: 1.5rem;
@@ -76,25 +68,63 @@ h1 {
     align-items: center;
 }
 #search-bar {
+    /*
+    */
     background: none;
     color: var(--dark);
     padding: 0;
     border: none;
     font-size: 2rem;
-    /*
-    border-radius: ;
-    */
+    border-radius: 0.5rem;
 }
 .submit {
+    /*
+    */
     border: none;
     border-radius: 0;
     padding: 0;
     text-align: center;
     cursor: pointer;
     align-self: stretch;
-    /*
-    */
 }
 main {
     margin: 0 5%;
+}
+table {
+    /*
+    border: 0.2rem solid var(--dark);
+    remove table-layout and all .col's and control with mq if this strategy fails rwd tests
+    increase font size for table if real tor names aren't long enough
+    */
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: var(--dark);
+    font-size: 1rem;
+}
+thead {
+    /*
+    background-color: var(--green);
+    color: var(--dark);
+    */
+    background-color: var(--dark);
+    color: var(--lite);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.fit {
+    /*
+    */
+    width: 7rem;
+}
+tr > td {
+    /*
+    */
+    border-bottom: 0.1rem solid var(--dark);
+    padding: 0.5rem;
+}
+td:not(.tor-name) {
+    /*
+    */
+    text-align: center;
 }
