@@ -10,33 +10,48 @@
             <h1>Pytor: A Torrent Finder</h1>
             <div class="search-area">
                 <form id="search-form" name="search-form" action="/search" method="POST">
-                    <input id="search-bar" type="search" name="query" placeholder=" Title (Season ##/S##/S##E##)..." required autofocus/>
-                    <button id="submit-tv" class="submit" type="submit" name="submit" value="tv">   </button>
-                    <button id="submit-movie" class="submit" type="submit" name="submit" value="movie">   </button>
+                    <button class="ibutton" type="submit" id="submit">
+                        <svg id="isearch" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                            <path class="thick round" d="m100 52a48 48 0 0 1-48 48 48 48 0 0 1-48-48 48 48 0 0 1 48-48 48 48 0 0 1 48 48z" />
+                            <path class="thick round" d="m86.332 86.332 37.627 37.627" />
+                        </svg>
+                    </button>
+                    <input id="search-bar" type="search" name="query" placeholder=" Title (Season ##/S##/S##E##)..." required autofocus />
+                    <button type="button" class="cat ibutton active">
+                        <svg class="icat" id="itv" viewBox="0 0 512 288" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                            <path class="thick" d="m24.974 4h462.05c11.619 0 20.974 6.9882 20.974 15.669v248.66c0 8.6804-9.3542 15.669-20.974 15.669h-462.05c-11.619 0-20.974-6.9882-20.974-15.669v-248.66c0-8.6804 9.3542-15.669 20.974-15.669z" />
+                            <path class="thick round" d="m90.982 49.298h146.98" />
+                            <path class="thick round" d="m164.37 49.713v189.55" />
+                            <path class="thick round" d="m262.07 49.538 79.072 188.86 79.942-189.67" />
+                        </svg>
+                    </button>
+                    <button type="button" class="cat ibutton">
+                        <svg class="icat" id="imv" viewBox="0 0 512 288" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                            <path class="thick" d="m24.974 4h462.05c11.619 0 20.974 6.9882 20.974 15.669v248.66c0 8.6805-9.3543 15.669-20.974 15.669h-462.05c-11.619 0-20.974-6.9882-20.974-15.669v-248.66c0-8.6805 9.3542-15.669 20.974-15.669z" />
+                            <path class="thin round" d="m216.61 36a106 106 0 0 0-106 106 106 106 0 0 0 106 106 106 106 0 0 0 106-106 106 106 0 0 0-106-106z" />
+                            <path class="thin" d="m261.42 238.06c83.861-47.921 75.219 29.761 140.58-32.867" />
+                            <circle class="thin round" cx="216.61" cy="142" r="88" />
+                            <circle class="thin round" cx="216.61" cy="85.254" r="20.5" />
+                            <circle class="thin round" cx="265.76" cy="113.63" r="20.5" />
+                            <circle class="thin round" cx="265.76" cy="170.37" r="20.5" />
+                            <circle class="thin round" cx="216.61" cy="198.75" r="20.5" />
+                            <circle class="thin round" cx="167.47" cy="170.37" r="20.5" />
+                            <circle class="thin round" cx="167.46" cy="113.63" r="20.5" />
+                            <circle class="thin round" cx="216.61" cy="141.97" r="11.5" />
+                        </svg>
+                    </button>
                 </form>
             </div>
-            <!--
-                <button id="submit" type="submit" name="submit">Search</button>
-                <input id="search-bar" type="search" name="query" placeholder=" Title (Season ##/S##/S##E##)..." required/>
-                <div class="categories">
-                    <input type="radio" name="cat" value="cat-tv" id="cat-tv">
-                    <label for="cat-tv">TV Show</label>
-                    <input type="radio" name="cat" value="cat-movie" id="cat-movie">
-                    <label for="cat-tv">Movie</label>
-
-                    <button type="button" class="cat sel" id="cat-tv" onclick="setCat(event, 'tv')">TV Show</button>
-                    <button type="button" class="cat desel" id="cat-movie" onclick="setCat(event, 'movie')">Movie</button>
-            -->
         </header>
         <main>
             <table id="results">
                 <caption>Results</caption>
                 <thead id="results-head">
                     <tr>
-                        <th class="col-name">Name</th>
-                        <th class="fit col-size">Size</th>
-                        <th class="fit col-seeds">Seeds</th>
-                        <th class="fit col-leeches">Leeches</th>
+                        <th class="tname">Name</th>
+                        <th class="tsize">Size</th>
+                        <th class="tseeds">Seeds</th>
+                        <th class="tpeers">Peers</th>
                     </tr>
                 </thead>
                 <tbody id="results-body">

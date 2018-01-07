@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Home Torrent Finder</title>
+        <link rel="stylesheet" type="text/css" href="styles.css" />
+    </head>
+    <body>
+        <header>
+            <h1>Pytor: A Torrent Finder</h1>
+            <div class="search-area">
+                <form id="search-form" name="search-form" action="/search" method="POST">
+                    <svg viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 52.000347,0 C 23.352414,-5.293587e-6 -2.1841723e-6,23.352416 -1.25e-6,52.000348 -1.8727817e-6,80.64828 23.352415,104.00071 52.000347,104.0007 c 12.168769,0 23.372367,-4.224637 32.24631,-11.267657 l 33.506083,33.504127 c 2.35044,2.35044 6.134,2.35044 8.48444,0 2.35043,-2.35043 2.35043,-6.13399 0,-8.48444 L 92.733042,84.246658 C 99.776062,75.372715 104.0007,64.169117 104.0007,52.000348 104.0007,23.352421 80.648275,1.2456068e-6 52.000347,0 Z m 0,12.00008 c 22.162604,10e-7 40.000269,17.837666 40.000268,40.000268 0,22.162602 -17.837664,40.000267 -40.000268,40.000268 C 29.837741,92.00062 12.000079,74.162954 12.000079,52.000348 12.000078,29.837743 29.83774,12.000076 52.000347,12.00008 Z"/>
+                    </svg>
+                    <input id="search-bar" type="search" name="query" placeholder="Title [Season 1/S01/S01E01]" required autofocus />
+                    <button type="button" class="cat" id="submit-tv">TV</button>
+                    <button type="button" class="cat" id="submit-mv">Movies</button>
+                </form>
+            </div>
+        </header>
+    </body>
+</html>

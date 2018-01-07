@@ -9,37 +9,40 @@
         height = 23
     For a given font-size, the input height will be 2.5px taller
 
+    for a floating look (box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15))
+
     column-width tests:
         https://jsfiddle.net/4jmosqty/19/
+        size/seed/leech 6.8/5/6.5rem;
     using css grid:
         https://jsfiddle.net/4jmosqty/17/
 
 */
-@import url("https://fonts.googleapis.com/css?family=Ubuntu");
+@import url("https://fonts.googleapis.com/css?family=Abel");
 
 :root {
     --dark: #3F3F3F;
     --lite: #F0F1F5;
-    --litedark: #3F3F3F33;
     --green: #44B74C;
     --blue: #3F51B5;
     font-size: 16px;
 }
 * {
     box-sizing: border-box;
+    font-family: Abel;
 }
 body {
     margin: 0;
     background-color: var(--lite);
-    font-family: Ubuntu;
 }
 header {
-    margin: 0 5%;
+    margin: 1rem 5%;
     overflow: auto;
 }
 h1 {
-    margin: 2rem auto;
+    margin: 0;
     color: var(--green);
+    font-family: Arial Black;
     font-size: 3.5rem;
     text-align: center;
 }
@@ -50,11 +53,12 @@ h1 {
     display: flex;
     align-items: center;
     border: 1px solid var(--dark);
+    border-radius: 0.5rem;
     padding: 0 0.4rem;
 }
 svg {
     margin: 0 1rem;
-    width: 2rem;
+    height: 2rem;
 }
 path {
     fill: var(--dark);
@@ -70,54 +74,64 @@ path {
 .cat {
     flex: 0 0 auto;
     font-size: 1.5rem;
-    color: var(--lite);
-    background-color: var(--green);
-    border: none;
+    color: var(--dark);
+    background: none;
+    border: 1px solid var(--dark);
+    border-radius: 0.5rem;
     padding: 0.5rem;
     margin: 0.4rem;
     transition: background-color 0.2s linear, color 0.2s linear;
 }
 .cat:hover {
-    background-color: var(--blue);
+    background-color: var(--green);
+    border: 1px solid var(--green);
     color: var(--lite);
 }
 main {
-    margin: 2rem calc(5% + 1rem);
+    margin: 0 calc(5% + 1rem);
+    /*overflow-x: auto;*/
 }
-.table {
+table {
     width: 100%;
-    max-width: 100%;
-    display: table;
-}
-.row {
-    /*display: flex;*/
-    display: table-row;
+    table-layout: fixed;
+    border-collapse: collapse;
     color: var(--dark);
     font-size: 1.5rem;
-    transition: background-color 0.2s linear, color 0.2s linear;
 }
-.row.header {
+thead tr {
     background-color: var(--dark);
     color: var(--lite);
-    font-size: 2rem;
-    font-weight: 600;
-    text-align: left;
-    position: sticky;
-    top: 1px;
     cursor: pointer;
 }
-.row:not(.header):hover {
+tbody tr:hover {
     background-color: var(--green);
     color: var(--lite);
 }
-.cell {
-    display: table-cell;
-    padding: 0.8rem;
+th.tname {
+    border-radius: 0.25rem 0 0 0;
+}
+th.tseeds {
+    border-radius: 0 0.25rem 0 0;
+}
+th {
+    padding: 0.75rem;
+    font-size: 1.75rem;
+    text-align: left;
+}
+td {
+    padding: 0.75rem;
     border-bottom: 1px solid var(--dark);
 }
 .tname {
-    overflow-wrap: break-word;
+    width: auto;
+    word-break: break-all;
 }
-.tsize, .tseed {
+.tsize {
+    width: 9rem;
+    white-space: nowrap;
+}
+.tseeds {
+    width: 6rem;
+    text-align: center;
     white-space: nowrap;
 }
