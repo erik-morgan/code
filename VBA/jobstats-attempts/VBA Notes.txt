@@ -1,0 +1,146 @@
+    'Debug.Print "ie: " & TypeName(ie)  IWebBrowser2
+    'Debug.Print "ie.document: "; TypeName(ie.document) HTMLDocument
+    'Debug.Print "ie.Application: " & TypeName(ie.Application)  IWebBrowser2
+    'Debug.Print "ie.Container: " & TypeName(ie.Container)  Nothing
+    'Debug.Print "ie.Parent: " & TypeName(ie.Parent)   IWebBrowser2
+
+' Using ie As New Internet Explorer
+Debug.Print TypeName(ie.Document.all)
+DispHTMLElementCollection
+Debug.Print TypeName(ie.Document.all.tags("table"))
+DispHTMLElementCollection
+Debug.Print ie.Document.all.tags("table").Length
+ 6 
+Debug.Print TypeName(ie.Document)
+HTMLDocument
+Debug.Print TypeName(ie)
+IWebBrowser2
+
+'THIS WORKS!
+
+    Set node = ie.document.all.Item("pageBody")
+    Set node = node.all.tags("table").Item(1)
+    Set rows = node.all.tags("tr")
+
+
+
+Working VBATest_Module1:
+Public ws As Worksheet, ie As Object
+
+Sub Main()
+'    On Error GoTo CleanUp
+    Set ws = Sheets("PARTS")
+    Set ie = CreateObject("InternetExplorer.Application")
+    Dim parts() As Variant: parts = ws.UsedRange.Value2
+    Dim jobs As Object: Set jobs = CreateObject("Scripting.Dictionary")
+    For p = LBound(parts, 1) To UBound(parts, 1)
+        ProcessPart parts(p, 1), jobs
+    Next p
+'EndSub:
+'    Exit Sub
+'CleanUp:
+'    MsgBox "Error (" & Err.Number & "):" & vbNewLine & Err.Description & vbNewLine & "On Line " & Err.Source
+'    shell ("taskkill /F /IM iexplore.exe")
+'    Resume EndSub
+End Sub
+
+Sub ProcessPart(ByVal pn As String, ByRef jobdict)
+    Dim job As Object, rows As Object, node As Object, nodes As Object, jobNum As String
+    ie.navigate "http://houston/ErpWeb/WorkOrdersForPart.aspx?PartNumber=" & pn
+    WaitForIE
+    Set node = ie.document.getElementById("pageBody")
+    Set nodes = node.getElementsByTagName("table")(1)
+    Set rows = nodes.getElementsByTagName("tr")
+    For r = 1 To rows.Length - 1
+        Set node = rows(r)
+        jobNum = node.FirstChild.innerText
+        'Set job = New Jobject
+        'wsrow = Sheets("JOBS").UsedRange.rows.Count + 1
+        'Sheets("JOBS").Range("A" & wsrow & ":E" & wsrow).Value2 = job.props
+    Next r
+End Sub
+
+Sub WaitForIE()
+    Do While ie.Busy
+        DoEvents
+    Loop
+End Sub
+
+ProbablyNotWorking VBATest_Jobject:
+Private jid As String, jprops(5) As String, filledProps As Boolean, IntEx As InternetExplorer
+
+Private Sub Jobject_Initialize(ByVal jn As String)
+    jid = jn
+    jprops(1) = jn
+    filledProps = False
+End Sub
+
+Property Get props() As String()
+    If Not filledProps Then
+        GetProps
+    End If
+    props = jprops
+End Sub
+
+Private Sub GetProps()
+    AddWO
+    AddWOALT
+    AddSO
+    filledProps = True
+End Sub
+
+Private Sub AddWO()
+    IntEx.navigate "http://houston/ErpWeb/WODetail.aspx?OrderNumber=" & jid
+    If IntEx.readyState = 4 And IntEx.statusText = 200 Then
+        jprops(2) = IntEx.document.Item("StartDate").innerText
+        Set nodes = IntEx.document.Item("tbody").Item(4).tags("tr")
+        For Each node In nodes
+            If node.Children(0).innerText = "MFG-STK" Then
+                jprops(3) = Split(node.Children(1).innerText, " ")(0)
+                Exit For
+            End If
+        Next node
+        jprops(4) = IntEx.document.querySelector("#OrderReference").innerText
+    End If
+End Sub
+
+Private Sub AddWOALT()
+    Dim response As DOMDocument60, http As XMLHTTP60, node As String ' XMLDOMNode, nodes As IXMLDOMNodeList
+    Set http = New XMLHTTP60
+    http.Open "GET", "http://houston/ErpWeb/WODetail.aspx?OrderNumber=" & jid, False
+    http.send
+    Set response = http.responseXML
+    Debug.Print "jprops(2) = " & response.SelectSingleNode("//*[@id='StartDate']/text()")
+    node = response.SelectSingleNode("//tbody[5]//td//*[contains(., 'MFG-STK')]/following-sibling/text()")
+    Debug.Print node
+    Debug.Print "jprops(3) = " & Split(node, " ")(0)
+    Debug.Print "jprops(4) = " & response.SelectSingleNode("//*[@id='OrderReference']/text()")
+End Sub
+
+Private Sub AddWOJS()
+    Dim js As String, win As HTMLWindow2
+    js = "document.body.setAttribute('JSResult1', document.getElementById('StartDate').innerText);"
+    js = js & vbNewLine & "var dend = '', i = 0, rows = document.getElementByTagName('tbody')[4].getElementByTagName('tr');"
+    js = js & vbNewLine & "while (dend == ''){ if (rows[i].children[0].innerText == 'MFG-STK') dend = rows[i].children[1].innerText; i++; }"
+    js = js & vbNewLine & "document.body.setAttribute('JSResult2', dend); "
+    js = js & vbNewLine & "document.body.setAttribute('JSResult3', document.getElementById('OrderReference').innerText);"
+    'Set win = IntEx.Parent
+    'IntEx.document.parentWindow.execScript(js, "javascript")
+    'jprops(2) =  IntEx.Document.body.getAttribute.("JSResult1")
+    'jprops(3) =  IntEx.Document.body.getAttribute.("JSResult2")
+    'jprops(4) =  IntEx.Document.body.getAttribute.("JSResult3")
+End Sub
+
+Private Sub AddSO()
+    IntEx.navigate "http://houston/ErpSalesWeb/SalesOrder.aspx?OrderNum=" & jid
+    WaitForIE
+    jprops(5) = IntEx.document.Item("OrderHeader_SoldToWeb").innerText
+End Sub
+
+Sub WaitForIE()
+    Do While IntEx.Busy
+        DoEvents
+    Loop
+End Sub
+
+
