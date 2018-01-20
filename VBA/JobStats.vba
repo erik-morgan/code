@@ -1,135 +1,156 @@
+' Make it a manual update
+' I COULD just write a web page, consisting only of a table, and use JS to fill it,
+' and have excel import table from my page
+' 
 ' JobProps = JobNum, StartDate, EndDate, SO, Customer, Customer Ref, Cert
 ' PartProps = PN, Type, Size, PSI, Mandrel, Gasket
-' Headers = JN, PN, SD, ED, SO, CUST, REF, CERT, DESC, TYP, SZ, PSI, MAN, GSKT
+' ASK JOEL:    Full Lists of Mandrels and Gaskets
+'              Are SDX Always 30" (Ref 2-606709-02)? Yes
+'              Can H4 Be 30" (Ref 2-608267-03)? Yes
+'              DX-1 Gasket vs DX (Ref 2-606646-02)? 
+'              Is Gasket Either VX/VT OR DX (No Others)? Yes
+' Test this:
+'     Dim doc As New HTMLDocument, newdoc As New HTMLDocument
+'     doc.createDocumentFromUrl(url, "null", newdoc)
+'     doc.implementation.createDocument => returns XMLDocument!?
+'     
+'     XHR with responseXML...should work (use QueryInterface to convert returned pointer into IXMLDOMDocument)
+'     XHR.status SHOULD work
 
 Private ws As Worksheet
-Private parts As Object
+Private data As Object
 Private jobs As Object
-Public regx As Object
+Private regexps As Object
 Public Const specURL As String = "http://houston/ErpWeb/WorkOrdersForPart.aspx?PartNumber="
 Public Const partURL As String = "http://houston/ErpWeb/PartDetails.aspx?PartNumber="
 Public Const workURL As String = "http://houston/ErpWeb/WODetail.aspx?OrderNumber="
 Public Const salesURL As String = "http://houston/ErpSalesWeb/SalesOrder.aspx?OrderNum="
 
 Sub Init()
-    ' Consider adding back part where I get existing sheet?
-    ' What if XHR fails? Don't overwrite job if I'm missing updated data
+    Dim preData() As Variant
     Set ws = Sheets("DATA")
-    Set parts = CreateObject("Scripting.Dictionary")
+    Set data = CreateObject("Scripting.Dictionary")
     Set jobs = CreateObject("Scripting.Dictionary")
-    ' Check out Chrome Bookmark: Increasing RE Performance (Pre-Compiled RE Exprs)
-    Set regx = CreateObject("VBScript.RegExp")
-    regx.Global = True
+    preData = Intersect(ws.UsedRange, ws.UsedRange.Offset(1)).Value2
+    For i As Integer = LBound(preData) To UBound(preData)
+        data(preData(i, 1)), preData(i)
+    Next i
+    InitRegx
     Main
 End Sub
 
 Sub Main()
-    Dim partNums ', partNum As String
-    partNums = Application.Transpose(Sheets("PARTS").UsedRange.Value2)
+'   Back-up Plan: Output data to local file instead of worksheet
+    Dim partNums()
+    partNums = Application.WorksheetFunction.Transpose(Sheets("PARTS").UsedRange.Value2)
     For i As Integer = LBound(partNums) To UBound(partNums)
         If Right(partNums(i), 9) Like "######-##" Then
-            AddPart partNums(i)
+            ProcessPart partNums(i)
         End If
     Next i
-    For p As Integer = 0 To parts.Count-1
-        ' If I use parts.Keys, I might not need a "PART" key in AddPart
-        ProcessPart parts.Items(p)
-    Next part
-    For j As Integer = 0 To jobs.Count-1
-        ' If I use jobs.Keys, I might not need a "JOB" key in AddJob
-        ProcessJob jobs.Items(j)
-    Next part
-    ' Put values back
+    ProcessData
+    Dim rows() As String = jobs.Items
+    ws.Range("A2:M" & UBound(rows)).Value2 = rows
+    MsgBox "Data Updated Successfully!"
 End Sub
 
-Sub ProcessPart(partDict)
-    ' Do implicit objs go away w/o references? (Set genericObject = ReturnedIXMLDOMNodeList)
-    Dim doc As Object, desc As String, matches As Object, table
-    Set doc = DOM (0, partDict("PART"))
-    table = Split(doc.getElementsByTagName("table")(3).innerText, Chr(255))
-    For i As Integer = 1 To UBound(table)
-        AddJob Left(table(i), InStr(table(i), Asc(9))-1), partDict("PART")
-    Next i
-    ' ASK JOEL:    DX-DW Always 30" Mandrel?
-    '              Full Lists of Mandrels and Gaskets
-    '              Are SDX Always 30" (Ref 2-606709-02)?
-    '              Can H4 Be 30" (Ref 2-608267-03)?
-    '              DX-1 Gasket vs DX (Ref 2-606646-02)?
-    '              Is Gasket Either VX/VT OR DX (No Others) ?
-    regx.Pattern = "(.)""| ?([-/]) ?"
-    desc = regx.Replace(doc.getElementById("Description").innerText, "$1$2")
+Sub ProcessPart(ByRef partNum)
+'   JobStats Array = 0=JOB 1=PART 2=DBEG 3=DEND 4=SO 5=CUST 6=REF 7=TYPE 8=SIZE 9=PSI 10=MAN 11=GSKT 12=CERT
+'   Back-up Plan: Let it do unnecessary processing overhead if timing isn't too bad
+    Dim props(12) As String, doc As Object, matches As Object, desc As String, txt As String, workOrders() As String
+    Set doc = DOM (0, partNum)
+    props(1) = partNum
+    desc = regx("DESC").Replace(doc.getElementById("Description").innerText, "$1$2")
     If InStr(desc, "DX-DW") Then
-        partDict("TYPE") = "DX-DW"
-        partDict("PSI") = "15,000 PSI"
+        props(7) = "DX-DW"
+        props(9) = "15,000 PSI"
     Else
-        regx.Pattern = "\b(10|1?5)(?=,000|K)\b"
-        Set matches = regx.Execute(desc)(0)
-        partDict("TYPE") = "DX-" & matches
-        partDict("PSI") = matches & ",000 PSI"
+        Set matches = regx("PSI").Execute(desc)
+        props(7) = "DX-" & matches(0)
+        props(9) = matches(0) & ",000 PSI"
     End If
-    partDict("SIZE") = Left(desc, 5)
-    partDict("MANSIZE") = Switch(desc Like "16*", "25-3/4""", desc Like "*[/ ]30*", "30""", desc Like "*", "27""")
-    regx.Pattern = "(CAMERON HUB|RBC)[^,]+(?:DOWN|PROFILE|LATCH)"
-    Set matches = regx.Execute(desc)
+    props(8) = Left(desc, 5)
+    txt = Switch(desc Like "16*", "25-3/4"" ", _
+                 desc Like "*[/ ]30*", "30"" ", _
+                 desc Like "*", "27"" ")
+    Set matches = regx("MAN").Execute(desc)
     If matches.Count Then
-        partDict("MAN") = matches(0).SubMatches(0)
+        txt = txt & matches(0).SubMatches(0)
     Else
-        regx.Pattern = "\b(S?HD.?)?H-?4(.HD.?)?\b"
-        Set matches = regx.Execute(desc)
-        If matches.Count Then
-            partDict("MAN") = matches(0)
-        Else
-            regx.Pattern = "\b(S?DX)\b[^-,]+(LATCH|PROFILE)"
-            partDict("MAN") = regx.Execute(desc)(0).SubMatches(0)
-        End If
+        Set matches = regx("H4").Execute(desc)
+        txt = txt & IIf(matches.Count, matches(0), regx("DX").Execute(desc)(0).SubMatches(0))
     End If
-    regx.Pattern = "\b(VX(?:.VT)?)\b"
-    Set matches = regx.Execute(desc)
-    partDict("GSKT") = IIf(matches.Count, matches(0), "DX")
-    ' Lastly, get jobs and add to joblist with their properties
-    ' Use Switch function to handle jobCerts
+    props(10) = txt
+    'DX vs DX-1 Gaskets
+    Set matches = regx("VX").Execute(desc)
+    props(11) = IIf(matches.Count, matches(0), "DX")
+    workOrders = Split(doc.getElementsByTagName("table")(3).innerText, Chr(255))
+    For w As Integer = 1 To UBound(workOrders)
+        txt = Split(workOrders(w), Asc(9), 2)(0)
+        ProcessJob txt, props
+    Next w
+    doc = Nothing
+    matches = Nothing
 End Sub
 
-Sub AddPart(pn As String)
-    Dim dict As Object, props() As String = {"TYPE", "SIZE", "PSI", "CONN", "MAN", "MANSIZE", "GSKT"}
-    Set dict = CreateObject("Scripting.Dictionary")
-    ' Might not be necessary...
-    dict("PART") = pn
-    For n As Integer = 1 To UBound(props)
-        dict(props(n)) = ""
-    Next n
-    parts(pn) = dict
-    ' Test This:
-    dict = Nothing
+Sub ProcessJob(ByRef jobNum, ByVal ParamArray job() As String)
+'   Make sure that using ParamArray doesn't remove holes
+    Dim doc As Object, tableText As String
+    If data.Exists(jobNum) Then
+'       Add this in so if error, it can reuse data
+        jobs(jobNum) = data(jobNum)
+    End If
+    Set doc = DOM (2, jobNum)
+    job(2) = doc.getElementById("StartDate").innerText
+    tableText = Split(doc.getElementsByTagName("table")(4).innerText, "MFG-STK ", 2)(1)
+    job(3) = Left(tableText, InStr(tableText, " ")-1)
+    job(4) = doc.getElementById("OrderReference").innerText
+    Set doc = DOM (3, job("SO"))
+    job(5) = doc.getElementById("OrderHeader_SoldToWeb").FirstChild.innerText
+    job(6) = doc.getElementById("OrderHeader_CustomerReference").textContent
+    tableText = doc.getElementsByTagName("table")(4).innerText
+    If regx("ABS").Test(tableText) Then
+        job(12) = IIf(InStr(tableText, "DNV"), "ABS/DNV", "ABS")
+    Else
+        job(12) = IIf(InStr(tableText, "DNV"), "DNV", "N/A")
+    End If
+    jobs(jobNum) = job
+    Set doc = Nothing
 End Sub
 
-Sub AddJob(jn As String, pn As String)
-    Dim dict As Object, props() As String = {"DBEG", "DEND", "SO", "CUST", "REF", "CERT"}
-    Set dict = CreateObject("Scripting.Dictionary")
-    ' Might not be necessary...
-    dict("JOB") = jn
-    ' Definitely might not be necessary...
-    dict("PART") = pn
-    For n As Integer = 1 To UBound(props)
-        dict(props(n)) = ""
-    Next n
-    jobs(jn) = dict
-    ' Test This:
-    dict = Nothing
-End Sub
-
-Function DOM(urlnum As Integer, idnum As String)
+Function DOM(ByRef urlnum As Integer, ByRef idnum As String)
     Dim url As String, http As Object, html As Object
     url = Switch(urlnum=0, specURL, urlnum=1, partURL, urlnum=2, workURL, urlnum=3, salesURL) & idnum
     Set http = CreateObject("MSXML2.XMLHTTP60") ' OR MSXML2.XMLHTTP.6.0
-    http.Open "GET", url, False
-    http.send
-    Set html = CreateObject("MSHTML.HTMLDocument")
-    html.body.innerHTML = html
-    Set DOM = html
+    For tries As Integer = 1 To 5
+        http.Open "GET", url, False
+        http.send
+        If InStr(http.statusText, "OK") Then
+            Set html = CreateObject("MSHTML.HTMLDocument")
+            html.body.innerHTML = html
+            Set DOM = html
+            Exit For
+        End If
+    Next i
     http = Nothing
     html = Nothing
 End Function
 
-' AndAlso/OrElse = Short-Circuit Logical Operators
-' HTML Tags Needing To Be Closed: meta, input, br, col, hr, img, link
+Sub InitRegx()
+    Dim keys() As String = {"DESC", "PSI", "MAN", "H4", "DX", "VX", "ABS"}
+    Dim patterns() As String = {"(.)""| ?([-/]) ?", _
+                                "\b(10|1?5)(?=,000|K)\b", _
+                                "(CAMERON HUB|RBC)[^,]+(?:DOWN|PROFILE|LATCH)", _
+                                "\b(S?HD.?)?H-?4(.HD.?)?\b", _
+                                "\b(S?DX)\b[^-,]+(LATCH|PROFILE)", _
+                                "\b(VX(?:.VT)?)\b", _
+                                "\bABS\b"}
+    Set regexps = CreateObject("Scripting.Dictionary")
+    For r As Integer = 0 To UBound(rxkeys)
+        Dim rx As Object
+        Set rx = CreateObject("VBScript.RegExp")
+        rx.Global = True
+        rx.Pattern = patterns(r)
+        regexps(rxkeys(r)) = rx
+    Next r
+End Sub

@@ -51,3 +51,15 @@ Function XDOM(urlnum As Integer, idnum As String)
     xml = Nothing
 End Function
 
+
+Function regx(ByRef rx As String)
+    Dim rxKey As String
+    If Not regexCache.Exists(rx) Then
+        Dim regExp As Object
+        Set regExp = CreateObject("VBScript.RegExp")
+        regExp.Global = True
+        regExp.Pattern = rx
+        Set regexCache(rx) = regExp
+    End If
+    Set regx = regexCache(rx)
+End Function
