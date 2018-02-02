@@ -8,71 +8,71 @@ var INSTALL_URL = 'https://accounts.google.com/o/oauth2/auth?response_type=code&
 Logger.clear();
 
 function doGet(e){
-  Logger.log('e: ' + e);
-  if (e.parameter.state){
-    Logger.log('e.parameters: ' + e.parameters);
-    var state = JSON.parse(e.parameter.state);
-    Logger.log('STATE: ' + state);
-    if (state.action === 'open'){
-      var fileID = state.ids[0];
-      Logger.log('fileID: ' + fileID);
-      unzipThis(fileID);
-      Logger.log('unzipThis complete');
+    Logger.log('e: ' + e);
+    if (e.parameter.state){
+        Logger.log('e.parameters: ' + e.parameters);
+        var state = JSON.parse(e.parameter.state);
+        Logger.log('STATE: ' + state);
+        if (state.action === 'open'){
+            var fileID = state.ids[0];
+            Logger.log('fileID: ' + fileID);
+            unzipThis(fileID);
+            Logger.log('unzipThis complete');
+        }
     }
-  }
-  else {
-    var code = UrlFetchApp.fetch(INSTALL_URL).getContentText();
-    getAndStoreAccessToken(code);
-    return HtmlService
-      .createHtmlOutputFromFile('picker.html')
-      .setWidth(600)
-      .setHeight(425)
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-  Logger.log('end of doGet');
+    else {
+        var code = UrlFetchApp.fetch(INSTALL_URL).getContentText();
+        getAndStoreAccessToken(code);
+        return HtmlService
+            .createHtmlOutputFromFile('picker.html')
+            .setWidth(600)
+            .setHeight(425)
+            .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    }
+    Logger.log('end of doGet');
 }
 
 function unzipThis(thisId){
-  var file = DriveApp.getFileById(thisId);
-  var folderName = file.getName().replace(/\.zip$/i, '');
-  var parent = file.getParents().next();
-  if (parent.getFoldersByName(folderName).hasNext()){
-    folderName = 'Unzip - ' + folderName;
-  }
-  unzipRoot = parent.createFolder(folderName);
-  var blobList = Utilities.unzip(file);
-  for (var b = 0; b < blobList.length; b++){
-    var blobPath = blobList[b].getName();
-    if (blobPath.charAt(blobPath.length-1) !== '/'){
-      var pathItems = blobPath.split('/');
-      for (var i = 0, thisParent = unzipRoot; i < pathItems.length; i++){
-        if (i == pathItems.length - 1){
-          var thisFile = thisParent.createFile(blobList[b]);
-          thisFile.setName(pathItems[i]);
-        }
-        else {
-          var subFolders = thisParent.getFoldersByName(pathItems[i]);
-          if (subFolders.hasNext()){
-            thisParent = subFolders.next();
-          }
-          else {
-            thisParent = thisParent.createFolder(pathItems[i]);
-          }
-        }
-      }
+    var file = DriveApp.getFileById(thisId);
+    var folderName = file.getName().replace(/\.zip$/i, '');
+    var parent = file.getParents().next();
+    if (parent.getFoldersByName(folderName).hasNext()){
+        folderName = 'Unzip - ' + folderName;
     }
-  }
+    unzipRoot = parent.createFolder(folderName);
+    var blobList = Utilities.unzip(file);
+    for (var b = 0; b < blobList.length; b++){
+        var blobPath = blobList[b].getName();
+        if (blobPath.charAt(blobPath.length-1) !== '/'){
+            var pathItems = blobPath.split('/');
+            for (var i = 0, thisParent = unzipRoot; i < pathItems.length; i++){
+                if (i == pathItems.length - 1){
+                    var thisFile = thisParent.createFile(blobList[b]);
+                    thisFile.setName(pathItems[i]);
+                }
+                else {
+                    var subFolders = thisParent.getFoldersByName(pathItems[i]);
+                    if (subFolders.hasNext()){
+                        thisParent = subFolders.next();
+                    }
+                    else {
+                        thisParent = thisParent.createFolder(pathItems[i]);
+                    }
+                }
+            }
+        }
+    }
 }
 
 function getOAuthToken() {
-  DriveApp.getRootFolder();
-  return ScriptApp.getOAuthToken();
+    DriveApp.getRootFolder();
+    return ScriptApp.getOAuthToken();
 }
 
 function getAndStoreAccessToken(code){
-  var parameters = {
-    method : 'post',
-    payload : 'client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&grant_type=authorization_code&redirect_uri='+REDIRECT_URL+'&code=' + code
-  };
-  var response = UrlFetchApp.fetch(TOKEN_URL,parameters).getContentText();
+    var parameters = {
+        method : 'post',
+        payload : 'client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET+'&grant_type=authorization_code&redirect_uri='+REDIRECT_URL+'&code=' + code
+    };
+    var response = UrlFetchApp.fetch(TOKEN_URL,parameters).getContentText();
 }

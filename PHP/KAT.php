@@ -1,7 +1,4 @@
 <?php
-										// name|size|seeds|peers|magnet|hash
-										// name|size|seeds|peers|download-link|hash
-										// name|size|seeds|peers|hash
     include '/Helpers.php';
     class KAT
     {

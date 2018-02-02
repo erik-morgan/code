@@ -9,20 +9,17 @@ set files_p65 to alias "HD6904:Users:HD6904:Desktop:Michael:p65:"
 set root to (((path to desktop as text) & "Michael:") as alias)
 my getFiles(root)
 
---	OR: USE ENTIRE CONTENTS OF!
-
---repeat with thisFile in fileList
---	if (file extension
+-- OR: USE ENTIRE CONTENTS OF!
 
 on getFiles(parentFolder)
-	tell application "System Events"
-		set itemList to (disk items of folder parentFolder)
-		repeat with thisItem in itemList
-			if class of thisItem is folder then
-				my getFiles(path of thisItem)
-			else
-				set end of fileList to (thisItem as alias)
-			end if
-		end repeat
-	end tell
+    tell application "System Events"
+        set itemList to (disk items of folder parentFolder)
+        repeat with thisItem in itemList
+            if class of thisItem is folder then
+                my getFiles(path of thisItem)
+            else
+                set end of fileList to (thisItem as alias)
+            end if
+        end repeat
+    end tell
 end getFiles

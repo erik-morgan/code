@@ -13,53 +13,53 @@ var fileList = getFiles();
 // the file OBJECT itself though. Test this!
 
 for (var i = 0; i < fileList.length; i++){
-	var ext = (fileList[i] instanceof File) ? getExt(fileList[i]) : '';
-	// figure out file extensions
-	// replace bullshit extensions like AI8 with ai in reName function
-	var nameOld = fileList[i].name;
-	var nameNew = (nameOld.search(ext) > -1) ? reName(nameOld) : reName(nameOld) + ext;
-	// check for existing file and decide how to handle conflicts
-	if (File(fileList[i].parent + '/' + nameNew).exists){
-		// test if its faster to use replace or dup variable
-		nameNew = nameNew.substr(0, nameNew.lastIndexOf('.')) + '(1)' + nameNew.substr(nameNew.lastIndexOf('.'));
+    var ext = (fileList[i] instanceof File) ? getExt(fileList[i]) : '';
+    // figure out file extensions
+    // replace bullshit extensions like AI8 with ai in reName function
+    var nameOld = fileList[i].name;
+    var nameNew = (nameOld.search(ext) > -1) ? reName(nameOld) : reName(nameOld) + ext;
+    // check for existing file and decide how to handle conflicts
+    if (File(fileList[i].parent + '/' + nameNew).exists){
+        // test if its faster to use replace or dup variable
+        nameNew = nameNew.substr(0, nameNew.lastIndexOf('.')) + '(1)' + nameNew.substr(nameNew.lastIndexOf('.'));
 /*
-		while (File(fileList[i].parent + '/' + nameNew).exists){
-			nameNew = nameNew.replace(/(?!\()(\d)(?=>\))/, function (match, m1, m2, m3){
-				return m1 + (parseInt(m2) + 1) + m3;
-			});
-		}
+        while (File(fileList[i].parent + '/' + nameNew).exists){
+            nameNew = nameNew.replace(/(?!\()(\d)(?=>\))/, function (match, m1, m2, m3){
+                return m1 + (parseInt(m2) + 1) + m3;
+            });
+        }
 */
-		var dup = 1;
-		// try this as just a while loop with a super long while statement
-		do {
-			nameNew = nameNew.substr(0, nameNew.lastIndexOf('.')) + '(' + dup + ')' + nameNew.substr(nameNew.lastIndexOf('.'));
-			dup++;
-		}
-		while (File(fileList[i].parent + '/' + nameNew).exists);
-	}
-	fileList[i].name = nameNew;
+        var dup = 1;
+        // try this as just a while loop with a super long while statement
+        do {
+            nameNew = nameNew.substr(0, nameNew.lastIndexOf('.')) + '(' + dup + ')' + nameNew.substr(nameNew.lastIndexOf('.'));
+            dup++;
+        }
+        while (File(fileList[i].parent + '/' + nameNew).exists);
+    }
+    fileList[i].name = nameNew;
 }
 
 function getFiles(parent){
-	var fileList = [];
-	var children = parent.getFiles();
-	for (var i = 0; i < children.length; i++){
-		fileList.push(children[i]);
-		if (children[i] instanceof Folder){
-			fileList = fileList.concat(getFiles(children[i]));
-		}
-	}
-	return fileList;
+    var fileList = [];
+    var children = parent.getFiles();
+    for (var i = 0; i < children.length; i++){
+        fileList.push(children[i]);
+        if (children[i] instanceof Folder){
+            fileList = fileList.concat(getFiles(children[i]));
+        }
+    }
+    return fileList;
 }
 
 function getExt(xFile){
-	// return file extension for given file
+    // return file extension for given file
 }
 
 function reName(filename){
-	var fractions = ['1/16', '1/8', '3/16', '1/4', '5/16', '3/8', '7/16', '1/2', '9/16', '5/8', '11/16', '3/4', '13/16', '7/8', '15/16'];
-	fileName = fileName.replace(/(?:-| )?(\d+)\/(2|4|6|8|16)/g, function(match, n1, n2){
-		return (parseInt(n1, 10)/parseInt(n2, 10)).toString().substring(1);
-	});
-	return fileName.replace(/(\/|"|*)/g, '');
+    var fractions = ['1/16', '1/8', '3/16', '1/4', '5/16', '3/8', '7/16', '1/2', '9/16', '5/8', '11/16', '3/4', '13/16', '7/8', '15/16'];
+    fileName = fileName.replace(/(?:-| )?(\d+)\/(2|4|6|8|16)/g, function(match, n1, n2){
+        return (parseInt(n1, 10)/parseInt(n2, 10)).toString().substring(1);
+    });
+    return fileName.replace(/(\/|"|*)/g, '');
 }

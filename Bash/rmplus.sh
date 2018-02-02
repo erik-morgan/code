@@ -1,20 +1,5 @@
 #!/bin/bash
 
-
-# ask () {
-#     regx="^[YyNn]"
-#     local target="$1"
-#     until [[ ans =~ $regx ]]; do
-#         read -r -p "Delete everthing in $target (y/n)? " ans
-#     done
-#     if [[ $ans = [Yy] ]]; then
-#         cd "$target"
-#         rm -rf ..?* .[!.]* *
-#     else
-#         exit 1
-#     fi
-# }
-
 ask () {
     target="$1"
     echo "Delete everything in ${target}?"

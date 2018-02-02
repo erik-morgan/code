@@ -8,21 +8,21 @@ var mainStory = doc.findGrep()[0].parentStory;
 var mainChars = mainStory.characters.everyItem().getElements();
 
 if (doc.label !== 'ENABLED'){
-	doc.label = 'ENABLED';
-	enableHighlights();
+    doc.label = 'ENABLED';
+    enableHighlights();
 }
 else {
-	disableHighlights();
+    disableHighlights();
 }
 
 function enableHighlights(){
-	for (i = 0; i < mainChars.length; i++){
-		mainChars[i].
+    for (i = 0; i < mainChars.length; i++){
+        mainChars[i].
 */
 
 if (doc.textPreferences.enableStylePreviewMode == true){
-	doc.textPreferences.enableStylePreviewMode = false;
+    doc.textPreferences.enableStylePreviewMode = false;
 }
 else {
-	doc.textPreferences.enableStylePreviewMode = true;
+    doc.textPreferences.enableStylePreviewMode = true;
 }

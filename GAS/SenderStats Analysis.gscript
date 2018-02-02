@@ -1,31 +1,26 @@
 function analyze(){
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var s1 = ss.getActiveSheet();
-  var senders = s1.getRange('C2:C' + s1.getLastRow()).getValues();
-
-  var countedSenders = senders.reduce(function(allSenders, sender){
-    if (sender in allSenders){
-      allSenders[sender]++;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var s1 = ss.getActiveSheet();
+    var senders = s1.getRange('C2:C' + s1.getLastRow()).getValues();
+    var countedSenders = senders.reduce(function(allSenders, sender){
+        if (sender in allSenders){
+            allSenders[sender]++;
+        }
+        else {
+            allSenders[sender] = 1;
+        }
+        return allSenders;
+    }, {});
+    var s2 = ss.insertSheet('Sheet2');
+    var sortObject = [];
+    for (var sender in countedSenders){
+        sortObject.push([sender, countedSenders[sender]]);
     }
-    else {
-      allSenders[sender] = 1;
+    sortObject.sort(function(a, b){
+        return a[1] - b[1]
+    });
+    for (i = 0; i < 25; i++){
+        s2.getRange(i + 1, 1).setValue(sortObject[i][0]);
+        s2.getRange(i + 1, 2).setValue(sortObject[i][1]);
     }
-    return allSenders;
-  }, {});
-  
-  var s2 = ss.insertSheet('Sheet2');
-  var sortObject = [];
-  
-  for (var sender in countedSenders){
-    sortObject.push([sender, countedSenders[sender]]);
-  }
-  
-  sortObject.sort(function(a, b){
-    return a[1] - b[1]
-  });
-
-  for (i = 0; i < 25; i++){
-    s2.getRange(i + 1, 1).setValue(sortObject[i][0]);
-    s2.getRange(i + 1, 2).setValue(sortObject[i][1]);
-  }
 }

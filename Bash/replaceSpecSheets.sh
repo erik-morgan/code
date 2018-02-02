@@ -10,7 +10,7 @@ curl -o "$hopper${pl}.pdf" "http://houston/ErpWeb/Part/PartDocumentReader.aspx?p
 
 while [[ ! -e "$hopper${pl}.pdf" ]]
 do
-	sleep 1
+    sleep 1
 done
 
 dirpath=$(find "$dwgs" -path '*/~*' -name "${pl}*pdf" -exec mv "{}" "$hopper${pn}.pdf" \; -exec dirname "{}" \;)

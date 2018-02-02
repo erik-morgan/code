@@ -2,18 +2,18 @@ set partsLists to {"2-413954-02", "2-413955-02", "2-414004-02", "2-415077-02", "
 set baseURL to "http://houston/ErpWeb/PartDetails.aspx?PartNumber="
 
 repeat with i from 3 to 49
-	set webPage to baseURL & item i of partsLists
-	tell application "Safari"
-		set URL of document 1 to webPage
-		set isLoaded to false
-		repeat while isLoaded is false
-			set readyState to (do JavaScript "document.readyState" in document 1)
-			if (readyState is "complete") then
-				set isLoaded to true
-			end if
-			delay 3
-		end repeat
-		--		do JavaScript "document.getElementById('viewSpecLink')[0].click();" in document 1
-		do JavaScript "document.getElementsByName('documentLink')[0].click();" in document 1
-	end tell
+    set webPage to baseURL & item i of partsLists
+    tell application "Safari"
+        set URL of document 1 to webPage
+        set isLoaded to false
+        repeat while isLoaded is false
+            set readyState to (do JavaScript "document.readyState" in document 1)
+            if (readyState is "complete") then
+                set isLoaded to true
+            end if
+            delay 3
+        end repeat
+        -- do JavaScript "document.getElementById('viewSpecLink')[0].click();" in document 1
+        do JavaScript "document.getElementsByName('documentLink')[0].click();" in document 1
+    end tell
 end repeat

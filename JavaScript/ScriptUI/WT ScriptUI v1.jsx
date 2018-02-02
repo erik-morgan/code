@@ -6,138 +6,138 @@ var funcDescs = ['Clears all guides and inserts correct ones on master spread', 
 var i, check0, check1, check2, check3, check4, check5, check6, check7, check8, check9;
 
 var w= new Window('dialog', 'Writer\'s Toolbox', undefined);
-	var brushBlack = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [0, 0, 0]);
-	var brushWhite = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [1, 1, 1]);
-	var brushHeader = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [0.533, 0.533,  0.533]);
-	var penWhite = w.graphics.newPen(w.graphics.PenType.SOLID_COLOR, [1, 1, 1], 1);
-	w.spacing = 0;
-	var gHeaders = w.add('group {spacing:1, margins:1, preferredSize:[-1, 30]}');
-		gHeaders.graphics.backgroundColor = brushBlack;
-		var gCheck = gHeaders.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
-			gCheck.graphics.backgroundColor = brushHeader;
-			var hCheck = gCheck.add('checkbox {helpTip:"Select all functions", preferredSize:[18, 18], alignment:["right", "center"]}');
-				hCheck.onClick = function() {check();};
-		var gName = gHeaders.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
-			gName.graphics.backgroundColor = brushHeader;
-			var hName = gName.add('staticText {alignment:["left", "center"], text:"Function Name", characters:20}');
-				hName.graphics.foregroundColor = penWhite;
-		var gDesc = gHeaders.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
-			gDesc.graphics.backgroundColor = brushHeader;
-			var hDesc = gDesc.add('staticText {alignment:["center", "center"], text:"Descriptions", characters:100}');
-				hDesc.graphics.foregroundColor = penWhite;
-	var row0 = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
-		row0.graphics.backgroundColor = brushBlack;
-		with (row0) {
-			gCheck0 = row0.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
-				gCheck0.graphics.backgroundColor = brushWhite;
-				with (gCheck0)
-				
-				
-	var row0 = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
-		row0.graphics.backgroundColor = brushBlack;
-		with (row0.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}')){
-			graphics.backgroundColor = brushWhite;
-			var check0 = 
-	
+    var brushBlack = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [0, 0, 0]);
+    var brushWhite = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [1, 1, 1]);
+    var brushHeader = w.graphics.newBrush(w.graphics.BrushType.SOLID_COLOR, [0.533, 0.533,  0.533]);
+    var penWhite = w.graphics.newPen(w.graphics.PenType.SOLID_COLOR, [1, 1, 1], 1);
+    w.spacing = 0;
+    var gHeaders = w.add('group {spacing:1, margins:1, preferredSize:[-1, 30]}');
+        gHeaders.graphics.backgroundColor = brushBlack;
+        var gCheck = gHeaders.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
+            gCheck.graphics.backgroundColor = brushHeader;
+            var hCheck = gCheck.add('checkbox {helpTip:"Select all functions", preferredSize:[18, 18], alignment:["right", "center"]}');
+                hCheck.onClick = function() {check();};
+        var gName = gHeaders.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
+            gName.graphics.backgroundColor = brushHeader;
+            var hName = gName.add('staticText {alignment:["left", "center"], text:"Function Name", characters:20}');
+                hName.graphics.foregroundColor = penWhite;
+        var gDesc = gHeaders.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
+            gDesc.graphics.backgroundColor = brushHeader;
+            var hDesc = gDesc.add('staticText {alignment:["center", "center"], text:"Descriptions", characters:100}');
+                hDesc.graphics.foregroundColor = penWhite;
+    var row0 = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
+        row0.graphics.backgroundColor = brushBlack;
+        with (row0) {
+            gCheck0 = row0.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
+                gCheck0.graphics.backgroundColor = brushWhite;
+                with (gCheck0)
+                
+                
+    var row0 = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
+        row0.graphics.backgroundColor = brushBlack;
+        with (row0.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}')){
+            graphics.backgroundColor = brushWhite;
+            var check0 = 
+    
 function buildRow(i){
-	with (w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30], graphics["backgroundColor"]:brushBlack}')){
-		with (add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0], graphics["backgroundColor"]:brushWhite}')){
-			eval("check" + i + '=' + 'add(\'checkbox {preferredSize:[18, 18], alignment:["right", "center"]}\')');
-			
-	
-	
-	
-	
-	
-	for (i = 0; i < rows.length; i++){
-		var gRow, gCheckbox, checkBox, gFuncName, name, gFuncDesc, desc;
-		gRow = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
-			gRow.graphics.backgroundColor = brushBlack;
-			gCheckbox = gRow.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
-				gCheckbox.graphics.backgroundColor = brushWhite;
-				eval(checks[i] + ' = ' + 'gCheckbox.add(\'checkbox {preferredSize:[18, 18], alignment:["right", "center"]}\')');
-				eval(checks[i]).onClick = function() {check(i);};
-			gFuncName = gRow.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
-				gFuncName.graphics.backgroundColor = brushWhite;
-				name = gFuncName.add('staticText', undefined, funcNames[i]);
-					name.alignment = ['left', 'center'];
-					name.characters = 20;
-			gFuncDesc = gRow.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
-				gFuncDesc.graphics.backgroundColor = brushWhite;
-				desc = gFuncDesc.add('staticText', undefined, funcDescs[i]);
-					desc.alignment = ['center', 'center'];
-					desc.characters = 100;
-	}
-	var gSpacing = w.add('group {alignment:["fill", "fill"], preferredSize:[-1, 15]}');
-	var gExecute = w.add('group {alignment:["fill", "fill"], margins:0, spacing:15}');
-		var gBackup = gExecute.add('group {alignment:["fill", "fill"], alignChildren:["left", "center"], spacing:10, margins:10, orientation:"column"}');
-			gBackup.graphics.backgroundColor = brushHeader;
-			var checkBackup = gBackup.add('checkbox {text:"Backup Active Document"}');
-			var gFile = gBackup.add('group {alignChildren:["left", "center"], alignment:["fill", "fill"], margins:0, spacing:0}');
-				var labelFile = gFile.add('staticText {preferredSize:[58, -1], text:"Filename:"}');
-				var editFile = gFile.add('editText {alignment:["fill", "fill"], text:"FILE NAME.INDD", borderless:true}');
-				var gBuffer = gFile.add('group {alignment:["fill", ""]}');
-			var gPath = gBackup.add('group {alignChildren:["left", "center"], alignment:["fill", "fill"], margins:0, spacing:0}');
-				var labelPath = gPath.add('staticText {preferredSize:[58, -1], text:"Location:"}');
-				var editPath = gPath.add('editText {alignment:["fill", "fill"], text:"FILE PATH TO MY DOCUMENTS", borderless:true}');
-				var bBrowse = gPath.add('iconbutton', undefined, folderIcon, {name:'browseIcon'});
-//				var bPath = gPath.add('button {text:"Browse", enabled:true, helpTip:"Browse to a different folder", alignment:["fill", "fill"]}');
-		var gButtons = gExecute.add('group {orientation:"column", margins:0, spacing:0, alignChildren:["", "fill"]}');
-			var bRun = gButtons.add('button {text:"Run", enabled:false, helpTip:"Runs the selected functions."}');
-			var bCancel = gButtons.add('button {text:"Cancel", name:"cancel", helpTip:"Cancel the script."}');
-				bCancel.onClick = function (){	$.writeln(bPath.size); w.close();	};
+    with (w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30], graphics["backgroundColor"]:brushBlack}')){
+        with (add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0], graphics["backgroundColor"]:brushWhite}')){
+            eval("check" + i + '=' + 'add(\'checkbox {preferredSize:[18, 18], alignment:["right", "center"]}\')');
+            
+    
+    
+    
+    
+    
+    for (i = 0; i < rows.length; i++){
+        var gRow, gCheckbox, checkBox, gFuncName, name, gFuncDesc, desc;
+        gRow = w.add('group {spacing:1, margins:[1, 0, 1, 1], preferredSize:[-1, 30]}');
+            gRow.graphics.backgroundColor = brushBlack;
+            gCheckbox = gRow.add('group {alignment:["left", "fill"], margins:[8, 1, 3, 0]}');
+                gCheckbox.graphics.backgroundColor = brushWhite;
+                eval(checks[i] + ' = ' + 'gCheckbox.add(\'checkbox {preferredSize:[18, 18], alignment:["right", "center"]}\')');
+                eval(checks[i]).onClick = function() {check(i);};
+            gFuncName = gRow.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
+                gFuncName.graphics.backgroundColor = brushWhite;
+                name = gFuncName.add('staticText', undefined, funcNames[i]);
+                    name.alignment = ['left', 'center'];
+                    name.characters = 20;
+            gFuncDesc = gRow.add('group {alignment:["fill", "fill"], margins:[9, 0, 0, 0]}');
+                gFuncDesc.graphics.backgroundColor = brushWhite;
+                desc = gFuncDesc.add('staticText', undefined, funcDescs[i]);
+                    desc.alignment = ['center', 'center'];
+                    desc.characters = 100;
+    }
+    var gSpacing = w.add('group {alignment:["fill", "fill"], preferredSize:[-1, 15]}');
+    var gExecute = w.add('group {alignment:["fill", "fill"], margins:0, spacing:15}');
+        var gBackup = gExecute.add('group {alignment:["fill", "fill"], alignChildren:["left", "center"], spacing:10, margins:10, orientation:"column"}');
+            gBackup.graphics.backgroundColor = brushHeader;
+            var checkBackup = gBackup.add('checkbox {text:"Backup Active Document"}');
+            var gFile = gBackup.add('group {alignChildren:["left", "center"], alignment:["fill", "fill"], margins:0, spacing:0}');
+                var labelFile = gFile.add('staticText {preferredSize:[58, -1], text:"Filename:"}');
+                var editFile = gFile.add('editText {alignment:["fill", "fill"], text:"FILE NAME.INDD", borderless:true}');
+                var gBuffer = gFile.add('group {alignment:["fill", ""]}');
+            var gPath = gBackup.add('group {alignChildren:["left", "center"], alignment:["fill", "fill"], margins:0, spacing:0}');
+                var labelPath = gPath.add('staticText {preferredSize:[58, -1], text:"Location:"}');
+                var editPath = gPath.add('editText {alignment:["fill", "fill"], text:"FILE PATH TO MY DOCUMENTS", borderless:true}');
+                var bBrowse = gPath.add('iconbutton', undefined, folderIcon, {name:'browseIcon'});
+//                var bPath = gPath.add('button {text:"Browse", enabled:true, helpTip:"Browse to a different folder", alignment:["fill", "fill"]}');
+        var gButtons = gExecute.add('group {orientation:"column", margins:0, spacing:0, alignChildren:["", "fill"]}');
+            var bRun = gButtons.add('button {text:"Run", enabled:false, helpTip:"Runs the selected functions."}');
+            var bCancel = gButtons.add('button {text:"Cancel", name:"cancel", helpTip:"Cancel the script."}');
+                bCancel.onClick = function (){    $.writeln(bPath.size); w.close();    };
 
 w.show();
 
 function check(i){
-	if (i == 7)
-		check4.value = check5.value = check7.value;
-	else if (i == "undefined")
-		check0.value = check1.value = check2.value = check3.value = check4.value = check5.value = check7.value = check8.value = check9.value;
-	$.writeln(i + "\t" + checks[i]);
-	bRun.enabled = canRun();
+    if (i == 7)
+        check4.value = check5.value = check7.value;
+    else if (i == "undefined")
+        check0.value = check1.value = check2.value = check3.value = check4.value = check5.value = check7.value = check8.value = check9.value;
+    $.writeln(i + "\t" + checks[i]);
+    bRun.enabled = canRun();
 }
 
 function canRun(){
-	for (var r = 0; r < checks.length; r++){
-		if (eval(checks[r]).value == true)
-			return true;
-	}
-	return false;
+    for (var r = 0; r < checks.length; r++){
+        if (eval(checks[r]).value == true)
+            return true;
+    }
+    return false;
 }
 
-/*				switch (i) {
-					case 0:
-						check0 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 1:
-						check1 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 2:
-						check2 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 3:
-						check3 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 4:
-						check4 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 5:
-						check5 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 6:
-						check6 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 7:
-						check7 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 8:
-						check8 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-					case 9:
-						check9 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
-						break;
-				}
+/*                switch (i) {
+                    case 0:
+                        check0 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 1:
+                        check1 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 2:
+                        check2 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 3:
+                        check3 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 4:
+                        check4 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 5:
+                        check5 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 6:
+                        check6 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 7:
+                        check7 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 8:
+                        check8 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                    case 9:
+                        check9 = gCheckbox.add('checkbox {preferredSize:[18, 18], alignment:["right", "center"]}');
+                        break;
+                }
 */
 
-//				name = gFuncName.add('staticText {alignment:["left", "center"], characters:20, text:funcNames.item(i)}');
+//                name = gFuncName.add('staticText {alignment:["left", "center"], characters:20, text:funcNames.item(i)}');

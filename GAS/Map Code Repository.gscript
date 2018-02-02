@@ -1,23 +1,23 @@
 function mapDriveFolder(){
-  var fileMap = [];
-  var root = DriveApp.getRootFolder();
-  var folder = root.getFoldersByName('Code Repository').next();
-  getChildren(folder, '/' + folder.getName() + '/');
-  var gSheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1Vb_kfeozIBa0_BGJ-oPyaPBSc0HfxDfdrwFeVOc07Dg/edit#gid=510033072');
-  gSheet.setActiveSheet(gSheet.getSheets()[2]);
-  var ss = gSheet.getActiveSheet();
-  var rng = ss.getRange('A1:A' + fileMap.length);
-  rng.setValues(fileMap);
-  function getChildren(parentFolder, folderPath){
-    var files = parentFolder.getFiles();
-    while (files.hasNext()){
-      var file = files.next();
-      fileMap.push([folderPath + file.getName() + '\t' + file.getSize() + '\t' + Date(file.getDateCreated())]);
+    var fileMap = [];
+    var root = DriveApp.getRootFolder();
+    var folder = root.getFoldersByName('Code Repository').next();
+    getChildren(folder, '/' + folder.getName() + '/');
+    var gSheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1Vb_kfeozIBa0_BGJ-oPyaPBSc0HfxDfdrwFeVOc07Dg/edit#gid=510033072');
+    gSheet.setActiveSheet(gSheet.getSheets()[2]);
+    var ss = gSheet.getActiveSheet();
+    var rng = ss.getRange('A1:A' + fileMap.length);
+    rng.setValues(fileMap);
+    function getChildren(parentFolder, folderPath){
+        var files = parentFolder.getFiles();
+        while (files.hasNext()){
+            var file = files.next();
+            fileMap.push([folderPath + file.getName() + '\t' + file.getSize() + '\t' + Date(file.getDateCreated())]);
+        }
+        var childFolders = parentFolder.getFolders();
+        while (childFolders.hasNext()){
+            var childFolder = childFolders.next();
+            getChildren(childFolder, folderPath + childFolder.getName() + '/');
+        }
     }
-    var childFolders = parentFolder.getFolders();
-    while (childFolders.hasNext()){
-      var childFolder = childFolders.next();
-      getChildren(childFolder, folderPath + childFolder.getName() + '/');
-    }
-  }
 }

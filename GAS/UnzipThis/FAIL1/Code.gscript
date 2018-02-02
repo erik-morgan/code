@@ -1,0 +1,33 @@
+// Launch HTML Service Dialog Window with a Single Button that says 'Start', and use that to launch the app
+// Look up the difference between a web add-on and a web app
+// See what happens when you go to Publish > Test as add-on
+
+function doGet(){
+    return HtmlService
+    .createTemplateFromFile("picker")
+    .evaluate()
+    .addMetaTag("viewport", "width=device-width, initial-scale=1")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function unzipThis(thisId){
+    var file = DriveApp.getFileById(thisId);
+    var folderName = file.getName().replace(/\.zip$/i, '');
+    var parent = file.getParents().next();
+    var unzipTo = parent.createFolder(folderName);
+    var blobList = Utilities.unzip(file);//.getBlob()
+    for (var i = 0; i < blobList.length; i++){
+        unzipTo.createFile(blobList[i]);
+    }
+}
+
+function include(fileName) {
+    return HtmlService
+    .createHtmlOutputFromFile(fileName)
+    .getContent();
+}
+
+function getOAuthToken() {
+//  DriveApp.getRootFolder();
+    return ScriptApp.getOAuthToken();
+}

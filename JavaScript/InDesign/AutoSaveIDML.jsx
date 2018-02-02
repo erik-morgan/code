@@ -36,27 +36,27 @@ eSaveAs = app.eventListeners.item('saveAs');
 eSaveCopy = app.eventListeners.item('saveCopy');
 
 if (!eSave.isValid){
-	eSave = app.addEventListener('afterSave', saveHandler);
-	eSave.name = 'save';
+    eSave = app.addEventListener('afterSave', saveHandler);
+    eSave.name = 'save';
 }
 if (!eSaveAs.isValid){
-	eSaveAs = app.addEventListener('afterSaveAs', saveHandler);
-	eSaveAs.name = 'saveAs';
+    eSaveAs = app.addEventListener('afterSaveAs', saveHandler);
+    eSaveAs.name = 'saveAs';
 }
 if (!eSaveCopy.isValid){
-	eSaveCopy = app.addEventListener('afterSaveACopy', saveHandler);
-	eSaveCopy.name = 'saveCopy';
+    eSaveCopy = app.addEventListener('afterSaveACopy', saveHandler);
+    eSaveCopy.name = 'saveCopy';
 }
 
 function saveHandler(e){
-	if (app.layoutWindows.length > 0){
-		var doc = app.activeDocument;
-		var inddPath = doc.fullName;
-		var idmlPath = inddPath.toString().replace(/\.indd/, '.idml');
-		var idmlFile = File(idmlPath);
-		doc.exportFile(ExportFormat.INDESIGN_MARKUP, idmlFile, false);
-	}
-	else {
-		alert('There are no documents open. This theoretically can\'t happen, so contact Erik if it does.', undefined, true);
-	}
+    if (app.layoutWindows.length > 0){
+        var doc = app.activeDocument;
+        var inddPath = doc.fullName;
+        var idmlPath = inddPath.toString().replace(/\.indd/, '.idml');
+        var idmlFile = File(idmlPath);
+        doc.exportFile(ExportFormat.INDESIGN_MARKUP, idmlFile, false);
+    }
+    else {
+        alert('There are no documents open. This theoretically can\'t happen, so contact Erik if it does.', undefined, true);
+    }
 }
