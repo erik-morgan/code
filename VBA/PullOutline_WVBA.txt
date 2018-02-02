@@ -1,0 +1,14 @@
+Sub PullOutline()
+    Dim doc As Document, para As Range, p As Integer, txt As String
+    Set doc = Application.ActiveDocument
+    For p = doc.Paragraphs.Count To 1 Step -1
+        Set para = doc.Paragraphs(p).Range
+        txt = Split(para.Text, Chr(9))(0)
+        If txt Like "[2467]-???###*" Or txt Like "######*" Then
+            para.Text = txt & vbNewLine
+        Else
+            para.Delete
+        End If
+    Next p
+    doc.Content.Sort
+End Sub
