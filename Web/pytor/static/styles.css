@@ -1,151 +1,220 @@
 /*
     Add title attribute with javascript if name length exceeds 63/77 characters (2/1.5 rem font-size)
     Replace periods in torrent names in python
-    search everything, everywhere
-    for filtor, exclude results with any part of the query at the end of the torrent name
-    when adding js onclick for .plus, make content x after clicked
-    change all sizes to MB
+    search everything, everywhere in python
+    for filtor in python, exclude results with any part of the query at the end of the torrent name
+    when adding js onclick for .plus, make content a checkmark after clicked and add disable attribute
+    change all sizes to MB in python
+    do sorting arrows in js
 */
 @font-face {
-    font-family: "Ubuntu";
-    src: url("/fonts/Ubuntu-Regular.ttf");
+    font-family: 'Ubuntu';
+    src: url('/fonts/Ubuntu-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('/fonts/Ubuntu-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('/fonts/Ubuntu-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('/fonts/Ubuntu-LightItalic.ttf') format('truetype');
+    font-weight: light;
+    font-style: italic;
 }
 * {
     box-sizing: border-box;
 }
-html {
-    font-size: 16px;
+:root {
+    /*font-size: 16px;*/
     font-family: Ubuntu;
     --green: #26A65B;
-    --gray: #ECF0F1;
+    --lite-gray: #ECF0F1;
+    --dark-gray: #D2D7D3;
+    --gray-green: #C8F7C5;
     --dark: #35393A;
+    --plus-size: 3rem;
     --form-font: 1.5rem;
     --form-vpad: 0.5rem;
     --form-height: calc((var(--form-font) * 1.15625) + (2 * var(--form-vpad)) + 4px);
 }
 body {
     margin: 0;
-    background-color: var(--gray);
+    min-width: 320px;
+    padding: 0 1%;
+    background-color: var(--dark-gray);
 }
-header {
-    padding: 0 5%;
-    margin: 0;
+@media (device-pixel-ratio: 1), (min-width: 512px) {
+    body {
+        padding: 0 2%;
+    }
 }
-h1 {
-    margin: 1.5rem auto;
-    color: var(--green);
-    font-size: 4rem;
-    text-align: center;
+@media (device-pixel-ratio: 1), (min-width: 672px) {
+    body {
+        padding: 0 3%;
+    }
+}
+@media (device-pixel-ratio: 1), (min-width: 832px) {
+    body {
+        padding: 0 4%;
+    }
+}
+@media (device-pixel-ratio: 1), (min-width: 992px) {
+    body {
+        padding: 0 5%;
+    }
+}
+@media (device-pixel-ratio: 1), (min-width: 1152px) {
+    body {
+        padding: 0 6%;
+    }
+}
+.title {
+    width: calc(20vh / 0.35);;
+    margin: 1rem auto;
+}
+.title-part {
+    fill: var(--green);
+    font-style: italic;
 }
 form {
     margin: 2rem;
     display: flex;
     height: var(--form-height);
-    border: 2px solid var(--dark);
+    border: 1px solid var(--dark);
 }
 input {
-    background-color: var(--gray);
+    background-color: var(--lite-gray);
     border: none;
     color: var(--dark);
     font-size: var(--form-font);
     flex: 1 1 auto;
+    max-width: calc(100% - var(--form-height));
     padding: var(--form-vpad) 0.75rem;
 }
 input:focus {
     outline: none;
 }
-.isearch {
+.bsearch {
     padding: 0.75rem;
     flex: 0 0 var(--form-height);
-    background: none;
+    background-color: var(--lite-gray);
     border: none;
     transition: background-color 0.2s linear;
     cursor: pointer;
     /*outline: none;*/
 }
-.isearch:hover {
-    background-color: var(--dark);
+@media (device-pixel-ratio: 1), (min-width: 672px) {
+    .bsearch:hover {
+        background-color: var(--dark);
+    }
 }
-svg {
-    height: 100%;
-    width: 100%;
-}
-path {
+.isearch > path {
     fill: var(--green);
 }
-main {
-    margin: 0 5%;
-    padding: 1rem 2rem;
-}
-table {
+.results {
     width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    font-size: var(--form-font);
+    padding: 0 2rem 1rem;
 }
-.head-row {
-    background-color: var(--dark);
-    color: var(--green);
-    font-weight: 600;
-}
-.body-row {
-    position: relative;
-    background-color: var(--gray);
+.tor {
+    margin: 1rem 0;
+    padding: 1rem;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+    display: grid;
+    grid-template-columns: 1fr 1fr var(--plus-size);
+    grid-template-rows: auto auto;
+    grid-template-areas: "name name name"
+                         "size seed down";
+    grid-row-gap: 1rem;
+    align-items: center;
+    font-weight: bold;
+    background-color: var(--lite-gray);
     color: var(--dark);
-    transition: background-color 0.2s linear, color 0.2s linear;
 }
-.body-row:hover {
-    background-color: var(--green);
-    color: var(--gray);
+/*@media (device-pixel-ratio: 1), (min-width: 832px) {*/
+@media (device-pixel-ratio: 1), (min-width: 672px) {
+    .tor {
+        grid-template-columns: 1fr 8rem 6rem var(--plus-size);
+        grid-template-rows: auto;
+        grid-template-areas: "name size seed down";
+        grid-row-gap: 0;
+        font-weight: normal;
+        transition: all 0.3s cubic-bezier(0.2,0.4,0.6,0.8);
+    }
+    .tor:not(.header):hover {
+        background-color: var(--gray-green);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.5);
+    }
 }
-th {
-    position: relative;
-    white-space: nowrap;
-    padding: 1rem;
+.tor.header {
+    background-color: var(--dark);
+    color: var(--lite-gray);
+}
+.head {
     cursor: pointer;
-    text-align: left;
-}
-td {
-    border-bottom: 1px solid var(--dark);
-    white-space: nowrap;
-    padding: 1rem;
 }
 .tname {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    grid-area: name;
 }
-th.tsize {
-    width: 10rem;
+@media (device-pixel-ratio: 1), (min-width: 672px) {
+    .tname, .tsize, .tseed {
+        padding: 0;
+    }
 }
-th.tseed {
-    width: 8rem;
+.tsize {
+    grid-area: size;
+}
+.tseed {
+    grid-area: seed;
+}
+.body.tseed {
+    color: var(--green);
 }
 .tdown {
-    width: 3rem;
-    padding: 0;
+    grid-area: down;
+}
+.body.tdown {
+    width: var(--plus-size);
+    height: var(--plus-size);
 }
 .plus {
-    margin: auto;
-    background-color: var(--dark);
-    color: var(--green);
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
+    border: none;
+    padding: 50% 0;
+    width: 100%;
+    line-height: 0;
+    background-color: var(--green);
+    color: var(--dark);
     border-radius: 50%;
     text-align: center;
-    font-size: 2rem;
-    font-weight: 600;
-    cursor: pointer;
+    font-size: calc(0.75 * var(--plus-size));
 }
-.sortd::after {
+@media (device-pixel-ratio: 1), (min-width: 672px) {
+    .plus {
+        box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+        transition: all 0.3s cubic-bezier(0.2,0.4,0.6,0.8);
+    }
+    .plus:hover {
+        box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2);
+    }
+}
+[class*=sort]::after {
     content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path style="fill:#26A65B;" d="M 63.868228,9.3e-4 A 7.9994804,8.0011186 0 0 0 55.99062,8.11453 V 99.89945 L 13.888183,55.36252 A 7.9994818,8.00112 0 0 0 8.2191957,52.77843 7.9994818,8.00112 0 0 0 2.2650987,66.35515 l 55.9126613,59.1469 a 7.9994818,8.00112 0 0 0 0.08593,0.082 7.9994804,8.0011186 0 0 0 0.269486,0.25782 7.9994818,8.00112 0 0 0 0.322212,0.29103 7.9994804,8.0011186 0 0 0 0.289016,0.22462 7.9994818,8.00112 0 0 0 0.335881,0.24805 7.9994804,8.0011186 0 0 0 0.369081,0.23243 7.9994818,8.00112 0 0 0 0.294873,0.1758 7.9994804,8.0011186 0 0 0 0.400325,0.20118 7.9994818,8.00112 0 0 0 0.339787,0.15625 7.9994804,8.0011186 0 0 0 0.35541,0.13477 7.9994818,8.00112 0 0 0 0.400326,0.14063 7.9994804,8.0011186 0 0 0 0.378843,0.10157 7.9994818,8.00112 0 0 0 0.390561,0.0937 7.9994804,8.0011186 0 0 0 0.372985,0.0605 7.9994818,8.00112 0 0 0 0.431569,0.0586 7.9994804,8.0011186 0 0 0 0.36127,0.0234 7.9994818,8.00112 0 0 0 0.421804,0.0156 7.9994804,8.0011186 0 0 0 0.394467,-0.0156 7.9994818,8.00112 0 0 0 0.410089,-0.0254 7.9994804,8.0011186 0 0 0 0.374938,-0.0527 7.9994818,8.00112 0 0 0 0.410088,-0.0684 7.9994804,8.0011186 0 0 0 0.367128,-0.0879 7.9994818,8.00112 0 0 0 0.425711,-0.11719 7.9994804,8.0011186 0 0 0 0.302684,-0.10547 7.9994818,8.00112 0 0 0 0.43938,-0.16798 7.9994804,8.0011186 0 0 0 0.357363,-0.16602 7.9994818,8.00112 0 0 0 0.335883,-0.16798 7.9994804,8.0011186 0 0 0 0.372986,-0.22266 7.9994818,8.00112 0 0 0 0.322211,-0.20509 7.9994804,8.0011186 0 0 0 0.343694,-0.25392 7.9994818,8.00112 0 0 0 0.277298,-0.2168 7.9994804,8.0011186 0 0 0 0.322213,-0.29298 7.9994818,8.00112 0 0 0 0.347599,-0.33204 l 0.0098,-0.0117 55.902909,-59.13518 A 7.9994818,8.00112 0 1 0 114.09047,55.36236 L 71.987984,99.89945 V 8.11453 A 7.9994804,8.0011186 0 0 0 63.868228,9.3e-4 Z"/></svg>');
-    padding-left: 0.5rem;
-    width: 1.2rem;
+    padding: 0.1rem 0.5rem;
+    width: 1rem;
     position: absolute;
 }
 .sorta::after {
-    content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path style="fill:#26A65B;" d="M 64.131775,127.99908 A 7.9994804,8.0011186 0 0 0 7.877608,-8.1136 L 0,-91.784917 42.102437,44.53693 A 7.9994818,8.00112 0 0 0 5.66899,2.58409 7.9994818,8.00112 0 0 0 5.95409,-13.57672 L 69.822243,2.4979634 A 7.9994818,8.00112 0 0 0 -0.08593,-0.082 7.9994804,8.0011186 0 0 0 -0.269486,-0.25782 7.9994818,8.00112 0 0 0 -0.322212,-0.29103 7.9994804,8.0011186 0 0 0 -0.289016,-0.22462 7.9994818,8.00112 0 0 0 -0.335881,-0.24805 7.9994804,8.0011186 0 0 0 -0.369081,-0.23243 7.9994818,8.00112 0 0 0 -0.294873,-0.17579996 7.9994804,8.0011186 0 0 0 -0.400325,-0.20118 7.9994818,8.00112 0 0 0 -0.339787,-0.15625 7.9994804,8.0011186 0 0 0 -0.35541,-0.13477 7.9994818,8.00112 0 0 0 -0.400326,-0.14063 7.9994804,8.0011186 0 0 0 -0.378843,-0.10157 7.9994818,8.00112 0 0 0 -0.390561,-0.0937 7.9994804,8.0011186 0 0 0 -0.372985,-0.0605 7.9994818,8.00112 0 0 0 -0.431569,-0.0586 7.9994804,8.0011186 0 0 0 -0.36127,-0.0234 A 7.9994818,8.00112 0 0 0 64.002884,1.3441708E-5 7.9994804,8.0011186 0 0 0 63.608417,0.01561344 A 7.9994818,8.00112 0 0 0 -0.410089,0.0254 7.9994804,8.0011186 0 0 0 -0.374938,0.0527 7.9994818,8.00112 0 0 0 -0.410088,0.0684 7.9994804,8.0011186 0 0 0 -0.367128,0.0879 7.9994818,8.00112 0 0 0 -0.425711,0.11719 7.9994804,8.0011186 0 0 0 -0.302684,0.10547 7.9994818,8.00112 0 0 0 -0.43938,0.16798 7.9994804,8.0011186 0 0 0 -0.357363,0.16602 7.9994818,8.00112 0 0 0 -0.335883,0.16798 7.9994804,8.0011186 0 0 0 -0.372986,0.22265996 7.9994818,8.00112 0 0 0 -0.322211,0.20509 7.9994804,8.0011186 0 0 0 -0.343694,0.25392 7.9994818,8.00112 0 0 0 -0.277298,0.2168 7.9994804,8.0011186 0 0 0 -0.322213,0.29298 7.9994818,8.00112 0 0 0 -0.347599,0.33204 L -0.0098,0.0117 L 2.286443,61.645023 A 7.9994818,8.00112 0 1 0 11.62309,10.99263 L 42.102486,-44.53709 0,91.784917 A 7.9994804,8.0011186 0 0 0 8.119756,8.1136 Z"/></svg>');
-    padding-left: 0.5rem;
-    width: 1.2rem;
-    position: absolute;
+    transform: rotate(180deg);
 }
+
+/*
+*/
