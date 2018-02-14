@@ -5,7 +5,6 @@
     for filtor in python, exclude results with any part of the query at the end of the torrent name
     when adding js onclick for .plus, make content a checkmark after clicked and add disable attribute
     change all sizes to MB in python
-    do sorting arrows in js
 */
 @font-face {
     font-family: 'Ubuntu';
@@ -35,7 +34,6 @@
     box-sizing: border-box;
 }
 :root {
-    /*font-size: 16px;*/
     font-family: Ubuntu;
     --green: #26A65B;
     --lite-gray: #ECF0F1;
@@ -52,6 +50,7 @@ body {
     min-width: 320px;
     padding: 0 1%;
     background-color: var(--dark-gray);
+    color: var(--dark);
 }
 @media (device-pixel-ratio: 1), (min-width: 512px) {
     body {
@@ -79,7 +78,7 @@ body {
     }
 }
 .title {
-    width: calc(20vh / 0.35);;
+    width: calc(20vh / 0.35);
     margin: 1rem auto;
 }
 .title-part {
@@ -91,34 +90,32 @@ form {
     display: flex;
     height: var(--form-height);
     border: 1px solid var(--dark);
+    background-color: var(--lite-gray);
 }
 input {
-    background-color: var(--lite-gray);
     border: none;
-    color: var(--dark);
+    background: none;
     font-size: var(--form-font);
     flex: 1 1 auto;
-    max-width: calc(100% - var(--form-height));
     padding: var(--form-vpad) 0.75rem;
 }
 input:focus {
     outline: none;
 }
-.bsearch {
+.isearch {
+    box-sizing: border-box;
     padding: 0.75rem;
     flex: 0 0 var(--form-height);
-    background-color: var(--lite-gray);
+    background: none;
     border: none;
     transition: background-color 0.2s linear;
-    cursor: pointer;
-    /*outline: none;*/
 }
 @media (device-pixel-ratio: 1), (min-width: 672px) {
-    .bsearch:hover {
+    .isearch:hover {
         background-color: var(--dark);
     }
 }
-.isearch > path {
+.isearch path {
     fill: var(--green);
 }
 .results {
@@ -130,34 +127,56 @@ input:focus {
     padding: 1rem;
     box-shadow: 0 3px 5px rgba(0,0,0,0.5);
     display: grid;
-    grid-template-columns: 1fr 1fr var(--plus-size);
-    grid-template-rows: auto auto;
-    grid-template-areas: "name name name"
-                         "size seed down";
-    grid-row-gap: 1rem;
+    grid-template: "name name name" auto
+                   "size seed down" auto
+                   / 1fr 1fr var(--plus-size);
+    grid-gap: 1rem 0;
     align-items: center;
     font-weight: bold;
     background-color: var(--lite-gray);
     color: var(--dark);
 }
-/*@media (device-pixel-ratio: 1), (min-width: 832px) {*/
 @media (device-pixel-ratio: 1), (min-width: 672px) {
     .tor {
-        grid-template-columns: 1fr 8rem 6rem var(--plus-size);
-        grid-template-rows: auto;
-        grid-template-areas: "name size seed down";
-        grid-row-gap: 0;
+        margin: 0;
+        padding: 0.5rem;
+        box-shadow: none;
+        grid-template: "name size seed down" auto
+                       / 1fr 7rem 5rem auto;
+        grid-gap: 0 1.5rem;
         font-weight: normal;
-        transition: all 0.3s cubic-bezier(0.2,0.4,0.6,0.8);
+        transition: all 0.25s cubic-bezier(0.2,0.4,0.6,0.8);
+        border-bottom: 1px solid var(--dark);
     }
     .tor:not(.header):hover {
         background-color: var(--gray-green);
-        box-shadow: 0 15px 25px rgba(0,0,0,0.5);
     }
 }
+/*@media (device-pixel-ratio: 1), (min-width: 832px) {
+    .tor {
+        padding: 0.75rem;
+        font-size: 1.2rem;
+        grid-template: "name size seed down" auto
+                       / 1fr 7rem 5rem auto;
+        grid-gap: 0 1.5rem;
+        font-weight: normal;
+    }
+}
+@media (device-pixel-ratio: 1), (min-width: 832px) {
+    .tor {
+        padding: 1rem;
+        font-size: 1.4rem;
+        grid-template: "name size seed down" auto
+                       / 1fr 7rem 5rem auto;
+        grid-gap: 0 1.5rem;
+        font-weight: normal;
+    }
+}
+*/
 .tor.header {
     background-color: var(--dark);
     color: var(--lite-gray);
+    border: none;
 }
 .head {
     cursor: pointer;
@@ -167,7 +186,10 @@ input:focus {
 }
 @media (device-pixel-ratio: 1), (min-width: 672px) {
     .tname, .tsize, .tseed {
-        padding: 0;
+        padding: 0.6rem;
+    }
+    .tdown {
+        padding: 0.3rem;
     }
 }
 .tsize {
@@ -181,10 +203,8 @@ input:focus {
 }
 .tdown {
     grid-area: down;
-}
-.body.tdown {
+    text-align: center;
     width: var(--plus-size);
-    height: var(--plus-size);
 }
 .plus {
     border: none;
@@ -196,14 +216,22 @@ input:focus {
     border-radius: 50%;
     text-align: center;
     font-size: calc(0.75 * var(--plus-size));
+    cursor: pointer;
+    /* transition: all 0.2s linear; */
+    transition: all 0.25s cubic-bezier(0.2,0.4,0.6,0.8);
+    box-shadow: 0 2px 0 -1px rgba(0,0,0,0.13), 0 3px 0 -1px rgba(0,0,0,0.08), 0 3px 13px -1px rgba(0,0,0,0.21);
 }
 @media (device-pixel-ratio: 1), (min-width: 672px) {
-    .plus {
-        box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
-        transition: all 0.3s cubic-bezier(0.2,0.4,0.6,0.8);
-    }
     .plus:hover {
-        box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    }
+    .plus:active {
+        top: 1px;
+        position: relative;
+        box-shadow: 0 0 20px 1px rgba(0,0,0,0.1) inset;
+    }
+    .plus:focus {
+      outline: none;
     }
 }
 [class*=sort]::after {
@@ -217,4 +245,37 @@ input:focus {
 }
 
 /*
+Ripple Effect for Button
+.ripple {
+    position: relative;
+    overflow: hidden;
+    transform: translate3d(0,0,0)
+}
+.ripple:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle,#000 10%,transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10,10);
+    opacity: 0;
+    transition: transform .5s,opacity 1s
+}
+.ripple:active:after {
+    transform: scale(0,0);
+    opacity: .2;
+    transition: 0s
+}
+
+.body.tdown {
+    width: 100%;
+    height: 100%;
+}
+
 */
