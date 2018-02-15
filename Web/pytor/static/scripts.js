@@ -1,51 +1,29 @@
-// or just put onclick in html and grab event
-let dls = document.getElementsByClassName('download');
+// manage qbt-cookie in python (look up timeout of webui cookie)
+let dls = document.getElementsByClassName('plus');
 for (dl of dls) {
     dl.addEventListener('click', function (e) {
-        addTorrent(e.target.getAttribute('href'));
+        mag = e.target.getAttribute('data-mag');
+        // SEND TO /qbt ENDPOINT
+        fetch('/qbt', {
+            method: 'POST',
+            body: data
+            // OR '&#x2713'
+        }).then(response => e.target.innerText = String.fromCharCode(2713));
+        /*
+            USING WEBSOCKET WITH PYTHON HANDLING THIS STUFF:
+                Open the socket outsids of the loop
+            
+            var sock = new WebSocket('ws://localhost:##');
+            sock.onopen = function (event) {
+                sock.send(mag);
+            };
+            // attach this to window so socket closes when window closes
+            sock.close();
+        */
     }
 }
 
-// OR MAKE HREF POINT TO PYTHON FOR QBT
-// switching to jquery for easy requests
-function addTorrent (link) {
-    if (!sessionStorage.getItem('qbt')) {
-        $.ajax({
-            url: 'http://192.168.1.71:8080/login',
-            type: 'POST',
-            headers: {
-                'Referrer': 'http://192.168.1.71:8080',
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            data: {
-                'username': 'admin',
-                'password': 'password'
-            },
-            success: function (jqxhr) {
-                // test whether i also get the path part
-                sessionStorage.setItem('qbt', jqxhr.getResponseHeader('Set-Cookie').split('; '));
-            }
-        });
-    }
-    // localhost on the server
-    $.ajax({
-        url: 'http://192.168.1.71:8080/command/download',
-        type: 'POST',
-        headers: {
-            'Referer': 'http://192.168.1.71:8080',
-            'Cookie': sessionStorage.getItem('qbt'),
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        data: {
-            'urls': link.replace(/&/g, '%26'),
-            'sequentialDownload': true
-        },
-        success: function (jqxhr) {
-            alert('Successfully added torrent!');
-        }
-    });
-}
-
+// TABLE SORTING FUNCTION
 var headers = document.getElementsByTagName('th');
 for (var i = 0; i < headers.length - 1; i++) {
     headers[i].addEventListener('click', function () {
