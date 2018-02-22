@@ -1,25 +1,48 @@
-// manage qbt-cookie in python (look up timeout of webui cookie)
-var addTorrent = (target) => {
-    target.addEventListener('click', (e) => {
-        let mag = e.target.getAttribute('data-mag');
-        fetch('/qbt', {
-            method: 'POST',
-            body: mag
-        }).then(() => (e.target.innerText = String.fromCharCode(2713)));
-    });
-    return undefined;
-};
-Array.from(document.getElementsByClassName('plus')).map(addTorrent);
-
-// if doing single-page updates, receive info as json, and create a map with data (mag hashes as keys)
-// ADD TITLES TO EVERY TNAME
-// CONSIDER FILTERING DUPLICATE NAME/SIZE IN ADDITION TO HASHES
-//     BC OF PERIOD/NON-PERIOD VARIATIONS & TITLES VS INNERHTML
-// TIME SORT USING FOREACH VS MAP ON LINE 23
-
 var opts = { sensitivity: 'base', numeric: true },
     table = document.querySelector('.results'),
-    compare = (a1, a2, ix) => a1[ix].localeCompare(a2[ix], undefined, opts);
+    tbase = table.cloneNode(true),
+    compare = (a1, a2, ix) => a1[ix].localeCompare(a2[ix], undefined, opts),
+    addMagnet = (target, mag) => {
+        target.addEventListener('click', () => {
+            this.setAttribute('data-mag', mag);
+            fetch('/qbt', {
+                method: 'POST',
+                body: mag
+            }).then(() => target.innerText = String.fromCharCode(2713) && target.disabled = true);
+        });
+    };
+
+function torSearch (formObject) {
+    var spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    if (table.children.length > 1) table.parentNode.replaceChild(table, tbase);
+    table.style.display = 'none';
+    table.appendChild(spinner);
+    fetch('/search', {
+        method: 'GET',
+        body: URLSearchParams('query=' + formObject['search-bar'].value)
+    }).then((resp) => resp.json());
+    .then((torObj) => {
+        if (torObj.status !== 'OK') {
+            table.appendChild(document.createElement('h2')).innerText = torObj.status;
+            return;
+        }
+        var tree = document.createDocumentFragment(),
+            rowTemplate = document.getElementById('torTemplate');
+        torObj.torrents.map((tor) => {
+            let row = rowTemplate.content.cloneNode(true);
+            row.children[0].innerText = tor[0];
+            row.children[1].innerText = tor[1].size;
+            row.children[1].setAttribute('data-bytes', tor[1].bytes);
+            row.children[2].innerText = tor[2];
+            addMagnet(row.querySelector('.plus'), tor[3]);
+            tree.appendChild(row);
+        });
+        table.replaceChild(spinner, tree);
+        table.style.display = 'block';
+    });
+}
+
 document.querySelectorAll('.head').forEach((head, i) => {
     head.addEventListener('click', (e) => {
         let rows = Array.from(document.querySelectorAll('.tor:not(.header)')),

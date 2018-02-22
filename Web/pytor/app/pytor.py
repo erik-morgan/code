@@ -168,16 +168,3 @@ def search (q, cat):
         logging.exception(e)
 
 # Torrent = [name, size, seed, peer, link, hash]
-#
-# sort by seeders
-# do byte conversions when putting in html
-# from math import floor, pow, log
-# if type(tor[1]) is int:
-#     i = int(floor(log(int(b), 1024)))
-#     str(round(int(b) / pow(1024, i), 2)) + ' ' + ('KB', 'MB', 'GB')[i]
-# torlock has a good selection, cats, sorting, and 75 per page all 0 seeds
-# leetx no magnets
-# magnetdl has sorting, cats, magnets, 40 per page, but results are iffy correct seeds
-# http://www.magnetdl.com/t/the-librarians/se/desc/
-# retest concurrent.futures solution multiple times
-# test brooklyn nine-nine to see how dashes get urlencoded
