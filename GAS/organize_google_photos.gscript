@@ -1,0 +1,148 @@
+var CLIENT_ID = '705925337315-fl63qlmn7pcoood7bfj217u4ucq3i0gd.apps.googleusercontent.com',
+    CLIENT_SECRET = 'hKZF5WTvg1RbceNknEuq0iqN',
+    REDIRECT_URL = 'https://script.google.com/macros/d/17DljMDaveK812BlcVPUQ-fHz0ubM08i5JG-Mj4Wtb3HVwN0EESaWWVuY/usercallback',
+    SCOPE = 'https://www.googleapis.com/auth/drive',
+    PHOTO_SS_ID = '1ZXYyrNVE4Wb6zZ_BO6yvbx-SYEP_c1mVaJz14suj0eo',
+    PROPS = PropertiesService.getScriptProperties(),
+    PHASE = PROPS.getProperty('PHASE'),
+    TIMER = {
+      'start': Date.now(),
+      'timedOut': function () {
+        return Date.now() - this.start >= 330000;
+      }
+    };
+
+function main () {
+  if (PHASE == 1) {
+    var status = phaseOne();
+    if (status) {
+      Logger.log('phase 1 complete');
+      ScriptApp.deleteTrigger(ScriptApp.getProjectTriggers()[0]);
+      Logger.log('trigger removed');
+      PROPS.setProperty('PHASE', 2);
+      Logger.log('phase property increased to 2');
+      PROPS.deleteProperty('PAGE_TOKEN');
+      Logger.log('deleted PAGE_TOKEN property');
+      GmailApp.sendEmail('morgan.erik@outlook.com', 'Organize Google Photos - Phase 1 Complete!', 'Function "phaseOne" of Organize Google Photos is finished');
+    }
+    else if (! ScriptApp.getProjectTriggers().length) {
+      ScriptApp.newTrigger('phaseOne').timeBased().everyMinutes(7).create();
+      Logger.log('trigger created');
+    }
+  }
+  else {
+    phaseTwo();
+  }
+}
+
+function phaseOne () {
+//  '1xf0SiaZAtgFbqIZh2jM9B3muYh8LoYl6RhGKofiN8UE' in parents and mimeType contains 'image'
+//  fields: title, id, createdDate, fileSize, md5Checksum
+  var folderID = PROPS.getProperty('PHOTOS_FOLDER_ID') || getPhotoFolderID(),
+      query = '"' + folderID + '" in parents and mimeType contains "image"',
+      ss = SpreadsheetApp.openById(PHOTO_SS_ID).getActiveSheet(),
+      pageToken = PROPS.getProperty('PAGE_TOKEN') || undefined,
+      images, imageProps = [];
+  do {
+    images = Drive.Files.list({
+      q: query,
+      fields: 'nextPageToken,items(title,id,createdDate,fileSize,md5Checksum)',
+      maxResults: 100,
+      pageToken: pageToken
+    });
+    if (images.items && images.items.length > 0) {
+      for (var i = 0; i < images.items.length; i++) {
+        var img = images.items[i];
+        imageProps.push([img.title, img.id, img.createdDate, img.fileSize, img.md5Checksum]);
+      }
+    } else {
+      Logger.log('No image files found.');
+    }
+    pageToken = images.nextPageToken;
+  } while (pageToken && ! TIMER.timedOut());
+  ss.getRange(ss.getLastRow() + 1, 1, imageProps.length, 5).setValues(imageProps);
+  if (pageToken) PROPS.setProperty('PAGE_TOKEN', pageToken);
+  return pageToken ? true : false;
+}
+
+function getPhotoFolderID () {
+  var id = DriveApp.getFoldersByName('Google Photos').next().getId();
+  PROPS.setProperty('PHOTOS_FOLDER_ID', id);
+  return id;
+}
+
+function phaseTwo() {
+  var ALBUMS_URL = 'https://picasaweb.google.com/data/feed/api/user/default';
+  var service = getService();
+  if (service.hasAccess()) {
+    var url = ALBUMS_URL;
+    var data = UrlFetchApp.fetch(url, {
+      headers: {
+        'Authorization': 'Bearer ' + service.getAccessToken(),
+        'GData-Version': 3
+      }
+    }).getContentText();
+    Logger.log(data);
+    var doc = XmlService.parse(data).getRootElement();
+    var items = doc.getChildren();
+    Logger.log('items.length = ' + items.length);
+    for (var i = 0; i < items.length; i++) {
+      var node = items[i];
+      Logger.log(node.getName());
+      if (node.getName() == 'entry') {
+        var kids = node.getChildren();
+        for (var k = 0; k < kids.length; k++) {
+          var albumProp = kids[k];
+          var propName = albumProp.getName();
+          Logger.log(propName);
+          if (propName == 'title') {
+            var title = albumProp.getText();
+            Logger.log(title);
+            if (title == 'Records') {
+              var output = XmlService.getPrettyFormat().format(node);
+              Logger.log(output);
+            }
+          }
+        }
+      }
+    }
+  } else {
+    var authorizationUrl = service.getAuthorizationUrl();
+    Logger.log('Open the following URL and re-run the script: %s',
+        authorizationUrl);
+  }
+}
+
+function getService() {
+  return OAuth2.createService('GooglePhotos')
+      .setAuthorizationBaseUrl('https://accounts.google.com/o/oauth2/auth')
+      .setTokenUrl('https://accounts.google.com/o/oauth2/token')
+      .setClientId(CLIENT_ID)
+      .setClientSecret(CLIENT_SECRET)
+      .setCallbackFunction('authCallback')
+      .setPropertyStore(PropertiesService.getUserProperties())
+      .setScope(SCOPE)
+      .setParam('login_hint', Session.getActiveUser().getEmail());
+}
+
+function authCallback(request) {
+  var service = getService();
+  var isAuthorized = service.handleCallback(request);
+  if (isAuthorized) {
+    return HtmlService.createHtmlOutput('Success! You can close this tab.');
+  } else {
+    return HtmlService.createHtmlOutput('Denied. You can close this tab');
+  }
+}
+
+function logRedirectUri() {
+  Logger.log(getService().getRedirectUri());
+}
+
+/* 
+ * gphoto:timestamp for photo date (ms since epoch)
+ * keywords
+ * 
+ * 
+ * 
+ */
