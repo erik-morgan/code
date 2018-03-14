@@ -1,101 +1,105 @@
 import os
 import glob
 import re
-import zipfile
+from zipfile import ZipFile
+import json
 from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
+# TODO: 
 dirs = {}
+xns = {
+    'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
+    'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+}
 
 def init_pub():
     # TODO: add ability to change vars
     # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
     global dirs
-    varsFile = os.path.dirname(os.path.realpath(__file__)) + '/.pypub_vars'
-    if os.path.exists(varsFile):
-        with open(varsFile, 'r') as f:
-            data = f.read().splitlines()
-        dirs.pdf = data[0]
-        dirs.draw = data[1]
+    dirsFile = os.path.dirname(os.path.realpath(__file__)) + '/.pypub_vars.json'
+    if os.path.exists(dirsFile):
+        with open(dirsFile, 'r') as f:
+            dirs = json.load(f)
     else:
         dirs.pdf = input('Enter path to PDFs folder: ')
         dirs.draw = input('Enter path to Drawings folder: ')
-        with open(varsFile, 'w') as f:
-            f.write(dirs.pdf + '\n' + dirs.draw)
-    dirs.proj = input('Enter path to project folder: ')
+        with open(dirsFile, 'w') as f:
+            json.dump(dirs, f, sort_keys=True, indent=4)
+    dirs.project = input('Enter path to project folder: ')
     getOutline()
 
 def getOutline():
-    docs = glob.glob(dirs.proj + '/Outlines/*docx')
+    global dirs
+    dirs.oproj = dirs.project + '/.oproj.json'
+    docs = glob.glob(dirs.project + '/Outlines/*docx')
     if len(docs) == 1:
-        doc = docs[0]
+        dirs.outline = docs[0]
     else:
-        doc = docs[0] if re.search('(?i)a-z|pull', docs[1]) else docs[1]
-    parseOutline(zipfile.ZipFile(doc).open('word/document.xml').read())
+        dirs.outline = docs[0] if re.search('(?i)a-z|pull', docs[1]) else docs[1]
+        # parseOutline(zipfile.ZipFile(doc).open('word/document.xml').read())
+        with ZipFile(dirs.outline) as zip:
+            xdoc = zip.open('word/document.xml').read()
+            if 'docProps/custom.xml' not in zip.namelist():
+                print('The outline file, must have the following custom Word properties:'
+                      'System, Manual Number, Customer, Project, Rig, and Rev/Volume if applicable')
+                return
+            xprops = zip.open('docProps/custom.xml').read()
+        parseOutline(xdoc, xprops)
 
-def parseOutline(xdoc):
-    # root is <w:document>, followed by body <w:body>
-    # body contains paragraphs <w:p>
-    # each paragraph contains runs of content <w:r>
-    # runs have text inside them <w:t>
-    #
-    # Delete everything before TABLE OF CONTENTS line.
-    # Delete paragraphs with strike-through.
-    # Delete everything after tab.
+# Use FunctionNamespace as decorator
+@ns
+def xpathExtension(context, param):
+    # eval_context and context_node
+    # The context node is the Element where the current function is called
+    print("%s: %s" % (context.context_node.tag, [ n.tag for n in nodes ]))
+    # The eval_context is a dictionary that is local to the evaluation. It allows functions to keep state
+    context.eval_context[context.context_node.tag] = "done"
+    print(sorted(context.eval_context.items()))
+
+    
+def usingXpathExtension():
+    ns = etree.FunctionNamespace(None)
+    # registers function hello with name hello in default ns (None)
+    root.xpath('hello(local-name(*))')
+    # you would want to separate the two in different namespaces
+    ns = etree.FunctionNamespace('http://mydomain.org/myfunctions')
+    ns['hello'] = hello
+    prefixmap = {'f' : 'http://mydomain.org/myfunctions'}
+    print(root.xpath('f:hello(local-name(*))', namespaces=prefixmap))
+
+def parseOutline(xdoc, xprops):
+    # Remove .outline.json after finished
     # First check for existence of all drawings (minus stack-ups)
-    # 
-    # save system, project, and rig from header
-    
-    doc = objectify(reformat(xdoc))
-    
-    
-
-def reformat(doc_str):
-    # check how word handles headers in xml
     # use outline metadata for proj details
     # urldecode special characters. see if lxml does it, or do global f/r
-    # see if para.text or para.text_content() works
     # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
-    doc = etree.fromstring(doc_str)
-    xns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
-    nstag = '{' + xns.w + '}'
-    paras = doc.xpath('//w:p[not(.//w:strike) and not(.//w:u and .//w:caps and .//w:b)]', namespaces=xns)
-    drawTest = re.compile('\d{5}', re.I)
-    data = []
-    app = data.append
-    for para in paras:
-        paraText = ''
-        for run in para.iter('{*}r'):
-            if run[-1].tag.endswith('tab'):
-                paraText += '\t'
-            else:
-                paraText += run[-1].text
-        if paraText.beginswith('Rev') and paraText !== 'Rev NC':
-            app({'type': 'REV', 'data': paraText.split()[1]}
-        
-        if drawTest.search(paraText):
-            app({'type': 'DRAWING', 'data': paraText}
-    for para in data:
-    rel = {
-        'system': doc[0],
-        'number': doc[0],
-        'customer': doc[0],
-        'project': doc[0],
-        'rig': doc[0],
-        'revision': doc[0],
-        'volume': doc[0]
-    }
+    if os.path.exists(dirs.oproj):
+        with open(dirs.oproj, 'r') as f:
+            oproj = json.load(f)
+    else:
+        oproj = objectify(xdoc)
+        propDoc = etree.fromString(xprops)
+        # get props
+        oproj.system = doc.xpath('//property[contains(@name, "")]', namespaces=xns)
+        oproj.number = 
+        oproj.customer = 
+        oproj.project = 
+        oproj.rig = 
+        oproj.revision = 
+        oproj.volume = 
+        with open(dirs.oproj, 'w') as f:
+            json.dump(oproj, f, sort_keys=True, indent=4)
 
 def objectify(doc_str):
 	doc_str = doc_str.replace('<w:br/>', '<w:t>\t</w:t>')
     doc = etree.fromstring(doc_str.replace('<w:tab/>', '<w:t>\t</w:t>'))
-    xns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
     nstag = lambda tag: '{' + xns.w + '}' + tag
     sects = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
     drawTest = re.compile('\d{5}', re.I)
     drawFormat = re.compile('^(\S+)\t+([^\t\r]+) ?[\s\S]*')
-    data = []
-    app = data.append
+    project = {'data': []}
+    app = project.data.append
     for sect in sects:
         sectInfo = {'phase': '', 'title': '', 'docs': []}
         if sect.getnext().lastChild.lastChild.name !== nstag('t')
@@ -125,8 +129,7 @@ def objectify(doc_str):
                 btcText = re.sub('(BTC) (\d+) Rev (\d+).*', '$1$2 $3', paraText)
                 sectInfo.docs.append({'type': 'BTC', 'id': btcText.split()[0], 'rev': int(btcText.split[1])})
         app(sectInfo)
-        
-
+    return project
 
 
 
