@@ -55,47 +55,27 @@ def reformat(doc_str):
     # use outline metadata for proj details
     # urldecode special characters. see if lxml does it, or do global f/r
     # see if para.text or para.text_content() works
-    xml = doc_str.replace('<w:tab/>', '<w:t>\\t</w:t>')
-    xml = xml.replace('</w:p>', '<w:r><w:t>\\r</w:t></w:r></w:p>')
-    doc = etree.fromstring(xml)
+    # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
+    doc = etree.fromstring(doc_str)
     xns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+    nstag = '{' + xns.w + '}'
     paras = doc.xpath('//w:p[not(.//w:strike) and not(.//w:u and .//w:caps and .//w:b)]', namespaces=xns)
-    data = ['' if not p.text_content() else p.text_content() for p in paras]
-    
-    for xpara in paras:
-        parText = 
-        for run in xpara.iter('w:r'):
-            if run[-1].tag is 'w:t':
-                parText += run[-1].text
-                if run[-1].tag is 'w:tab':
-                    break
-        if 'OUTLINE' in parText:
-            break
-            app(proj)
-        if re.search('(?i)order|due|deliver|engineer|by:', parText):
-            continue
-        proj += parText + ' '
-    paras = doc.xpath('//w:p[position()>' + (pindex + 1) + ']') #  and not(w:pPr/w:rPr/w:strike)
+    drawTest = re.compile('\d{5}', re.I)
+    data = []
+    app = data.append
     for para in paras:
-        # time difference if loop thru runs vs replacing tabs w/ txt
-        pstyle = etree.tostring(para[0][-1])
-        if 'w:strike' in pstyle or ('w:u' in pstyle and 'w:b' in pstyle):
-            continue
-        parText = ''
-        runs = para.xpath('//w:r[not(w:rPr/w:strike)]')
-        for run in runs:
-            if run[-1].tag is 'w:t':
-                parText += run[-1].text
-            elif run[-1].tag is 'w:tab':
-                parText += '\t'
-            
-        runs = xpara.xpath('//w:r[not(w:strike)]/w:t')
-        if runs:
-            paraText = ''
-            for run in runs:
-
-
-        if par.find('w:pPr')
+        paraText = ''
+        for run in para.iter('{*}r'):
+            if run[-1].tag.endswith('tab'):
+                paraText += '\t'
+            else:
+                paraText += run[-1].text
+        if paraText.beginswith('Rev') and paraText !== 'Rev NC':
+            app({'type': 'REV', 'data': paraText.split()[1]}
+        
+        if drawTest.search(paraText):
+            app({'type': 'DRAWING', 'data': paraText}
+    for para in data:
     rel = {
         'system': doc[0],
         'number': doc[0],
@@ -106,4 +86,47 @@ def reformat(doc_str):
         'volume': doc[0]
     }
 
-def objectify(docmap):
+def objectify(doc_str):
+	doc_str = doc_str.replace('<w:br/>', '<w:t>\t</w:t>')
+    doc = etree.fromstring(doc_str.replace('<w:tab/>', '<w:t>\t</w:t>'))
+    xns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+    nstag = lambda tag: '{' + xns.w + '}' + tag
+    sects = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
+    drawTest = re.compile('\d{5}', re.I)
+    drawFormat = re.compile('^(\S+)\t+([^\t\r]+) ?[\s\S]*')
+    data = []
+    app = data.append
+    for sect in sects:
+        sectInfo = {'phase': '', 'title': '', 'docs': []}
+        if sect.getnext().lastChild.lastChild.name !== nstag('t')
+            sectTitle = ''.join(t[-1].text for t in sect.iter('{*}t'))
+            sectTitle = re.sub('(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
+            if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
+                sectInfo.title = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
+                sect = sect.getnext()
+            else:
+                activePhase = sectTitle
+                continue
+        sectInfo.phase = activePhase
+        for p in sect.itersiblings('{*}p'):
+            paraText = ''.join(t[-1].text for t in p.iter('{*}t'))
+            if not paraText:
+                break
+            if drawTest.search(paraText):
+                draw = re.sub(drawFormat, '$1\t$2', paraText).split('\t')
+                sectInfo.docs.append({'type': 'DRAW', 'id': draw[0], 'description': draw[1]})
+            elif re.match('[A-Z]{2,6}\d{4}', paraText):
+                sectInfo.docs.append({'type': 'RP', 'id': paraText.split()[0].replace('/', '-')})
+            elif paraText.beginswith('Rev'):
+                sectInfo.docs[0].rev = int(paraText.split()[1])
+            elif 'ADVISORY' in paraText:
+                sectInfo.docs[0].advisory = True
+            elif 'BTC' in paraText:
+                btcText = re.sub('(BTC) (\d+) Rev (\d+).*', '$1$2 $3', paraText)
+                sectInfo.docs.append({'type': 'BTC', 'id': btcText.split()[0], 'rev': int(btcText.split[1])})
+        app(sectInfo)
+        
+
+
+
+
