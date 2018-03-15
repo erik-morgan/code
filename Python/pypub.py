@@ -41,32 +41,13 @@ def getOutline():
         with ZipFile(dirs.outline) as zip:
             xdoc = zip.open('word/document.xml').read()
             if 'docProps/custom.xml' not in zip.namelist():
-                print('The outline file, must have the following custom Word properties:'
-                      'System, Manual Number, Customer, Project, Rig, and Rev/Volume if applicable')
+                print('Set these REQUIRED custom Word properties:'
+                      'system, number, customer, project, rig, and draft/rev/volume, if applicable'
+                      'If there is no project/rig, write false for the value'
+                      'This is very important: pypub will NOT validate the data')
                 return
             xprops = zip.open('docProps/custom.xml').read()
         parseOutline(xdoc, xprops)
-
-# Use FunctionNamespace as decorator
-@ns
-def xpathExtension(context, param):
-    # eval_context and context_node
-    # The context node is the Element where the current function is called
-    print("%s: %s" % (context.context_node.tag, [ n.tag for n in nodes ]))
-    # The eval_context is a dictionary that is local to the evaluation. It allows functions to keep state
-    context.eval_context[context.context_node.tag] = "done"
-    print(sorted(context.eval_context.items()))
-
-    
-def usingXpathExtension():
-    ns = etree.FunctionNamespace(None)
-    # registers function hello with name hello in default ns (None)
-    root.xpath('hello(local-name(*))')
-    # you would want to separate the two in different namespaces
-    ns = etree.FunctionNamespace('http://mydomain.org/myfunctions')
-    ns['hello'] = hello
-    prefixmap = {'f' : 'http://mydomain.org/myfunctions'}
-    print(root.xpath('f:hello(local-name(*))', namespaces=prefixmap))
 
 def parseOutline(xdoc, xprops):
     # Remove .outline.json after finished
@@ -74,13 +55,18 @@ def parseOutline(xdoc, xprops):
     # use outline metadata for proj details
     # urldecode special characters. see if lxml does it, or do global f/r
     # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
+    projProps = set(['system', 'number', 'customer', 'project', 'rig', 'rev', 'volume', 'draft'])
     if os.path.exists(dirs.oproj):
         with open(dirs.oproj, 'r') as f:
             oproj = json.load(f)
     else:
         oproj = objectify(xdoc)
-        propDoc = etree.fromString(xprops)
-        # get props
+        props = {}
+        for prop in etree.fromString(xprops):
+            propName = prop.get('name').lower()
+            props[propName] = prop[0].text
+        if set(props.keys).issubset(projProps):
+        # REMOVE ALL DOT NOTATION DUMBASS!
         oproj.system = doc.xpath('//property[contains(@name, "")]', namespaces=xns)
         oproj.number = 
         oproj.customer = 
@@ -92,18 +78,20 @@ def parseOutline(xdoc, xprops):
             json.dump(oproj, f, sort_keys=True, indent=4)
 
 def objectify(doc_str):
-	doc_str = doc_str.replace('<w:br/>', '<w:t>\t</w:t>')
+    doc_str = doc_str.replace('<w:br/>', '<w:t>\t</w:t>')
     doc = etree.fromstring(doc_str.replace('<w:tab/>', '<w:t>\t</w:t>'))
     nstag = lambda tag: '{' + xns.w + '}' + tag
     sects = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
     drawTest = re.compile('\d{5}', re.I)
-    drawFormat = re.compile('^(\S+)\t+([^\t\r]+) ?[\s\S]*')
+    procTest = re.compile('[A-Z]{2,6}\d{4}')
+    resplit = re.compile('\t+')
     project = {'data': []}
     app = project.data.append
+    join = ''.join
     for sect in sects:
         sectInfo = {'phase': '', 'title': '', 'docs': []}
         if sect.getnext().lastChild.lastChild.name !== nstag('t')
-            sectTitle = ''.join(t[-1].text for t in sect.iter('{*}t'))
+            sectTitle = join(t[-1].text for t in sect.iter('{*}t'))
             sectTitle = re.sub('(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
             if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
                 sectInfo.title = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
@@ -113,21 +101,22 @@ def objectify(doc_str):
                 continue
         sectInfo.phase = activePhase
         for p in sect.itersiblings('{*}p'):
-            paraText = ''.join(t[-1].text for t in p.iter('{*}t'))
+            paraText = join(t[-1].text for t in p.iter('{*}t'))
             if not paraText:
                 break
-            if drawTest.search(paraText):
-                draw = re.sub(drawFormat, '$1\t$2', paraText).split('\t')
-                sectInfo.docs.append({'type': 'DRAW', 'id': draw[0], 'description': draw[1]})
-            elif re.match('[A-Z]{2,6}\d{4}', paraText):
-                sectInfo.docs.append({'type': 'RP', 'id': paraText.split()[0].replace('/', '-')})
-            elif paraText.beginswith('Rev'):
-                sectInfo.docs[0].rev = int(paraText.split()[1])
+            para = re.split(resplit, paraText.split('\r')[0])
+            if drawTest.search(para[0]):
+                sectInfo.docs.append({'type': 'DRAW', 'id': para[0], 'description': para[1]})
+            elif re.match(procTest, para[0]):
+                # standardize RP naming convention (regarding CC0104-MT vs CC0104-QTM-CR vs CC0104-01MT)
+                sectInfo.docs.append({'type': 'RP', 'id': para[0].replace('/', '-')})
+            elif para[0].beginswith('Rev'):
+                sectInfo.docs[0].rev = int(para[0].split()[1])
             elif 'ADVISORY' in paraText:
                 sectInfo.docs[0].advisory = True
             elif 'BTC' in paraText:
-                btcText = re.sub('(BTC) (\d+) Rev (\d+).*', '$1$2 $3', paraText)
-                sectInfo.docs.append({'type': 'BTC', 'id': btcText.split()[0], 'rev': int(btcText.split[1])})
+                btc = paraText.split()
+                sectInfo.docs.append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
         app(sectInfo)
     return project
 
