@@ -1,43 +1,43 @@
 Public ws As Worksheet
-Public regexps As Object
-Public dataRange As String
-Public Const NCR_URL As String = "http://houston/ErpWeb/NCRStatus.aspx?NCRNumber="
+Public regx As Object
+Public Const nodeID As String = "DMRList_ctl00_ReworkInstructionTableCell"
 
 Sub Init()
-    Set ws = Application.ActiveSheet
-    Set regexps = CreateObject("Scripting.Dictionary")
-    InitRegx "RANGE", "([A-Z]+[0-9]+:\1[0-9]+"
+    Dim dataRange As String
+    Set regx = CreateObject("VBScript.RegExp")
+    regx.Global = True
+    regx.IgnoreCase = True
+    regx.Pattern = "([A-Z]+)[0-9]+:\1[0-9]+"
+    Set ws = Application.ActiveWorkbook.ActiveSheet
     dataRange = ""
-    Do Until regexps("RANGE").Test(dataRange)
+    While Not regx.Test(dataRange)
         dataRange = InputBox("Enter the range with the data. MUST be in single column!")
-    Loop
+    Wend
     Application.ScreenUpdating = False
-    Main
+    Main ws.Range(dataRange)
 End Sub
 
-Sub Main()
-    Dim data() As Variant, i As Integer, offsetCols As Integer
-    Dim doc As Object, scrapedData As Object, rng As Range
-    Set scrapedData = CreateObject("Scripting.Dictionary")
-    Set rng = ws.Range(dataRange)
-    data = rng.Value2
-    ' ReDim scrapedData(LBound(data) To UBound(data), 1 To 1)
+Sub Main(ByRef dataRange As Range)
+    Dim data() As Variant, i As Integer, offsetCols As Integer, ncrNum As String, dataCount As Integer, doc As Object
+    data = dataRange.Value2
+    dataCount = UBound(data)
+    regx.Pattern = "\s*[\r\n]\s*"
     For i = LBound(data) To UBound(data)
-        ncrNum = data(i, 1).Value2
-        Set doc = DOM(NCR_URL, ncrNum)
-        scrapedData(ncrNum) = Trim(doc.getElementById("DMRList_ctl00_ReworkInstructionTableCell").innerText)
+        ncrNum = data(i, 1)
+        Set doc = DOM("http://houston/ErpWeb/NCRStatus.aspx?NCRNumber=" & ncrNum)
+        data(i, 1) = regx.Replace(doc.getElementById(nodeID).innerText, vbNewLine)
+        Debug.Print "Scraping Page " & i & " of " & dataCount
     Next i
     Set doc = Nothing
-    offsetCols = ws.UsedRange.Columns.Count - rng.Column + 1
-    rng.Offset(0, offsetCols).Value2 = Application.WorksheetFunction.Transpose(scrapedData.Items)
-    rng.Offset(0, offsetCols).WrapText = False
+    offsetCols = ws.UsedRange.Columns.Count - dataRange.Column + 1
+    dataRange.Offset(0, offsetCols).Value2 = data
+    dataRange.Offset(0, offsetCols).WrapText = False
     Application.ScreenUpdating = True
     MsgBox "Data Scraped Successfully!"
 End Sub
 
-Function DOM(ByRef baseURL As String, ByRef id As String)
-    Dim url As String, http As Object, html As Object, tries As Integer
-    url = baseURL & id
+Function DOM(ByRef url As String)
+    Dim http As Object, html As Object, tries As Integer
     Set http = CreateObject("MSXML2.XMLHTTP.6.0")
     For tries = 1 To 5
         http.Open "GET", url, False
@@ -52,12 +52,3 @@ Function DOM(ByRef baseURL As String, ByRef id As String)
     Set http = Nothing
     Set html = Nothing
 End Function
-
-Sub InitRegx(ByRef rxkey As String, ByRef rxpat As String)
-    Dim rx As Object
-    Set rx = CreateObject("VBScript.RegExp")
-    rx.Global = True
-    rx.Pattern = rxpat
-    Set regexps(rxkey) = rx
-    Set rx = Nothing
-End Sub
