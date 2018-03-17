@@ -1,37 +1,35 @@
-import os
-import glob
 import re
 from zipfile import ZipFile
-import json
+from pathlib import Path
 from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
 # TODO: 
 dirs = {}
+join = ''.join
 xns = {
     'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
-exists = os.path.exists
 
 def initPub():
     # TODO: add ability to change vars
+    # TODO: refactor dirs or add os check b/c dirs are now PosixPath objects; switch back to string paths?
     # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
     global dirs
-    dirsFile = os.path.dirname(os.path.realpath(__file__)) + '/pypub_vars.json'
-    with open(dirsFile, 'r+') as f:
-        if exists(dirsFile):
-            dirs = json.load(f)
+    dirsPath = Path(Path(__file__).parent / 'pypub_vars.xml').resolve()
+    with open(dirsPath, 'r+') as f:
+        if dirsPath.exists():
+            dirs = dict(tuple(ln.split('::')) for ln in f.read().splitlines())
         else:
-            dirs['pdf'] = getPath('Enter path to PDFs folder: ', 'dir')
-            dirs['indd'] = getPath('Enter path to InDesign folder: ', 'dir')
-            dirs['draw'] = getPath('Enter path to Drawings folder: ', 'dir')
-            json.dump(dirs, f, sort_keys=True, indent=4)
-            print('PDF and Drawings folder paths saved to: ' + dirsFile)
+            dirs['indd'] = getPath('Enter full path to InDesign folder: ', 'dir')
+            dirs['pdf'] = getPath('Enter full path to PDFs folder: ', 'dir')
+            dirs['draw'] = getPath('Enter full path to Drawings folder: ', 'dir')
+            f.write('\n'.join(f'{k}::{v}'for k, v in dirs.items()))
+            print('Folder paths saved to: ' + dirsPath)
     dirs['project'] = getPath('Enter path to project folder: ', 'dir')
-    os.chdir(dirs['project'])
     try:
-        dirs['outline'] = glob.glob('**/*Outline.docx')[0]
+        dirs['outline'] = Path(dirs['project']).glob('**/*Outline.docx')[0]
     except IndexError:
         print('No outline found in project folder. Outline must end in "Outline.docx"')
         return
@@ -58,18 +56,16 @@ def main():
 
 def parseOutline(outline):
     # xdoc = xdoc.replace('<w:br/>', '<w:t>\t</w:t>')
-    
-    doc = etree.fromstring(re.sub(':(br|tab)/', outline.replace('<w:tab/>', '<w:t>\t</w:t>'))
+    # doc = etree.fromstring(re.sub(':(br|tab)/', outline.replace('<w:tab/>', '<w:t>\t</w:t>'))
     xpub = etree.Element('project')
-    nstag = lambda tag: '{' + xns.w + '}' + tag
     meta = doc.xpath('//w:p[position() < 5]', namespaces=xns)
     xprops = xpub.attrib
-    xprops[''] = 
-    xprops[''] = 
-    xprops[''] = 
-    xprops[''] = 
-    xprops[''] = 
-    xprops[''] = 
+    xprops['system'] = join(t for t in paraText(meta[0], True))
+    xprops[''] = join(t for t in paraText(meta[0], True))
+    xprops[''] = join(t for t in paraText(meta[0], True))
+    xprops[''] = join(t for t in paraText(meta[0], True))
+    xprops[''] = join(t for t in paraText(meta[0], True))
+    xprops[''] = join(t for t in paraText(meta[0], True))
     
     
     
@@ -78,7 +74,6 @@ def parseOutline(outline):
     procTest = re.compile('[A-Z]{2,6}\d{4}')
     resplit = re.compile('\t+')
     app = pub['data'].append
-    join = ''.join
     for section in sections:
         sectInfo = {'phase': '', 'title': '', 'docs': []}
         if section.getnext().lastChild.lastChild.name !== nstag('t')
@@ -113,17 +108,11 @@ def parseOutline(outline):
         app(sectInfo)
     return pub
 
-def getPath(inPrompt, inType):
-    inPath = ''
-    isType = os.path.isdir if inType == 'dir' else os.path.isfile
-    while not (inPath and exists(inPath) and isType(inPath)):
-        inPath = input(inPrompt)
-    return inPath
+def getPath(inPrompt, inPath=None):
+    while not inPath or not (inPath.exists() and inPath.is_dir()):
+        inPath = Path(input(inPrompt))
+    return inPath.resolve()
 
-def getParaText(para):
-    paraText = join(
-        '\t' if r[-1].tag !== nstag('t') else r[-1].text
-        for r in para.iter('{*}r'))
-    for r in para.iter:
-        
-    
+# paraText = join(
+#     r[-1].text if r[-1].tag[-2:] == '}t' else '\t'
+#     for r in para.iter('{*}r'))
