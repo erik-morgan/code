@@ -5,7 +5,6 @@ from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
 # TODO: 
-dirs = {}
 join = ''.join
 xns = {
     'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
@@ -17,23 +16,6 @@ def initPub():
     # TODO: refactor dirs or add os check b/c dirs are now PosixPath objects; switch back to string paths?
     # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
     global dirs
-    dirsPath = Path(Path(__file__).parent / 'pypub_vars.xml').resolve()
-    with open(dirsPath, 'r+') as f:
-        if dirsPath.exists():
-            dirs = dict(tuple(ln.split('::')) for ln in f.read().splitlines())
-        else:
-            dirs['indd'] = getPath('Enter full path to InDesign folder: ', 'dir')
-            dirs['pdf'] = getPath('Enter full path to PDFs folder: ', 'dir')
-            dirs['draw'] = getPath('Enter full path to Drawings folder: ', 'dir')
-            f.write('\n'.join(f'{k}::{v}'for k, v in dirs.items()))
-            print('Folder paths saved to: ' + dirsPath)
-    dirs['project'] = getPath('Enter path to project folder: ', 'dir')
-    try:
-        dirs['outline'] = Path(dirs['project']).glob('**/*Outline.docx')[0]
-    except IndexError:
-        print('No outline found in project folder. Outline must end in "Outline.docx"')
-        return
-    dirs['opub'] = '.opub.json'
     main()
 
 def main():
@@ -45,18 +27,17 @@ def main():
     # Use INDD RPs with TOCs in front instead of separate files
     # Ignore advisory, and stick it in to INDD
     # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
-    with open(dirs['opub'], 'r+') as f:
-        if exists(dirs['opub']):
-            opub = json.load(f)
-        else:
-            with ZipFile(dirs['outline']) as zip:
-                xdoc = zip.open('word/document.xml').read()
-            opub = parseOutline(xdoc)
-            json.dump(opub, f, sort_keys=True, indent=4)
+    if dirs['opub'].exists():
+        opub = etree.fromstring(dirs['opub'].read_bytes())
+    else:
+        with ZipFile(dirs['outline']) as zip:
+            xdoc = zip.open('word/document.xml').read()
+        opub = parseOutline(xdoc)
+        dirs['opub'].write_bytes(etree.tostring(opub, pretty_print=True))
 
 def parseOutline(outline):
     # xdoc = xdoc.replace('<w:br/>', '<w:t>\t</w:t>')
-    # doc = etree.fromstring(re.sub(':(br|tab)/', outline.replace('<w:tab/>', '<w:t>\t</w:t>'))
+    # doc = etree.fromstring(re.sub(r':(br|tab)/', outline.replace('<w:tab/>', '<w:t>\t</w:t>'))
     xpub = etree.Element('project')
     meta = doc.xpath('//w:p[position() < 5]', namespaces=xns)
     xprops = xpub.attrib
@@ -70,15 +51,15 @@ def parseOutline(outline):
     
     
     sections = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
-    drawTest = re.compile('\d{5}', re.I)
-    procTest = re.compile('[A-Z]{2,6}\d{4}')
-    resplit = re.compile('\t+')
+    drawTest = re.compile(r'\d{5}', re.I)
+    procTest = re.compile(r'[A-Z]{2,6}\d{4}')
+    resplit = re.compile(r'\t+')
     app = pub['data'].append
     for section in sections:
         sectInfo = {'phase': '', 'title': '', 'docs': []}
-        if section.getnext().lastChild.lastChild.name !== nstag('t')
+        if section.getnext().lastChild.lastChild.tag[-2:] != '}t':
             sectTitle = join(t[-1].text for t in section.iter('{*}t'))
-            sectTitle = re.sub('(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
+            sectTitle = re.sub(r'(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
             if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
                 sectInfo['title'] = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
                 section = section.getnext()
@@ -107,11 +88,6 @@ def parseOutline(outline):
                 sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
         app(sectInfo)
     return pub
-
-def getPath(inPrompt, inPath=None):
-    while not inPath or not (inPath.exists() and inPath.is_dir()):
-        inPath = Path(input(inPrompt))
-    return inPath.resolve()
 
 # paraText = join(
 #     r[-1].text if r[-1].tag[-2:] == '}t' else '\t'
