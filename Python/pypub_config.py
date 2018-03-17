@@ -2,17 +2,17 @@ import json
 from pathlib import Path
 
 class PubDirs:
-    configPath = Path(__file__).parent.resolve() / 'config.json'
+    config = Path(__file__).parent.resolve() / 'config.json'
     _dirs = {}
-
+    
     def __init__(self):
-        if configPath.exists():
-            self._dirs = json.load(configPath.open())
+        if self.config.exists():
+            self._dirs = json.load(self.config.open())
         self.indd = self._getPath('indd')
         self.pdfs = self._getPath('pdfs')
         self.draw = self._getPath('draw')
-        json.dump(self._dirs, configPath.open('w'), sort_keys=True, indent=4)
-        print('Folder paths saved to: ' + str(configPath))
+        json.dump(self._dirs, self.config.open('w'), sort_keys=True, indent=4)
+        print('Folder paths saved to: ' + str(self.config))
     
     def getProject(self):
         self.proj = self._getPath('proj')
