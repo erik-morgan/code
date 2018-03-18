@@ -1,22 +1,16 @@
 import re
+from pypub_config import PubDirs
 from zipfile import ZipFile
-from pathlib import Path
 from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
 # TODO: 
+dirs = PubDirs()
 join = ''.join
 xns = {
     'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
-
-def initPub():
-    # TODO: add ability to change vars
-    # TODO: refactor dirs or add os check b/c dirs are now PosixPath objects; switch back to string paths?
-    # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
-    global dirs
-    main()
 
 def main():
     # Remove .outline.json after finished
@@ -27,34 +21,36 @@ def main():
     # Use INDD RPs with TOCs in front instead of separate files
     # Ignore advisory, and stick it in to INDD
     # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
-    if dirs['opub'].exists():
-        opub = etree.fromstring(dirs['opub'].read_bytes())
+    # TODO: add ability to change vars
+    # TODO: refactor dirs or add os check b/c dirs are now PosixPath objects; switch back to string paths?
+    # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
+    dirs.getProject()
+    if dirs.opub.exists():
+        opub = etree.fromstring(dirs.opub.read_bytes())
     else:
-        with ZipFile(dirs['outline']) as zip:
+        with ZipFile(dirs.docx) as zip:
             xdoc = zip.open('word/document.xml').read()
         opub = parseOutline(xdoc)
-        dirs['opub'].write_bytes(etree.tostring(opub, pretty_print=True))
+        dirs.opub.write_bytes(etree.tostring(opub, pretty_print=True))
 
-def parseOutline(outline):
-    # xdoc = xdoc.replace('<w:br/>', '<w:t>\t</w:t>')
-    # doc = etree.fromstring(re.sub(r':(br|tab)/', outline.replace('<w:tab/>', '<w:t>\t</w:t>'))
+def parseOutline(xdoc):
+    doc = etree.fromstring(re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc))[0]
     xpub = etree.Element('project')
-    meta = doc.xpath('//w:p[position() < 5]', namespaces=xns)
-    xprops = xpub.attrib
-    xprops['system'] = join(t for t in paraText(meta[0], True))
-    xprops[''] = join(t for t in paraText(meta[0], True))
-    xprops[''] = join(t for t in paraText(meta[0], True))
-    xprops[''] = join(t for t in paraText(meta[0], True))
-    xprops[''] = join(t for t in paraText(meta[0], True))
-    xprops[''] = join(t for t in paraText(meta[0], True))
-    
-    
+    ptext = [join(t for t in p.itertext()) for p in doc]
+    resplit = re.compile('\t+')
+    props = xpub.attrib
+    props['sys'] = re.split(resplit, ptext[0])[0]
+    m = re.fullmatch(r'Customer: (.+?)( \()?((?<= \()[^()]+)?(\))?', ptext[1])
+    props['cust'], props['proj'] = m.groups(1, 2)
+    props['rig'] = ptext[2].split(': ')[-1]
+    m = re.match(r'Service Manual: (\d{4})(?: Volume )?(\S+)?(?: Rev )?(\d+)?', ptext[3])
+    props['num'], props['vol'], props['rev'] = m.groups(1, 3)
+    props['draft'] = 'draft' in ptext[3].lower()
     
     sections = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
     drawTest = re.compile(r'\d{5}', re.I)
     procTest = re.compile(r'[A-Z]{2,6}\d{4}')
-    resplit = re.compile(r'\t+')
-    app = pub['data'].append
+    app = xpub['data'].append
     for section in sections:
         sectInfo = {'phase': '', 'title': '', 'docs': []}
         if section.getnext().lastChild.lastChild.tag[-2:] != '}t':
@@ -87,7 +83,7 @@ def parseOutline(outline):
                 btc = paraText.split()
                 sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
         app(sectInfo)
-    return pub
+    return xpub
 
 # paraText = join(
 #     r[-1].text if r[-1].tag[-2:] == '}t' else '\t'
