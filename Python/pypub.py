@@ -35,10 +35,11 @@ def main():
 
 def parseOutline(xdoc):
     doc = etree.fromstring(re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc))[0]
-    xpub = etree.Element('project')
+    for node in doc.xpath('//w:p[./w:pPr//w:strike]', namespaces=xns):
+        doc.remove(node)
     ptext = [join(t for t in p.itertext()) for p in doc]
     resplit = re.compile('\t+')
-    props = xpub.attrib
+    props = {}
     props['sys'] = re.split(resplit, ptext[0])[0]
     m = re.fullmatch(r'Customer: (.+?)( \()?((?<= \()[^()]+)?(\))?', ptext[1])
     props['cust'], props['proj'] = m.groups(1, 2)
@@ -46,24 +47,23 @@ def parseOutline(xdoc):
     m = re.match(r'Service Manual: (\d{4})(?: Volume )?(\S+)?(?: Rev )?(\d+)?', ptext[3])
     props['num'], props['vol'], props['rev'] = m.groups(1, 3)
     props['draft'] = 'draft' in ptext[3].lower()
-    
-    sections = doc.xpath('//w:p[not(.//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
+    xpub = etree.Element('project', props)
+    sections = doc.xpath('//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
     drawTest = re.compile(r'\d{5}', re.I)
     procTest = re.compile(r'[A-Z]{2,6}\d{4}')
-    app = xpub['data'].append
-    for section in sections:
-        sectInfo = {'phase': '', 'title': '', 'docs': []}
-        if section.getnext().lastChild.lastChild.tag[-2:] != '}t':
-            sectTitle = join(t[-1].text for t in section.iter('{*}t'))
-            sectTitle = re.sub(r'(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
-            if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
-                sectInfo['title'] = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
-                section = section.getnext()
+    for sectIndex, sect in enumerate(sections):
+        docIndex = doc.index(sect)
+        pdata = ptext[docIndex]
+        if not ptext[docIndex + 1]:
+            if pdata.beginswith('STACK-UP') or 'TEST OPTION' in pdata:
+                unit = etree.SubElement(xpub[-1], 'unit', title=pdata)
+                sect = sect.getnext()
             else:
-                activePhase = sectTitle
-                continue
-        sectInfo['phase'] = activePhase
-        for p in section.itersiblings('{*}p'):
+                phase = re.sub(r' PHASE| PROCEDURES?|[\t\r].*)', '', pdata)
+                etree.SubElement(xpub, 'phase', name=phase)
+        # while pdata and p is not sections[sectIndex + 1]
+        # for pdata in ptext[docIndex + 1:doc.index(sections[sectIndex + 1])]
+        for p in sect.itersiblings('{*}p'):
             paraText = join(t[-1].text for t in p.iter('{*}t'))
             if not paraText:
                 break
@@ -84,7 +84,36 @@ def parseOutline(xdoc):
                 sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
         app(sectInfo)
     return xpub
-
-# paraText = join(
-#     r[-1].text if r[-1].tag[-2:] == '}t' else '\t'
-#     for r in para.iter('{*}r'))
+    # for section in sections:
+    #     sectInfo = {'phase': '', 'title': '', 'docs': []}
+    #     if section.getnext().lastChild.lastChild.tag[-2:] != '}t':
+    #         sectTitle = join(t[-1].text for t in section.iter('{*}t'))
+    #         sectTitle = re.sub(r'(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
+    #         if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
+    #             sectInfo['title'] = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
+    #             section = section.getnext()
+    #         else:
+    #             activePhase = sectTitle
+    #             continue
+    #     sectInfo['phase'] = activePhase
+    #     for p in section.itersiblings('{*}p'):
+    #         paraText = join(t[-1].text for t in p.iter('{*}t'))
+    #         if not paraText:
+    #             break
+    #         para = re.split(resplit, paraText.split('\r')[0])
+    #         if drawTest.search(para[0]):
+    #             sectInfo['docs'].append({'type': 'DRAW', 'id': para[0], 'description': para[1]})
+    #         elif re.match(procTest, para[0]):
+    #             # standardize RP naming convention (regarding CC0104-MT vs CC0104-QTM-CR vs CC0104-01MT)
+    #             sectInfo['docs'].append({'type': 'RP', 'id': para[0].replace('/', '-')})
+    #         elif para[0].beginswith('Rev'):
+    #             proc = sectInfo['docs'][0]
+    #             proc['rev'] = int(para[0].split()[1])
+    #         elif 'ADVISORY' in paraText:
+    #             proc = sectInfo['docs'][0]
+    #             proc['advisory'] = True
+    #         elif 'BTC' in paraText:
+    #             btc = paraText.split()
+    #             sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
+    #     app(sectInfo)
+    # return xpub
