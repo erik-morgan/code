@@ -1,11 +1,20 @@
 import json
 from pathlib import Path
+from PIL import Image
+from PIL.ImageTk import PhotoImage as PI
 
 class PubDirs:
-    config = Path(__file__).parent.resolve() / 'config.json'
+	app = Path(__file__).parent.resolve()
+    config = app / 'config.json'
+    imgs = {
+        photo = 
+        'start': PI(Image.open(app / 'images/start.svg')),
+        'prefs': PI(Image.open(app / 'images/prefs.svg')),
+        'exit': PI(Image.open(app / 'images/exit.svg'))
+    }
     _dirs = {}
     
-    def __init__(self):
+    def config_pub(self):
         if self.config.exists():
             self._dirs = json.load(self.config.open())
         self.indd = self._getPath('indd')
@@ -14,14 +23,14 @@ class PubDirs:
         json.dump(self._dirs, self.config.open('w'), sort_keys=True, indent=4)
         print('Folder paths saved to: ' + str(self.config))
     
-    def getProject(self):
+    def get_project(self):
         self.proj = self._getPath('proj')
         try:
-            self.docx = self.proj.glob('**/*Outline.docx')[0]
-        except IndexError:
+            self.docx = next(self.proj.rglob('*Outline.docx'))
+        except StopIteration:
             print('No outline found in project folder. Outline must end in "Outline.docx"')
             return
-        self.opub = self.project / '.opub.xml'
+        self.pub = self.project / '.pub.xml'
     
     def _getPath(self, dirname, p=None):
         if self._dirs.haskey(dirname):

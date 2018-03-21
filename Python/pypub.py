@@ -1,16 +1,38 @@
 import re
+from tkinter import *
+from tkinter.ttk import *
 from pypub_config import PubDirs
 from zipfile import ZipFile
 from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
-# TODO: 
+w = Tk()
 dirs = PubDirs()
 join = ''.join
 xns = {
     'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
+
+def initPub():
+    global w
+    w.title('pypub')
+    w.geometry(f'{w.winfo_screenwidth() / 3}x{w.winfo_screenheight() / 3}')
+    wtb = ttk.Frame(w, padding='12', borderwidth=1, relief='raised')
+    b_start = Button(wtb, image=dirs.imgs['start'], relief='flat', command=main)
+    b_start.image = dirs.imgs['start']
+    b_start.pack(side='left', padx=2, pady=2)
+    b_prefs = Button(wtb, image=dirs.imgs['prefs'], relief='flat', command=dirs.setup)
+    b_prefs.image = dirs.imgs['prefs']
+    b_prefs.pack(side='left', padx=2, pady=2)
+    b_exit = Button(wtb, image=dirs.imgs['exit'], relief='flat', command=exit)
+    b_exit.image = dirs.imgs['exit']
+    b_exit.pack(side='left', padx=2, pady=2)
+    wtb.pack(side='top', fill='x')
+    # button for options
+    # button for new projects
+    # button for exiting
+    w.mainloop()
 
 def main():
     # Remove .outline.json after finished
@@ -24,14 +46,26 @@ def main():
     # TODO: add ability to change vars
     # TODO: refactor dirs or add os check b/c dirs are now PosixPath objects; switch back to string paths?
     # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
+    # TODO: add handling of bluesheets
+    # TODO: add handling of third party documents for appendix
+    # TODO: 
     dirs.getProject()
-    if dirs.opub.exists():
-        opub = etree.fromstring(dirs.opub.read_bytes())
-    else:
+    if dirs.pub.exists():
+        redo = ""
+        while not redo or not re.match(r'^[YyNn]', redo):
+            redo = input('Recover project? (no if outline has changed): ')
+        if redo[0] == 'n' or redo[0] == 'N':
+            pub = etree.fromstring(dirs.pub.read_bytes())
+        else:
+            pub = None
+    if not pub:
         with ZipFile(dirs.docx) as zip:
             xdoc = zip.open('word/document.xml').read()
-        opub = parseOutline(xdoc)
-        dirs.opub.write_bytes(etree.tostring(opub, pretty_print=True))
+        pub = parseOutline(xdoc)
+        dirs.pub.write_bytes(etree.tostring(pub))
+    if not fileCheck(pub):
+        return
+    buildPub(pub)
 
 def parseOutline(xdoc):
     doc = etree.fromstring(re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc))[0]
@@ -40,80 +74,87 @@ def parseOutline(xdoc):
     ptext = [join(t for t in p.itertext()) for p in doc]
     resplit = re.compile('\t+')
     props = {}
-    props['sys'] = re.split(resplit, ptext[0])[0]
-    m = re.fullmatch(r'Customer: (.+?)( \()?((?<= \()[^()]+)?(\))?', ptext[1])
+    props['sys'] = resplit.split(ptext[0])[0]
+    m = re.match(r'Customer: ([^\t]+?)( \()?((?<= \()[^()\t]+)?(\))?', ptext[1])
     props['cust'], props['proj'] = m.groups(1, 2)
     props['rig'] = ptext[2].split(': ')[-1]
     m = re.match(r'Service Manual: (\d{4})(?: Volume )?(\S+)?(?: Rev )?(\d+)?', ptext[3])
     props['num'], props['vol'], props['rev'] = m.groups(1, 3)
-    props['draft'] = 'draft' in ptext[3].lower()
+    draft = props['draft'] = 'draft' in ptext[3].lower()
     xpub = etree.Element('project', props)
     sections = doc.xpath('//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]', namespaces=xns)
-    drawTest = re.compile(r'\d{5}', re.I)
+    drawTest = re.compile(r'\d{5}|^\d-', re.I)
     procTest = re.compile(r'[A-Z]{2,6}\d{4}')
+    bs = re.compile('bluesheet', re.I)
     for sectIndex, sect in enumerate(sections):
         docIndex = doc.index(sect)
         pdata = ptext[docIndex]
         if not ptext[docIndex + 1]:
-            if pdata.beginswith('STACK-UP') or 'TEST OPTION' in pdata:
-                unit = etree.SubElement(xpub[-1], 'unit', title=pdata)
-                sect = sect.getnext()
-            else:
-                phase = re.sub(r' PHASE| PROCEDURES?|[\t\r].*)', '', pdata)
-                etree.SubElement(xpub, 'phase', name=phase)
-        # while pdata and p is not sections[sectIndex + 1]
-        # for pdata in ptext[docIndex + 1:doc.index(sections[sectIndex + 1])]
-        for p in sect.itersiblings('{*}p'):
-            paraText = join(t[-1].text for t in p.iter('{*}t'))
-            if not paraText:
-                break
-            para = re.split(resplit, paraText.split('\r')[0])
-            if drawTest.search(para[0]):
-                sectInfo['docs'].append({'type': 'DRAW', 'id': para[0], 'description': para[1]})
-            elif re.match(procTest, para[0]):
+            phase = re.sub(r' PHASE| PROCEDURES?|[\t].*)', '', pdata)
+            phase = etree.SubElement(xpub, 'phase', name=phase)
+        else:
+            unit = etree.SubElement(phase, 'unit')
+            if pdata.beginswith('STACK-UP'):
+                unit.set('title', 'Stack-Up and Sequence Drawings')
+            elif pdata.beginswith('CONDUCTOR'):
+                unit.set('title', 'Conductor')
+            elif 'TEST OPTION' in pdata:
+                unit.set('title', 'BOP Test Options')
+        nextIndex = doc.index(sections[sectIndex + 1])
+        for pdata in ptext[docIndex + 1:nextIndex]:
+            if not pdata:
+                continue
+            p = resplit.split(pdata)
+            if drawTest.search(p[0]):
+                draw = etree.SubElement(unit, 'drawing', id=p[0].replace(' ', ''))
+                draw.text = p[1]
+                if draft and bs.match(pdata):
+                    draw.set('bs', 'true')
+            elif procTest.match(p[0]):
                 # standardize RP naming convention (regarding CC0104-MT vs CC0104-QTM-CR vs CC0104-01MT)
-                sectInfo['docs'].append({'type': 'RP', 'id': para[0].replace('/', '-')})
-            elif para[0].beginswith('Rev'):
-                proc = sectInfo['docs'][0]
-                proc['rev'] = int(para[0].split()[1])
-            elif 'ADVISORY' in paraText:
-                proc = sectInfo['docs'][0]
-                proc['advisory'] = True
-            elif 'BTC' in paraText:
-                btc = paraText.split()
-                sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
-        app(sectInfo)
+                proc = etree.SubElement(unit, 'procedure', id=p[0].replace('/', '-'))
+                if draft and bs.match(pdata):
+                    proc.set('bs', 'true')
+            elif p[0].beginswith('Rev'):
+                proc.set('rev', p[0][-2:])
+            elif 'ADVISORY' in pdata:
+                proc.set('advisory', "True")
+            elif 'BTC' in pdata:
+                btc = join(p[0].split()[0:2]
+                proc = etree.SubElement(unit, 'procedure', id=btc)
     return xpub
-    # for section in sections:
-    #     sectInfo = {'phase': '', 'title': '', 'docs': []}
-    #     if section.getnext().lastChild.lastChild.tag[-2:] != '}t':
-    #         sectTitle = join(t[-1].text for t in section.iter('{*}t'))
-    #         sectTitle = re.sub(r'(?i)^([^\t\r]+) ?[\s\S]*', '$1', sectTitle).strip()
-    #         if sectTitle.beginswith('STACK-UP') or 'TEST OPTION' in sectTitle:
-    #             sectInfo['title'] = sectTitle if 'BOP' in sectTitle else 'STACK-UP DRAWINGS'
-    #             section = section.getnext()
-    #         else:
-    #             activePhase = sectTitle
-    #             continue
-    #     sectInfo['phase'] = activePhase
-    #     for p in section.itersiblings('{*}p'):
-    #         paraText = join(t[-1].text for t in p.iter('{*}t'))
-    #         if not paraText:
-    #             break
-    #         para = re.split(resplit, paraText.split('\r')[0])
-    #         if drawTest.search(para[0]):
-    #             sectInfo['docs'].append({'type': 'DRAW', 'id': para[0], 'description': para[1]})
-    #         elif re.match(procTest, para[0]):
-    #             # standardize RP naming convention (regarding CC0104-MT vs CC0104-QTM-CR vs CC0104-01MT)
-    #             sectInfo['docs'].append({'type': 'RP', 'id': para[0].replace('/', '-')})
-    #         elif para[0].beginswith('Rev'):
-    #             proc = sectInfo['docs'][0]
-    #             proc['rev'] = int(para[0].split()[1])
-    #         elif 'ADVISORY' in paraText:
-    #             proc = sectInfo['docs'][0]
-    #             proc['advisory'] = True
-    #         elif 'BTC' in paraText:
-    #             btc = paraText.split()
-    #             sectInfo['docs'].append({'type': 'BTC', 'id': join(btc[0:2]), 'rev': int(btc[3])})
-    #     app(sectInfo)
-    # return xpub
+
+def fileCheck(xpub):
+    # TODO: introductions and pdf cover locations
+    # TODO: add intros and back cover to PDF location
+    procs = set((p.get('id'), p.get('rev')) for p in xpub.xpath('//procedure[not(@bs)]'))
+    draws = set(xpub.xpath('//drawing[not(@bs)]/@id'))
+    procLib = [i.stem for i in dirs.indd.glob('*.indd')]
+    drawLib = [d.name.split('.')[0] for d in dirs.draw.glob('*.pdf')]
+    fails = []
+    app = fails.append
+    for proc, rev in procs
+        rev = f'.R{int(rev)}' if rev.isdigit() else ''
+        if f'{proc[0]}{rev}' not in procLib:
+            app(f'{proc[0]}, Rev {rev}')
+    for draw in draws:
+        if draw not in drawLib:
+            try:
+                localDraw = next(dirs.proj.rglob(f'{draw}*pdf'))
+            except StopIteration:
+                app(draw)
+    for i, fail in enumerate(fails):
+        print(f'Addressing fail {i}/{len(fails)}:')
+        print(f'Failed to find {fail} in provided directories')
+    else:
+        return not fails
+
+def buildPub(pub):
+    # write jsx function to handle indd files:
+    # must accept the file to use, the drawings, and the output
+    # then use pdftk or a python pdf library to compile everything
+    
+    
+
+if __name__ == '__main__':
+    main()

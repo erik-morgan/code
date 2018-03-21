@@ -1,0 +1,13 @@
+Sub ImportHTML(url As Variant, tableIndex As Variant, cols As Variant, rows As Variant)
+    Dim wb As Workbook, ws As Worksheet, cxn As String, tbl As Object, dest As Range
+    wb = ActiveWorkbook
+    Set ws = wb.Sheets.Add After:=wb.Worksheets(wb.Sheets.Count)
+    cxn = "URL;" & url
+    Set tbl = ws.QueryTables.Add(Connection:= cxn, Destination := ws.Cells(1,1))
+    With tbl
+        .WebFormatting = xlNone
+        .WebSelectionType = xlSpecifiedTables
+        .WebTables = "1,2"
+        .Refresh
+    End With
+End Sub
