@@ -5,9 +5,25 @@ Sub ImportHTML(url As Variant, tableIndex As Variant, cols As Variant, rows As V
     cxn = "URL;" & url
     Set tbl = ws.QueryTables.Add(Connection:= cxn, Destination := ws.Cells(1,1))
     With tbl
+        .Name = "DQscrape1"
+        .QueryType = xlWebQuery
         .WebFormatting = xlNone
         .WebSelectionType = xlSpecifiedTables
-        .WebTables = "1,2"
-        .Refresh
+        .WebTables = tableIndex
+'        .WebPreFormattedTextToColumns = True
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = False
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = True
+        .RefreshStyle = xlOverwriteCells
+        .SavePassword = True
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebDisableDateRecognition = True
+        .WebDisableRedirections = True
+        .Refresh BackgroundQuery:=False
     End With
 End Sub

@@ -18,20 +18,33 @@ def initPub():
     global w
     w.title('pypub')
     w.geometry(f'{w.winfo_screenwidth() / 3}x{w.winfo_screenheight() / 3}')
-    wtb = ttk.Frame(w, padding='12', borderwidth=1, relief='raised')
-    b_start = Button(wtb, image=dirs.imgs['start'], relief='flat', command=main)
-    b_start.image = dirs.imgs['start']
-    b_start.pack(side='left', padx=2, pady=2)
-    b_prefs = Button(wtb, image=dirs.imgs['prefs'], relief='flat', command=dirs.setup)
-    b_prefs.image = dirs.imgs['prefs']
-    b_prefs.pack(side='left', padx=2, pady=2)
-    b_exit = Button(wtb, image=dirs.imgs['exit'], relief='flat', command=exit)
-    b_exit.image = dirs.imgs['exit']
-    b_exit.pack(side='left', padx=2, pady=2)
-    wtb.pack(side='top', fill='x')
-    # button for options
-    # button for new projects
-    # button for exiting
+    wf = Frame(w, padding='6')
+    wf.grid(column=0, row=0, sticky=(N, E, S, W))
+    wf.columnconfigure(0, weight=1)
+    wf.rowconfigure(0, weight=1)
+    indd_label = 
+    indd_entry = 
+    indd_button = 
+    pdfs_label = 
+    pdfs_entry = 
+    pdfs_button = 
+    draw_label = 
+    draw_entry = 
+    draw_button = 
+    proj_label = 
+    proj_entry = 
+    proj_button = 
+    
+    feet_entry = ttk.Entry(mainframe, width=7, textvariable=feet)
+    feet_entry.grid(column=2, row=1, sticky=(W, E))
+    ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
+    ttk.Button(mainframe, text="Calculate", command=calculate).grid(column=3, row=3, sticky=W)
+    ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
+    ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
+    ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
+    for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
+    feet_entry.focus()
+    root.bind('<Return>', calculate)
     w.mainloop()
 
 def main():

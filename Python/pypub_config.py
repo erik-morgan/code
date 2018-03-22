@@ -7,7 +7,6 @@ class PubDirs:
 	app = Path(__file__).parent.resolve()
     config = app / 'config.json'
     imgs = {
-        photo = 
         'start': PI(Image.open(app / 'images/start.svg')),
         'prefs': PI(Image.open(app / 'images/prefs.svg')),
         'exit': PI(Image.open(app / 'images/exit.svg'))
