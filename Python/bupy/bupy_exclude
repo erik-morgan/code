@@ -1,0 +1,13 @@
+.gvfs
+.cache
+.thumbnails*
+*.backup*
+.dropbox*
+.Private
+.local/share/[Tt]rash*
+/etc/mtab
+/var/cache
+/var/tmp
+/var/backups
+/home/erik/Videos
+/home/erik/torrents
