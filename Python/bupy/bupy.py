@@ -1,24 +1,44 @@
 #!/usr/bin/python
+# TODO: Backup system once a week, and home folder daily
 from pathlib import Path
 from datetime import datetime
 import hashlib
 
 BUPY_INCL = Path(__file__).parent / 'bupy_include'
 BUPY_EXCL = Path(__file__).parent / 'bupy_exclude'
-SRC_DIRS = BUPY_INCL.read_text().splitlines()
-EXCLUSIONS = BUPY_EXCL.read_text().splitlines()
+SRC_DIRS = [Path(d) for d in BUPY_INCL.read_text().splitlines()]
+EXCLUDE_PATTERNS = [Path(d) for d in BUPY_EXCL.read_text().splitlines()]
 
 def backup_init():
     if not Path('/run/media/erik/wd_backup').exists():
         print('Could not locate wd_backup drive in /run/media/erik')
         return 1
     dest_drive = Path('/run/media/erik/wd_backup')
-    dest_dir = dest_drive / 'bupy'
-    if not dest_dir.exists():
-        dest_dir.mkdir()
+    dest_root = dest_drive / 'bupy'
+    if not dest_root.exists():
+        dest_root.mkdir()
     bupy_time = datetime.now().isoformat(timespec='seconds')
-    dest = dest_dir / bupy_time
+    dest = dest_root / bupy_time
     dest.mkdir()
+    last_dir = max(root.glob('./[0-9][0-9][0-9][0-9]*'))
+    main(dest, dest / last_dir)
+
+def main(dest_dir, ref_dir):
+    for f in SRC_DIRS:
+        backup(f)
+
+def backup(disk_item):
+    if exclusion_test(disk_item):
+        return
+    if disk_item.is_dir():
+        # test if disk_item already exists in dest
+        map(lambda item: backup(item), disk_item.iterdir())
+    else:
+        
+
+def exclusion_test(f):
+    # test if given Path, f, is excluded
+    return any(f.match(excl_pattern) for excl_pattern in EXCLUDE_PATTERNS)
 
 def is_diff(f1, f2):
     s1, s2 = f1.stat(), f2.stat()
