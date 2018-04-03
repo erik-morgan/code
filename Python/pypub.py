@@ -18,33 +18,24 @@ def initPub():
     global w
     w.title('pypub')
     w.geometry(f'{w.winfo_screenwidth() / 3}x{w.winfo_screenheight() / 3}')
-    wf = Frame(w, padding='6')
-    wf.grid(column=0, row=0, sticky=(N, E, S, W))
-    wf.columnconfigure(0, weight=1)
-    wf.rowconfigure(0, weight=1)
-    indd_label = 
-    indd_entry = 
-    indd_button = 
-    pdfs_label = 
-    pdfs_entry = 
-    pdfs_button = 
-    draw_label = 
-    draw_entry = 
-    draw_button = 
-    proj_label = 
-    proj_entry = 
-    proj_button = 
-    
-    feet_entry = ttk.Entry(mainframe, width=7, textvariable=feet)
-    feet_entry.grid(column=2, row=1, sticky=(W, E))
-    ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
-    ttk.Button(mainframe, text="Calculate", command=calculate).grid(column=3, row=3, sticky=W)
-    ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-    ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-    ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
-    for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
-    feet_entry.focus()
-    root.bind('<Return>', calculate)
+    f_w = Frame(w, padding='6')
+    f_w.grid(column=0, row=0, sticky='nesw')
+    f_w.columnconfigure(0, weight=1)
+    f_w.rowconfigure(0, weight=1)
+    # button.configure(text='goodbye') to change multiple options
+    indd_path = StringVar()
+    indd_label = Label(f_w, text='InDesign Folder:')
+    indd_label.grid(column=0, row=0, sticky='w', padx=9)
+    indd_entry = Entry(f_w, textvariable=indd_path, state='readonly')
+    indd_entry.grid(column=1, row=0, sticky='ew')
+    indd_button = Button(f_w, text="Browse", command=pick_dir)
+    indd_button.grid(column=2, row=0, sticky='we')
+    # pdfs_label = 
+    # draw_label = 
+    # proj_label = 
+    # for child in mainframe.winfo_children(): child.grid_configure(padx=5, pady=5)
+    # feet_entry.focus()
+    # root.bind('<Return>', calculate)
     w.mainloop()
 
 def main():
@@ -167,7 +158,5 @@ def buildPub(pub):
     # must accept the file to use, the drawings, and the output
     # then use pdftk or a python pdf library to compile everything
     
-    
-
 if __name__ == '__main__':
     main()
