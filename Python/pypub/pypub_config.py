@@ -1,7 +1,5 @@
 import json
 from pathlib import Path
-from PIL import Image
-from PIL.ImageTk import PhotoImage as PI
 
 class PubDirs:
 	app = Path(__file__).parent.resolve()

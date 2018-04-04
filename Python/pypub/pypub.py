@@ -1,13 +1,10 @@
 import re
-from tkinter import *
-from tkinter.ttk import *
 from pypub_config import PubDirs
 from zipfile import ZipFile
 from lxml import etree
 
 # TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
-w = Tk()
-dirs = PubDirs()
+#dirs = PubDirs()
 join = ''.join
 xns = {
     'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
