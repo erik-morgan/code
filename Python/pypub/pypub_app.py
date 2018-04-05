@@ -3,26 +3,24 @@ from tkinter import Tk, StringVar, ttk, filedialog
 import pypub
 
 class Pypub:
-    _indd = StringVar()
-    _pdfs = StringVar()
-    _draw = StringVar()
-    _proj = StringVar()
-    _config = Path(__file__).parent.resolve() / 'config'
-    #
-    # make load and save options defs
-    #
+        
     def __init__(self, parent):
+        self.indd = {'var': StringVar()}
+        self.pdfs = {'var': StringVar()}
+        self.draw = {'var': StringVar()}
+        self.proj = {'var': StringVar()}
+        self.config = Path(__file__).parent.resolve() / 'config'
+        if self.config.exists():
+            self.load_dirs()
         self.parent = parent
         self.parent.title('pypub')
+        init_gui()
+    
+    def init_gui():
         self.mainframe = ttk.Frame(self.parent, padding=24)
         self.mainframe.grid(column=0, row=0, sticky='nesw')
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.rowconfigure(0, weight=1)
-        if self._config.exists():
-            self.load_dirs()
-            self._indd.set(self._dirs['indd'])
-            self._pdfs.set(self._dirs['pdfs'])
-            self._draw.set(self._dirs['draw'])
         indd_label = ttk.Label(mainframe, text='InDesign Folder:')
         indd_label.grid(column=0, row=0, sticky='w', padx=12)
         indd_entry = ttk.Entry(mainframe, textvariable=self._indd, state='readonly')
@@ -35,22 +33,45 @@ class Pypub:
         # check what happens if user cancels
         # remember to check status of all entrys to enable run button
         # and denote required fields with red asterisks, and put legend/note at bottom
-        self._indd.set(filedialog.askdirectory())
+        self.indd.set(filedialog.askdirectory())
     
     def run(self):
         # save on cancel as well
-        self._config.write_text(json.dumps(self.dirs, sort_keys=True, indent=4))
+        pass
     
-    def load_dirs(self):
+    def loaddirs(self):
         with self._config.open() as f:
             items = [ln.split('=', maxsplit=1) for ln in f]
-        self._dirs = {k.strip():v.strip() for k, v in items}
+        dirs = {k.strip():v.strip() for k, v in items}
+        self.indd['var'].set(dirs['indd'])
+        self.pdfs['var'].set(dirs['pdfs'])
+        self.draw['var'].set(dirs['draw'])
     
-    def save_dirs(self):
-        items = '\n'.join('='.join(item) for item in self._dirs.items())
+    def savedirs(self):
+        # try this instead:
+        # dirs = {
+        #     'indd': {
+        #         'var': StringVar(),
+        #         'label': ,
+        #         'entry': ,
+        #         'button': 
+        #     }
+        # }
+        # dirs['indd']['var']
+        # 
+        # OR write quick little dir class
+        # 
+        # 
+        # 
+        items = '\n'.join('='.join(item) for item in self.dirs.items())
         self._config.write_text(items)
     
-    
+    def make_style():
+        s = ttk.Style()
+        s.theme_create('dq', parent = 'alt')
+        s.theme_use('alt')
+        s.configure('dq.TButton', borderwidth=0)
+
     
     # pdfs_label = 
     # draw_label = 
