@@ -82,7 +82,6 @@ class Pypub:
         # see if there's a difference b/w Button/Label/Entry.padding, or if they're variations like Test.TEntry
         # there is no tkinter.Style()
         s = Style()
-        s.theme_create('dq', parent = 'alt')
-        s.theme_use('alt')
-        s.configure('dq.TButton', borderwidth=0)
+        s.theme_use('clam')
+        s.configure('md.TButton', borderwidth=0)
     
