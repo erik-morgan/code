@@ -1,66 +1,97 @@
 from pathlib import Path
-from tkinter import Tk
-from tkinter.ttk import Frame, Style, Button
 from inspect import ismethod
 from pubdir import PubDir
+import wx
 
 class Pypub:
-    _state = {
-        True: 'normal',
-        False: 'disabled'
+    colors = {
+        'back': wx.Colour(238, 238, 238),
+        'text': wx.Colour(33, 33, 33),
+        'line': wx.Colour(192, 192, 192),
+        'gray': wx.Colour(224, 224, 224),
+        True: (wx.Colour(33, 150, 243), wx.Colour(255, 255, 255)),
+        False: (wx.Colour(209, 209, 209), wx.Colour(177, 177, 177))
     }
     
-    def __init__(self, parent):
-        self.indd = PubDir('indd')
-        self.pdfs = PubDir('pdfs')
-        self.draw = PubDir('draw')
-        self.proj = PubDir('proj')
+    def __init__(self):
+        # Remember to bind Ctrl+Q to close
+        self.frame = Frame(None, -1, 'pypub')
+        self.font = wx.Font(16, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'PypubFont')
+        self.frame.SetFont(self.font)
+        self.frame.BackgroundColour = self.colors['back']
+        self.frame.ForegroundColour = self.colors['text']
+        self.indd = PubDir(self.frame, 'indd', 'InDesign Folder')
+        self.pdfs = PubDir(self.frame, 'pdfs', 'PDFs Folder')
+        self.draw = PubDir(self.frame, 'draw', 'Drawings Folder')
+        self.proj = PubDir(self.frame, 'proj', 'Project Folder')
         self.config = Path(__file__).parent.resolve() / 'config'
         if self.config.exists():
             self.load_dirs()
-        self.parent = parent
-        self.parent.title('pypub')
         self.init_gui()
+        self.frame.Show()
     
     def init_gui(self):
-        self.frame = Frame(self.parent, padding=24)
-        self.frame.grid(column=0, row=0, sticky='nesw')
-        self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(0, weight=1)
-        self.indd.tkinit(self.frame, 'InDesign Folder', self.can_run)
-        self.pdfs.tkinit(self.frame, 'PDFs Folder', self.can_run)
-        self.draw.tkinit(self.frame, 'Drawings Folder', self.can_run)
-        self.proj.tkinit(self.frame, 'Project Folder', self.can_run)
-        # 
-        # indd_label = ttk.Label(self.frame, text='InDesign Folder:')
-        # indd_label.grid(column=0, row=0, sticky='w', padx=12)
-        # indd_entry = ttk.Entry(self.frame, textvariable=self._indd, state='readonly')
-        # indd_entry.grid(column=1, row=0, columnspan=3, sticky='ew')
-        # indd_button = ttk.Button(self.frame, text='Browse', command=set_indd)
-        # indd_button.grid(column=4, row=0, sticky='we')
-        self.b_run = Button(self.frame, text='Run', command=self.init_app)
-        self.b_quit = Button(self.frame, text='Exit', command=self.frame.quit)
-        # set minwidths on columns
+        self.sizer = wx.BoxSizer(orient=wx.VERTICAL)
+        for adir in self.idir(None, True):
+            adir.wxinit()
+            adir.text.BackgroundColour = colors['back']
+            adir.textln.BackgroundColour = colors['line']
+            adir.button.BackgroundColour = colors['gray']
+            adir.button.ForegroundColour = colors['text']
+            self.sizer.Add(adir.sizer, wx.EXPAND)
+        self._make_buttons()
+        self.sizer.Add(hsizer, wx.EXPAND)
+        self.frame.Bind(wx.EVT_BUTTON, self.eval_state)
+        atentry = (wx.ACCEL_CTRL, ord('Q'), self.bquit.GetId())
+        self.frame.SetAcceleratorTable(wx.AcceleratorTable([atentry]))
+        # TODO: check spacing/layout
+        # TODO: find a better way to organize this
     
     def init_app(self):
-        if not self.dirs or set(self.idir('svar')) != set(self.dirs.values()):
+        if not self.dirs or set(self.idir('tval')) != set(self.dirs.values()):
             self.save_dirs()
         self.parent.mainloop()
     
-    def can_run(self):
-        run_bool = self.b_run['state'] == 'normal'
-        if all(self.idir('svar', True)) != run_bool:
-            self.b_run['state'] = self._state[not run_bool]
+    def quit_app(self):
+        if not self.dirs or set(self.idir('tval')) != set(self.dirs.values()):
+            self.save_dirs()
+        self.frame.Destroy()
+    
+    def _make_buttons(self):
+        hsizer = wx.BoxSizer(orient=wx.HORIZONTAL)
+        self.bquit = wx.Button(self.frame, -1, label='Quit')
+        hsizer.Add(self.bquit, 0, wx.ALIGN_RIGHT)
+        hsizer.AddSpacer(12, -1)
+        self.binit = wx.Button(self.frame, -1, label='Run')
+        hsizer.Add(self.binit, 0, wx.ALIGN_RIGHT)
+        self.bquit.Bind(wx.EVT_BUTTON, self.quit_app)
+        self.binit.Bind(wx.EVT_BUTTON, self.init_app)
+    
+    def eval_state(self, ev):
+        b = ev.EventObject
+        state = self.binit.Enabled
+        if b.Name != 'button' and all(self.idir('tval', True)) != state:
+            self.binit.Enable(not state)
+            back, fore = self.colors[state]
+            self.binit.BackgroundColour = back
+            self.binit.ForegroundColour = fore
     
     def load_dirs(self):
         with self.config.open() as f:
             lines = [ln.split('=', maxsplit=1) for ln in f]
-        self.dirs = {k.strip():v.strip() for k, v in lines}
+        try:
+            self.dirs = {k.strip():v.strip() for k, v in lines}
+        except ValueError:
+            return
+        # get longest string, and pass that to calc_text_width
+        dc = wx.WindowDC(self.frame)
+        attrs = dc.GetFullTextExtent(max(dirs.values()), font=self.font)
         for d in self.idir():
-            d.svar(self.dirs[d.name])
+            d.tval(self.dirs[d.name])
+            d.text.SetMinSize((attrs[0] * 1.1, -1))
     
     def save_dirs(self):
-        self.config.write_text(''.join(list(self.idir('svar'))))
+        self.config.write_text(''.join(list(self.idir('fsave'))))
     
     def idir(self, attr_name=None, incl_proj=False):
         idirs = [self.indd, self.pdfs, self.draw]
@@ -73,15 +104,6 @@ class Pypub:
             else:
                 yield d
     
-    def make_style(self):
-        # have to replace elements in layout with favorable ones
-        # use clam theme as starting point, it is the best looking
-        # s.configure('Test.TEntry')
-        # e2['style'] = 'Test.TEntry'
-        # s.theme_use(theme_name) changes real-time
-        # see if there's a difference b/w Button/Label/Entry.padding, or if they're variations like Test.TEntry
-        # there is no tkinter.Style()
-        s = Style()
-        s.theme_use('clam')
-        s.configure('md.TButton', borderwidth=0)
-    
+if __name__ == '__main__':
+    app = wx.App()
+    app_obj = Pypub()

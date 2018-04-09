@@ -1,39 +1,36 @@
-from tkinter import filedialog, StringVar
-from tkinter.ttk import Button, Entry, Label, Frame
+import wx
 
 class PubDir:
-    def __init__(self, dir_name):
-        self.strvar = StringVar()
+    def __init__(self, frame, dir_name, label):
         self.name = dir_name
+        self.label = wx.StaticText(frame, -1, label=label)
+        self.text = wx.TextCtrl(frame, -1, value=txtval, style=wx.TE_READONLY)
+        self.textln = wx.Panel(frame, -1, size=(-1, 1))
+        self.button = wx.Button(frame, label='Browse', name=label[0:-7])
+        self.sizer = wx.FlexGridSizer(2, 2, 6, 12)
+        self.tsizer = wx.BoxSizer(orient=wx.VERTICAL)
     
-    def tkinit(self, parent, label, get_dir_cb):
-        self.label = Label(parent, text=label)
-        self.entry_frame = Frame(parent)
-        self.entry = Entry(self.entry_frame, textvariable=self.strvar, state='readonly')
-        self.button = Button(parent, text='Browse')
-        self.button['command'] = self._get_dir(get_dir_cb)
+    def wxinit(self):
+        self.button.Bind(wx.EVT_BUTTON, self._get_dir)
+        self.tsizer.Add(self.text, 0, wx.EXPAND)
+        self.tsizer.Add(self.textln, 0, wx.EXPAND)
+        self.sizer.Add(self.label, 1)
+        self.sizer.AddSpacer(0, 0)
+        self.sizer.Add(self.tsizer, 1, wx.EXPAND)
+        self.sizer.Add(self.button, 0, wx.EXPAND, 0)
+        self.sizer.AddGrowableCol(0)
     
-    def tkstyle(self, widget, col, row):
-        # denote required fields with red asterisks, and put legend/note at bottom
-        self.label.grid()
-        self.entry_frame.grid(column=0, row=row+1, sticky='wes')
-        self.entry.grid()
-        self.button.grid()
-    
-    def _get_dir(self, callback):
-        # check what happens if user cancels in askdir dialog
-        def pick_dir(self):
-            dir_path = filedialog.askdirectory()
-            if dir_path and dir_path != self.svar():
-                self.svar(dir_path)
-            callback()
-        return pick_dir
+    def _get_dir(self, ev):
+        dirdlg = wx.DirSelector()
+        if dirdlg:
+            self.text.SetValue(dirdlg)
+        ev.Skip()
     
     def fsave(self):
-        return f'{self.name}={self.svar()}\n'
+        return f'{self.name}={self.tval()}\n'
     
-    def svar(self, svar_val=None):
-        if svar_val:
-            self.strvar.set(svar_val)
+    def tval(self, text_val=None):
+        if text_val:
+            self.text.SetValue(text_val)
         else:
-            return self.strvar.get()
+            return self.text.GetValue()
