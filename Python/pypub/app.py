@@ -3,76 +3,70 @@ from inspect import ismethod
 from pubdir import PubDir
 import wx
 
-class Pypub:
-    colors = {
-        'back': wx.Colour(238, 238, 238),
-        'text': wx.Colour(33, 33, 33),
-        'line': wx.Colour(192, 192, 192),
-        'gray': wx.Colour(224, 224, 224),
+class Pypub(wx.Frame):
+    
+    back_color = wx.Colour(238, 238, 238)
+    text_color = wx.Colour(33, 33, 33)
+    gray_color = wx.Colour(224, 224, 224)
+    bcolors = {
         True: (wx.Colour(33, 150, 243), wx.Colour(255, 255, 255)),
         False: (wx.Colour(209, 209, 209), wx.Colour(177, 177, 177))
     }
     
     def __init__(self):
-        # Remember to bind Ctrl+Q to close
-        self.frame = Frame(None, -1, 'pypub')
-        self.font = wx.Font(16, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'PypubFont')
-        self.frame.SetFont(self.font)
-        self.frame.BackgroundColour = self.colors['back']
-        self.frame.ForegroundColour = self.colors['text']
-        self.indd = PubDir(self.frame, 'indd', 'InDesign Folder')
-        self.pdfs = PubDir(self.frame, 'pdfs', 'PDFs Folder')
-        self.draw = PubDir(self.frame, 'draw', 'Drawings Folder')
-        self.proj = PubDir(self.frame, 'proj', 'Project Folder')
+        super().__init__(None, title='pypub')
+        self.font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
+        self.SetFont(self.font)
+        self.BackgroundColour = self.back_color
+        self.ForegroundColour = self.text_color
         self.config = Path(__file__).parent.resolve() / 'config'
-        if self.config.exists():
-            self.load_dirs()
+        atentry = (wx.ACCEL_CTRL, ord('Q'), self.bquit.GetId())
+        self.SetAcceleratorTable(wx.AcceleratorTable([atentry]))
         self.init_gui()
-        self.frame.Show()
+        self.
+        self.Show()
     
     def init_gui(self):
-        self.sizer = wx.BoxSizer(orient=wx.VERTICAL)
-        for adir in self.idir(None, True):
-            adir.wxinit()
-            adir.text.BackgroundColour = colors['back']
-            adir.textln.BackgroundColour = colors['line']
-            adir.button.BackgroundColour = colors['gray']
-            adir.button.ForegroundColour = colors['text']
-            self.sizer.Add(adir.sizer, wx.EXPAND)
-        self._make_buttons()
-        self.sizer.Add(hsizer, wx.EXPAND)
-        self.frame.Bind(wx.EVT_BUTTON, self.eval_state)
-        atentry = (wx.ACCEL_CTRL, ord('Q'), self.bquit.GetId())
-        self.frame.SetAcceleratorTable(wx.AcceleratorTable([atentry]))
+        self.sizer = wx.GridBagSizer(12, 12)
+        self.indd = PubDir(self, 'indd', 'InDesign Folder')
+        self.pdfs = PubDir(self, 'pdfs', 'PDFs Folder')
+        self.draw = PubDir(self, 'draw', 'Drawings Folder')
+        self.proj = PubDir(self, 'proj', 'Project Folder')
+        if self.config.exists():
+            self.load_dirs()
+        self.idir('wxinit', True)
+        self._add_ctrls()
+        self.sizer.AddGrowableCol(0)
+        self.sizer.AddGrowableRow(self.num_rows())
         # TODO: check spacing/layout
-        # TODO: find a better way to organize this
     
     def init_app(self):
-        if not self.dirs or set(self.idir('tval')) != set(self.dirs.values()):
-            self.save_dirs()
+        self.save_dirs()
         self.parent.mainloop()
     
     def quit_app(self):
-        if not self.dirs or set(self.idir('tval')) != set(self.dirs.values()):
-            self.save_dirs()
-        self.frame.Destroy()
+        self.save_dirs()
+        self.Destroy()
     
-    def _make_buttons(self):
-        hsizer = wx.BoxSizer(orient=wx.HORIZONTAL)
-        self.bquit = wx.Button(self.frame, -1, label='Quit')
-        hsizer.Add(self.bquit, 0, wx.ALIGN_RIGHT)
-        hsizer.AddSpacer(12, -1)
-        self.binit = wx.Button(self.frame, -1, label='Run')
-        hsizer.Add(self.binit, 0, wx.ALIGN_RIGHT)
+    def num_rows(self):
+        return self.sizer.EffectiveRowsCount
+    
+    def _add_ctrls(self):
+        row = self.num_rows()
+        self.bquit = wx.Button(self, -1, label='Quit')
+        seld.bquit.BackgrohndColour = self.gray_color
+        self.sizer.Add(self.bquit, (row, 1), flag=wx.EXPAND)
+        self.binit = wx.Button(self, -1, label='Run')
+        self.sizer.Add(self.binit, (row, 2), flag=wx.EXPAND)
         self.bquit.Bind(wx.EVT_BUTTON, self.quit_app)
         self.binit.Bind(wx.EVT_BUTTON, self.init_app)
+        self.eval_state()
     
-    def eval_state(self, ev):
-        b = ev.EventObject
+    def eval_state(self):
         state = self.binit.Enabled
-        if b.Name != 'button' and all(self.idir('tval', True)) != state:
+        if all(self.idir('tval', True)) != state:
             self.binit.Enable(not state)
-            back, fore = self.colors[state]
+            back, fore = self.bcolors[state]
             self.binit.BackgroundColour = back
             self.binit.ForegroundColour = fore
     
@@ -83,15 +77,15 @@ class Pypub:
             self.dirs = {k.strip():v.strip() for k, v in lines}
         except ValueError:
             return
-        # get longest string, and pass that to calc_text_width
-        dc = wx.WindowDC(self.frame)
+        dc = wx.WindowDC(self)
         attrs = dc.GetFullTextExtent(max(dirs.values()), font=self.font)
         for d in self.idir():
             d.tval(self.dirs[d.name])
             d.text.SetMinSize((attrs[0] * 1.1, -1))
     
     def save_dirs(self):
-        self.config.write_text(''.join(list(self.idir('fsave'))))
+        if not self.dirs or set(self.idir('tval')) != set(self.dirs.values()):
+            self.config.write_text(''.join(list(self.idir('fsave'))))
     
     def idir(self, attr_name=None, incl_proj=False):
         idirs = [self.indd, self.pdfs, self.draw]
