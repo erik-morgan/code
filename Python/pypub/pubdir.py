@@ -1,4 +1,5 @@
 import wx
+from wxbutton import PubButton
 
 class PubDir:
     def __init__(self, frame, dir_name, label):
@@ -7,10 +8,10 @@ class PubDir:
         self.sizer = frame.sizer
         self.label = wx.StaticText(frame, -1, label=label)
         # try wx.TRANSPARENT_WINDOW for self.text
-        self.text = wx.TextCtrl(frame, -1, value=txtval, style=wx.TE_READONLY)
+        self.text = wx.TextCtrl(frame, -1, style=wx.TE_READONLY)
         self.textln = wx.Panel(frame, -1, size=(-1, 1))
         self.tsizer = wx.BoxSizer(orient=wx.VERTICAL)
-        self.button = wx.Button(frame, label='Browse', name=label[0:-7])
+        self.button = wx.PubButton(frame, 'Browse', label[0:-7])
     
     def wxinit(self):
         self.tsizer.Add(self.text, 0, wx.EXPAND)
@@ -29,7 +30,7 @@ class PubDir:
         dirdlg = wx.DirSelector()
         if dirdlg:
             self.tval(dirdlg)
-        self.frame.eval_state()
+        # self.frame.eval_state()
         ev.Skip()
     
     def fsave(self):

@@ -5,16 +5,17 @@ var app = Application.currentApplication(),
 		se.folders.byName('/Users/HD6904/Desktop/Drawings'),
 		se.folders.byName('/Users/HD6904/Desktop/NetworkFS/Libraries/Drawings')
 	],
-	procList = se.folders.byName('/Users/HD6904/Desktop/PDFs').files;
+	procDir = se.folders.byName('/Users/HD6904/Desktop/PDFs');
+
 app.includeStandardAdditions = true;
 
 function openDocuments (droppedItems) {
 	for (var itemAlias of droppedItems) {
-		if (item.class() == 'folder') return;
 		var item = se.diskItems.byName(itemAlias.toString()),
 			itemName = item.name();
+		if (item.class() == 'folder') continue;
 		if (/^[A-Z]{2,6}[0-9]{4}.+TOC.+pdf$/i.test(itemName)) {
-			var procID = /^[-A-Z0-9]+/i.exec(tocName)[0];
+			var procID = /^[-A-Z0-9]+/i.exec(itemName)[0];
 			processTOC(item, procID);
 		}
 	}
@@ -22,72 +23,45 @@ function openDocuments (droppedItems) {
 
 function processTOC (toc, tocNum) {
 	var proj = toc.container().container(),
-		idrx = RegExp('^' + tocNum + '[ .]'),
-		fileList = [toc],
-		procMatches = procList.filter(rp => idrx.test(rp.name())),
-		drawText = bash('/usr/local/bin/pdftotext -layout -nopgbrk ' + quote(toc) + ' -'),
-		drawMatches = drawText.match(/^ +([-0-9]{8,}|(\d-)?([A-Z]{2}[- ]?)\d{5})\S*/mg),
-		drawNums = drawMatches.map(draw => draw.replace(/\s/g, ''));
-	if (!procMatches.length) {
-		// raise an alert about missing procedure
+		rx = '.+/' + tocNum + '[ .].*pdf',
+		fileList = [toc];
+		procList = bash('find -E ' + quote(procDir) + ' -regex  ' + quote(rx)).split(/\r|\n/);
+	if (!procList.length) {
+		app.displayDialog('Could not find procedure ' + tocNum + ' in ' + procDir.posixPath());
 		return;
 	}
-	fileList.push(procMatches[0]);
-	for (var i = 0; i < drawNums.length; i++) {
-		var drawID = drawNums[i],
-			drawFile = findFiles(drawsDirs, drawID);
-		if (!drawFile) {
-			// raise an alert about missing drawing
-			return;
-		}
-		fileList.push(drawFile);
+	fileList.push(procList[0]);
+	var drawText = bash('/usr/local/bin/pdftotext -layout -nopgbrk ' + quote(toc) + ' -'),
+		drawMatches = drawText.match(/^ +([-0-9]{8,}|(\d-)?([A-Z]{2}[- ]?)\d{5})\S*/mg),
+		drawNums = drawMatches.map(draw => draw.replace(/\s/g, '')),
+		missingDraws = [];
+	for (var n = 0; n < drawNums.length; n++) {
+		var drawID = drawNums[n],
+			drawFile = findFiles(drawDirs, drawID);
+		if (drawFile) fileList.push(drawFile);
+		else missingDraws.push(drawID);
 	}
+	if (missingDraws.length) {
+		app.displayDialog('Could not find drawing(s): ' + missingDraws.join(', '));
+		return;
+	}
+	// ADD ABILITY TO CHECK FOR BASE NUMBER ONLY (EG WHEN TOC SAYS -14)
 	var filePaths = fileList.map(f => quote(f)),
 		outDir = proj.folders.whose({name: {_beginsWith: 'PDF'}})[0],
-		outPath = quote(outDir + '/' + tocNum + '.pdf');
+		outPath = quote(outDir.posixPath() + '/' + tocNum + '.pdf');
 	bash('/usr/local/bin/pdftk ' + filePaths.join(' ') + ' cat output ' + outPath);
 }
 
 function quote (item) {
-	// Path(decodeURI()).toString()
-	if (/diskItem|file|folder/.test(item.class())) item = item.posixPath();
-	return '\'' + item.replace(/'/g, '\'\\\'\'');
-}
-
-function listDir (dirs, fname) {
-	while (dirs.length) {
-		var dir = dirs.shift();
-		for (f of dir.files) {
-			if (f.name().startswith(fname)) return f;
-		}
-		dirs.concat(dir.folders);
-	}
-	return null;
+	if (item instanceof String) s = item;
+	else if (item.hasOwnProperty('posixPath')) s = item.posixPath();
+	else s = item.toString();
+	return '\'' + s.replace(/'/g, '\'\\\'\'') + '\'';
 }
 
 function findFiles (dirs, fname) {
-	var subDirs = [];
-	for (var d = 0; d < dirs.length; d++) {
-		var dir = dirs[d];
-		var files = dir.files.whose({name: {_beginsWith: fname}});
-		if (files.length) return files[0];
-		subDirs.concat(dir.folders);
-	}
-	return findFiles(subDirs, fname) || undefined;
+	var findcmd = 'find ' + dirs.map(d => quote(d)).join(' ') + ' -iname \'' + fname + '*pdf\'',
+		found = bash(findcmd).split(/\r|\n/);
+	if (found.length) return found[0];
+	return undefined;
 }
-
-/*
-	pdftotext -simple -nodiag -nopgbrk SS4184*pdf - | grep -E '^ +.+\d{5,6}'
-	
-	rxMatch = s.match(/^ *([-0-9]{8,}|(\d-)?([A-Z]{2}[- ]?)\d{5})\S{0,}/mg)
-	
-	2-400000
-	2-400000-00
-	2-400000-000
-	400000-00
-	SD 30052
-	TP37002
-	2-PD-12345
-	2-PD-12345-67
-	2-PD-12345-67CP
-*/
