@@ -2,6 +2,19 @@ import wx
 from pubdir import PubDir
 from wxbutton import PubButton
 
+# NOTES:
+# Panel AND TextCtrl don't inherit colors
+# TextCtrl doesn't respond to transparency
+# Currently lacking tabbed navigation
+# style=wx.BORDER_NONE only removes physical border, not spacing
+# 
+# e = wx.TextCtrl(pnl, value=val, size=(min_size(val), -1), style=wx.TE_READONLY)
+# e = wx.TextCtrl(f, value=val, style=wx.TE_READONLY)
+# minw = round(f.CharWidth * len(val)) * 1.2
+# e.SetInitialSize((minw, -1))
+# Below works, above works, & MinSize = works with sizer
+# e.SetInitialSize((min_size(val), -1))
+
 class PypubGUI(wx.Frame):
     
     def __init__(self, *args, **kwargs):
@@ -16,44 +29,39 @@ class PypubGUI(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self.on_char)
         self.Bind(wx.EVT_CLOSE, self.onquit)
     
-    def on_char(self, evt):
-        key = chr(evt.KeyCode)
-        mod = evt.GetModifiers()
-        if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
-            self.quit_app()
-        evt.DoAllowNextEvent()
-    
-    def build_gui(self, dirs_list):
+    def build_gui(self, dirs_list, colors):
         self.sizer = wx.GridBagSizer(12, 12)
         for name, label, val in dirs_list:
             # set minsize of each item in dirs_list based on their own strings
             # eg if val: self.name.text (TextCtrl) MinSize = (self.name.text.CharWidth * len(self.name.text.Value), -1)
+            self.build_label(label)
             o = PubField(name, label, val)
             setattr(self, 'b' + name, o)
-        # old build_gui code below this line
-        self.idir('wxinit', True)
-        self.add_ctrls()
+        # RESUME HERE
         self.sizer.AddGrowableCol(0)
-        self.sizer.AddGrowableRow(self.num_rows())
+        self.sizer.AddGrowableRow(self.row_num() + 1)
         self.Show()
         # TODO: check spacing/layout
     
-    def init_app(self):
-        self.parent.mainloop()
+    def build_label(self, label_text):
+        label = wx.StaticText(self, label_text, style=wx.ALIGN_LEFT)
+        self.sizer.Add(label, (row_num(), 0), (1, 2))
     
-    def quit_app(self):
-        self.save_dirs()
-        self.Destroy()
+    def build_field(self, val, bg):
+        field = wx.Panel(self)
+        field.BackgroundColour = bgcolor
+        field_sizer = wx.BoxSizer()
+        text = wx.TextCtrl(self, value=init_val, style=wx.TE_READONLY|wx.TE_DONTWRAP)
+        field_sizer.Add(text, 1, wx.EXPAND|wx.BOTTOM, 1)
+        if init_val:
+            self.text.MinSize = (self.text.CharWidth * len(init_val), -1)
+        self.sizer.Add(label, (row_num(), 0), (1, 2))
     
-    def build_label(self, label):
-        self.label = wx.StaticText(self, label, style=wx.ALIGN_LEFT)
-        self.sizer.Add(self.label, (0, 0), (1, 2))
-    
-    def num_rows(self):
+    def row_num(self):
         return self.sizer.EffectiveRowsCount
     
     def add_ctrls(self):
-        row = self.num_rows()
+        row = self.row_num()
         self.bquit = PubButton(self, -1, 'Quit')
         self.bquit.BackgrohndColour = self.gray_color
         self.sizer.Add(self.bquit, (row, 1), flag=wx.EXPAND)
@@ -70,6 +78,13 @@ class PypubGUI(wx.Frame):
             d.tval(self.dirs[d.name])
             d.text.SetMinSize((attrs[0] * 1.1, -1))
     
+    def init_app(self):
+        self.parent.mainloop()
+    
+    def quit_app(self):
+        self.save_dirs()
+        self.Destroy()
+    
     def idir(self, attr_name=None, incl_proj=False):
         idirs = [self.indd, self.pdfs, self.draw]
         if incl_proj:
@@ -80,7 +95,14 @@ class PypubGUI(wx.Frame):
                 yield attrib() if ismethod(attrib) else attrib
             else:
                 yield d
-
+    
+    def on_char(self, evt):
+        key = chr(evt.KeyCode)
+        mod = evt.GetModifiers()
+        if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
+            self.quit_app()
+        evt.DoAllowNextEvent()
+    
 #     def init_hotkey(self):
 #         atentry = (wx.ACCEL_CTRL, ord('Q'), self.bquit.Id)
 #         self.AcceleratorTable = wx.AcceleratorTable((wx.ACCEL_CTRL, ord('Q'), self.bquit.Id))
