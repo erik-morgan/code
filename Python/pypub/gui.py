@@ -1,6 +1,6 @@
 import wx
-from pubdir import PubDir
 from wxbutton import PubButton
+from wxfield import TextField
 
 # NOTES:
 # Panel AND TextCtrl don't inherit colors
@@ -18,26 +18,24 @@ from wxbutton import PubButton
 class PypubGUI(wx.Frame):
     
     def __init__(self, *args, **kwargs):
-        bgcolor = kwargs.pop('bgcolor', wx.NullColour)
-        fgcolor = kwargs.pop('fgcolor', wx.NullColour)
+        self.colors = kwargs.pop('colors')
         self.oninit = kwargs.pop('oninit', None)
         self.onquit = kwargs.pop('oninit', None)
         super().__init__(None, *args, **kwargs)
-        self.BackgroundColour = bgcolor
-        self.ForegroundColour = fgcolor
+        self.BackgroundColour = self.colors['bg']
+        self.ForegroundColour = self.colors['fg']
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
-        self.Bind(wx.EVT_CHAR_HOOK, self.on_char)
+        self.Bind(wx.EVT_CHAR_HOOK, self.onchar)
         self.Bind(wx.EVT_CLOSE, self.onquit)
     
     def build_gui(self, dirs_list, colors):
         self.sizer = wx.GridBagSizer(12, 12)
+        button_map = {}
         for name, label, val in dirs_list:
-            # set minsize of each item in dirs_list based on their own strings
-            # eg if val: self.name.text (TextCtrl) MinSize = (self.name.text.CharWidth * len(self.name.text.Value), -1)
             self.build_label(label)
-            o = PubField(name, label, val)
-            setattr(self, 'b' + name, o)
-        # RESUME HERE
+            self.build_field(val, 'f' + name)
+            self.build_browse(colors, 'b' + name)
+            
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(self.row_num() + 1)
         self.Show()
@@ -45,17 +43,21 @@ class PypubGUI(wx.Frame):
     
     def build_label(self, label_text):
         label = wx.StaticText(self, label_text, style=wx.ALIGN_LEFT)
-        self.sizer.Add(label, (row_num(), 0), (1, 2))
+        self.sizer.Add(label, (row_num(), 0))
     
-    def build_field(self, val, bg):
-        field = wx.Panel(self)
-        field.BackgroundColour = bgcolor
-        field_sizer = wx.BoxSizer()
-        text = wx.TextCtrl(self, value=init_val, style=wx.TE_READONLY|wx.TE_DONTWRAP)
-        field_sizer.Add(text, 1, wx.EXPAND|wx.BOTTOM, 1)
-        if init_val:
-            self.text.MinSize = (self.text.CharWidth * len(init_val), -1)
-        self.sizer.Add(label, (row_num(), 0), (1, 2))
+    def build_field(self, value, name):
+        field = TextField(self, value, name, True)
+        self.sizer.Add(field, (row_num(), 0), (1, 2))
+    
+    def build_browse(self, colors, name=None):
+        # either use a function to return an event handler with the specified input
+        # or create a dict mapping button ids to fields
+        button = PubButton(colors=colors, name=name)
+        button.Bind(wx.EVT_BUTTON, self.browse_dir)
+        self.sizer.Add(field, (row_num() - 1, 0), (1, 2))
+    
+    def browse_dir(self, evt):
+        # button browse code & wx.Window.FindWindowByName(name)
     
     def row_num(self):
         return self.sizer.EffectiveRowsCount
@@ -78,32 +80,20 @@ class PypubGUI(wx.Frame):
             d.tval(self.dirs[d.name])
             d.text.SetMinSize((attrs[0] * 1.1, -1))
     
-    def init_app(self):
-        self.parent.mainloop()
+    # def idir(self, attr_name=None, incl_proj=False):
+    #     idirs = [self.indd, self.pdfs, self.draw]
+    #     if incl_proj:
+    #         idirs.append(self.proj)
+    #     for d in idirs:
+    #         if attr_name:
+    #             attrib = getattr(d, attr_name)
+    #             yield attrib() if ismethod(attrib) else attrib
+    #         else:
+    #             yield d
     
-    def quit_app(self):
-        self.save_dirs()
-        self.Destroy()
-    
-    def idir(self, attr_name=None, incl_proj=False):
-        idirs = [self.indd, self.pdfs, self.draw]
-        if incl_proj:
-            idirs.append(self.proj)
-        for d in idirs:
-            if attr_name:
-                attrib = getattr(d, attr_name)
-                yield attrib() if ismethod(attrib) else attrib
-            else:
-                yield d
-    
-    def on_char(self, evt):
+    def onchar(self, evt):
         key = chr(evt.KeyCode)
         mod = evt.GetModifiers()
         if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
             self.quit_app()
         evt.DoAllowNextEvent()
-    
-#     def init_hotkey(self):
-#         atentry = (wx.ACCEL_CTRL, ord('Q'), self.bquit.Id)
-#         self.AcceleratorTable = wx.AcceleratorTable((wx.ACCEL_CTRL, ord('Q'), self.bquit.Id))
-        
