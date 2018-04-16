@@ -13,7 +13,6 @@ def colors(color_name=None):
     color_dict = {
         'bg': wx.Colour(238, 238, 238),
         'fg': wx.Colour(33, 33, 33),
-        'fld_bg': wx.Colour(192, 192, 192),
         'but_bg': wx.Colour(224, 224, 224),
         'act_bg': wx.Colour(33, 150, 243),
         'act_fg': wx.Colour(255, 255, 255),

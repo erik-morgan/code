@@ -8,32 +8,36 @@ StateChangeEvent, EVT_STATE_CHANGE = wx.lib.newevent.NewEvent()
 class PubButton(wxb.GenButton):
     
     def __init__(self, *args, **kwargs):
-        action = kwargs.pop('action', None)
-        self.colors = kwargs.pop('colors')
         super().__init__(self, *args, **kwargs)
-        if action:
-            self.enable(False)
-            self._set_colors('act_bg', 'act_fg')
-            self.Bind(EVT_STATE_CHANGE, self._toggle_state)
-        else:
-            self._set_colors('but_bg', 'fg')
+        self.Bind(EVT_STATE_CHANGE, self.state_handler)
+        self.bg = wx.NullColour
+        self.fg = self.Parent.ForegroundColour
+        self.disbg = wx.NullColour
+        self.disfg = wx.NullColour
     
     def enable(self, state_bool=True):
+        # or with StateEvent(wx.PyEvent) wx.PostEvent(self.GetEventHandler(), StateEvent(obj.GetId(), obj))
         self.Enabled = state_bool
         evt = StateChangeEvent(state=state_bool)
-        # or with StateEvent(wx.PyEvent) wx.PostEvent(self.GetEventHandler(), StateEvent(obj.GetId(), obj))
         wx.PostEvent(self, evt)
     
-    def _toggle_state(self, evt):
+    def state_handler(self, evt):
         state = evt.state
-        print(f'EventObject: id={evt.EventObject.Id} state={evt.state}')
-        print(f'Button [id={self.Id}]: state={self.Enabled} back={str(self.BackgroundColour)}')
-        # or if self.Enabled:
-        if state:
-            self._set_colors('act_bg', 'act_fg')
-        else:
-            self._set_colors('dis_bg', 'dis_fg')
+        print(f'EventObject: id={str(evt.EventObject.Id)} state={str(evt.state)}')
+        print(f'Button [id={str(self.Id)}]: state={str(self.Enabled)} back={str(self.BackgroundColour)}')
+        self.update_colors()
     
-    def _set_colors(self, bg, fg):
-        self.BackgroundColour = self.colors['bg']
-        self.ForegroundColour = self.colors['fg']
+    def update_colors(self):
+        if self.Enabled:
+            self.BackgroundColour = getattr(self, 'bg', wx.NullColour)
+            self.ForegroundColour = getattr(self, 'fg', wx.NullColour)
+        else:
+            self.BackgroundColour = getattr(self, 'disbg', wx.NullColour)
+            self.ForegroundColour = getattr(self, 'disfg', wx.NullColour)
+    
+    def set_colors(self, bg=None, fg=None, disbg=None, disfg=None):
+        self.bg = bg if bg else self.bg
+        self.fg = fg if fg else self.fg
+        self.disbg = disbg if disbg else self.disbg
+        self.disfg = disfg if disfg else self.disfg
+        self.update_colors()

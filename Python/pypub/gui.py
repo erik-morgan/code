@@ -7,89 +7,87 @@ from wxfield import TextField
 # TextCtrl doesn't respond to transparency
 # Currently lacking tabbed navigation
 # style=wx.BORDER_NONE only removes physical border, not spacing
-# 
-# e = wx.TextCtrl(pnl, value=val, size=(min_size(val), -1), style=wx.TE_READONLY)
-# e = wx.TextCtrl(f, value=val, style=wx.TE_READONLY)
-# minw = round(f.CharWidth * len(val)) * 1.2
-# e.SetInitialSize((minw, -1))
-# Below works, above works, & MinSize = works with sizer
-# e.SetInitialSize((min_size(val), -1))
+# i can load dirs after gui is built, but before mainloop is called
+# TODO: check spacing/layout
 
 class PypubGUI(wx.Frame):
     
+    # FINISH REVERTING TO wx.Frame AND ADDING PANEL
+    # Remove panel and use boxsizers. Current setup segfaulted in tests
+    
     def __init__(self, *args, **kwargs):
-        self.colors = kwargs.pop('colors')
-        self.oninit = kwargs.pop('oninit', None)
-        self.onquit = kwargs.pop('oninit', None)
+        self.oninit = kwargs['oninit']
+        self.onquit = kwargs['oninit']
         super().__init__(None, *args, **kwargs)
-        self.BackgroundColour = self.colors['bg']
-        self.ForegroundColour = self.colors['fg']
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
         self.Bind(wx.EVT_CHAR_HOOK, self.onchar)
         self.Bind(wx.EVT_CLOSE, self.onquit)
     
-    def build_gui(self, dirs_list, colors):
-        self.sizer = wx.GridBagSizer(12, 12)
-        button_map = {}
+    def init_gui(self, colors):
+        self.colors = colors
+        self.BackgroundColour = colors['bg']
+        self.ForegroundColour = colors['fg']
+        self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.panel = wx.Panel(self)
+        self.panel.BackgroundColour = colors['bg']
+        self.panel.ForegroundColour = colors['fg']
+        self.frame_sizer.Add(self.panel, )
+        self.sizer = wx.GridBagSizer(8, 8)
+    
+    def build_gui(self, dirs_list):
+        self.fields = []
         for name, label, val in dirs_list:
             self.build_label(label)
             self.build_field(val, 'f' + name)
-            self.build_browse(colors, 'b' + name)
-            
+            self.build_button('Browse', 'b' + name, self.browse)
+        self.build_button('Quit', 'bquit', self.onquit, self.add_quit)
+        self.build_button('Run', 'binit', self.oninit, self.add_init)
         self.sizer.AddGrowableCol(0)
-        self.sizer.AddGrowableRow(self.row_num() + 1)
-        self.Show()
-        # TODO: check spacing/layout
+        self.sizer.Add(-1, 1, (self.row(), 0), (1, 3), wx.EXPAND)
+        self.sizer.AddGrowableRow(self.row())
     
     def build_label(self, label_text):
         label = wx.StaticText(self, label_text, style=wx.ALIGN_LEFT)
-        self.sizer.Add(label, (row_num(), 0))
+        self.sizer.Add(label, (self.row(), 0))
     
     def build_field(self, value, name):
         field = TextField(self, value, name, True)
-        self.sizer.Add(field, (row_num(), 0), (1, 2))
+        self.sizer.Add(field, (self.row(), 0), (1, 2))
+        self.fields.append(field)
     
-    def build_browse(self, colors, name=None):
-        # either use a function to return an event handler with the specified input
-        # or create a dict mapping button ids to fields
-        button = PubButton(colors=colors, name=name)
-        button.Bind(wx.EVT_BUTTON, self.browse_dir)
-        self.sizer.Add(field, (row_num() - 1, 0), (1, 2))
+    def build_button(self, label, name, handler, callafter=self.add_browse):
+        button = PubButton(self, label=label, name=name)
+        button.Bind(wx.EVT_BUTTON, handler)
+        callafter(button)
     
-    def browse_dir(self, evt):
-        # button browse code & wx.Window.FindWindowByName(name)
+    def add_browse(self, button):
+        button.set_colors(self.colors['but_bg'])
+        pos = (self.row() - 1, self.col() - 1)
+        self.sizer.Add(button, pos, flag=wx.EXPAND)
     
-    def row_num(self):
+    def add_quit(self, button):
+        button.set_colors(self.colors['but_bg'])
+        pos = (self.row(), self.col() - 2)
+        self.sizer.Add(button, pos, flag=wx.EXPAND|wx.ALIGN_RIGHT)
+    
+    def add_init(self, button):
+        button.set_colors(self.colors['act_bg'], self.colors['act_fg'])
+        button.enable(False)
+        pos = (self.row() - 1, self.col() - 1)
+        self.sizer.Add(button, pos, flag=wx.EXPAND)
+    
+    def browse(self, evt):
+        dirdlg = wx.DirSelector()
+        if dirdlg:
+            fname = 'f' + evt.EventObject.Name[1:]
+            wx.Window.FindWindowByName(fname).value = dirdlg
+        evt.Skip()
+    
+    def row(self):
         return self.sizer.EffectiveRowsCount
     
-    def add_ctrls(self):
-        row = self.row_num()
-        self.bquit = PubButton(self, -1, 'Quit')
-        self.bquit.BackgrohndColour = self.gray_color
-        self.sizer.Add(self.bquit, (row, 1), flag=wx.EXPAND)
-        self.binit = PubButton(self, -1, 'Run', True)
-        self.sizer.Add(self.binit, (row, 2), flag=wx.EXPAND)
-        self.bquit.Bind(wx.EVT_BUTTON, self.quit_app)
-        self.binit.Bind(wx.EVT_BUTTON, self.init_app)
-        self.eval_state()
-    
-    def text_size(self):
-        dc = wx.WindowDC(self)
-        attrs = dc.GetFullTextExtent(max(self.dirs.values()), font=self.Font)
-        for d in self.idir():
-            d.tval(self.dirs[d.name])
-            d.text.SetMinSize((attrs[0] * 1.1, -1))
-    
-    # def idir(self, attr_name=None, incl_proj=False):
-    #     idirs = [self.indd, self.pdfs, self.draw]
-    #     if incl_proj:
-    #         idirs.append(self.proj)
-    #     for d in idirs:
-    #         if attr_name:
-    #             attrib = getattr(d, attr_name)
-    #             yield attrib() if ismethod(attrib) else attrib
-    #         else:
-    #             yield d
+    def col(self):
+        return self.sizer.EffectiveColsCount
     
     def onchar(self, evt):
         key = chr(evt.KeyCode)
@@ -97,3 +95,10 @@ class PypubGUI(wx.Frame):
         if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
             self.quit_app()
         evt.DoAllowNextEvent()
+    
+    def pack_fields(self):
+        field_list = []
+        for field in self.fields:
+            field_list.append(f'{field.name}={field.value}')
+        return field_list
+    
