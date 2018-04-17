@@ -11,13 +11,13 @@ pubdirs = (
 
 def colors(color_name=None):
     color_dict = {
-        'bg': wx.Colour(238, 238, 238),
-        'fg': wx.Colour(33, 33, 33),
-        'but_bg': wx.Colour(224, 224, 224),
-        'act_bg': wx.Colour(33, 150, 243),
-        'act_fg': wx.Colour(255, 255, 255),
-        'dis_bg': wx.Colour(209, 209, 209),
-        'dis_fg': wx.Colour(177, 177, 177)
+        'bg': Colour(238, 238, 238),
+        'fg': Colour(33, 33, 33),
+        'but_bg': Colour(224, 224, 224),
+        'act_bg': Colour(33, 150, 243),
+        'act_fg': Colour(255, 255, 255),
+        'dis_bg': Colour(209, 209, 209),
+        'dis_fg': Colour(177, 177, 177)
     }
     return color_dict if color_name else color_dict[color_name]
 

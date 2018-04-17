@@ -3,22 +3,15 @@ from wxbutton import PubButton
 from wxfield import TextField
 
 # NOTES:
-# Panel AND TextCtrl don't inherit colors
-# TextCtrl doesn't respond to transparency
-# Currently lacking tabbed navigation
-# style=wx.BORDER_NONE only removes physical border, not spacing
-# i can load dirs after gui is built, but before mainloop is called
+# Remove panel and use boxsizers. Current setup segfaulted in tests
 # TODO: check spacing/layout
 
 class PypubGUI(wx.Frame):
     
-    # FINISH REVERTING TO wx.Frame AND ADDING PANEL
-    # Remove panel and use boxsizers. Current setup segfaulted in tests
-    
-    def __init__(self, *args, **kwargs):
-        self.oninit = kwargs['oninit']
-        self.onquit = kwargs['oninit']
-        super().__init__(None, *args, **kwargs)
+    def __init__(self, title, oninit, onquit):
+        self.oninit = oninit
+        self.onquit = onquit
+        super().__init__(None, title=title)
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
         self.Bind(wx.EVT_CHAR_HOOK, self.onchar)
         self.Bind(wx.EVT_CLOSE, self.onquit)
@@ -27,54 +20,64 @@ class PypubGUI(wx.Frame):
         self.colors = colors
         self.BackgroundColour = colors['bg']
         self.ForegroundColour = colors['fg']
-        self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.panel = wx.Panel(self)
-        self.panel.BackgroundColour = colors['bg']
-        self.panel.ForegroundColour = colors['fg']
-        self.frame_sizer.Add(self.panel, )
-        self.sizer = wx.GridBagSizer(8, 8)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
     
     def build_gui(self, dirs_list):
         self.fields = []
         for name, label, val in dirs_list:
-            self.build_label(label)
-            self.build_field(val, 'f' + name)
-            self.build_button('Browse', 'b' + name, self.browse)
+            self.row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+            self.row_sizer.AddSpacer(16)
+            self.build_row(name, label, val)
+            self.row_sizer.AddSpacer(16)
+            self.sizer.Add(self.vsizer, 0, wx.EXPAND)
+        self.hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.hsizer.AddStretchSpacer(1)
         self.build_button('Quit', 'bquit', self.onquit, self.add_quit)
+        self.hsizer.AddSpacer(8)
         self.build_button('Run', 'binit', self.oninit, self.add_init)
-        self.sizer.AddGrowableCol(0)
-        self.sizer.Add(-1, 1, (self.row(), 0), (1, 3), wx.EXPAND)
-        self.sizer.AddGrowableRow(self.row())
+        self.hsizer.AddSpacer(16)
+        self.sizer.Add(self.hsizer, 0, wx.EXPAND)
+        self.sizer.Add((-1, 16), 1, wx.EXPAND)
+    
+    def build_row(self, name, label, value):
+        self.vsizer = wx.BoxSizer(wx.VERTICAL)
+        self.vsizer.AddSpacer(16)
+        self.build_label(label)
+        self.vsizer.AddSpacer(8)
+        self.hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.build_field(value, 'f' + name)
+        self.hsizer.AddSpacer(8)
+        self.build_button('Browse', 'b' + name, self.browse)
+        self.vsizer.Add(self.hsizer, 0, wx.EXPAND)
     
     def build_label(self, label_text):
         label = wx.StaticText(self, label_text, style=wx.ALIGN_LEFT)
-        self.sizer.Add(label, (self.row(), 0))
+        self.vsizer.Add(label, 1)
     
     def build_field(self, value, name):
         field = TextField(self, value, name, True)
-        self.sizer.Add(field, (self.row(), 0), (1, 2))
+        self.hsizer.Add(field, 1, wx.EXPAND)
         self.fields.append(field)
     
-    def build_button(self, label, name, handler, callafter=self.add_browse):
+    def build_button(self, label, name, handler, callafter=None):
         button = PubButton(self, label=label, name=name)
         button.Bind(wx.EVT_BUTTON, handler)
+        if not callafter:
+            callafter = self.add_browse
         callafter(button)
     
     def add_browse(self, button):
         button.set_colors(self.colors['but_bg'])
-        pos = (self.row() - 1, self.col() - 1)
-        self.sizer.Add(button, pos, flag=wx.EXPAND)
+        self.hsizer.Add(button, 0, wx.EXPAND)
     
     def add_quit(self, button):
         button.set_colors(self.colors['but_bg'])
-        pos = (self.row(), self.col() - 2)
-        self.sizer.Add(button, pos, flag=wx.EXPAND|wx.ALIGN_RIGHT)
+        self.hsizer.Add(button, 0, wx.EXPAND|wx.ALIGN_RIGHT)
     
     def add_init(self, button):
         button.set_colors(self.colors['act_bg'], self.colors['act_fg'])
         button.enable(False)
-        pos = (self.row() - 1, self.col() - 1)
-        self.sizer.Add(button, pos, flag=wx.EXPAND)
+        self.hsizer.Add(button, 0, wx.EXPAND)
     
     def browse(self, evt):
         dirdlg = wx.DirSelector()
@@ -82,12 +85,6 @@ class PypubGUI(wx.Frame):
             fname = 'f' + evt.EventObject.Name[1:]
             wx.Window.FindWindowByName(fname).value = dirdlg
         evt.Skip()
-    
-    def row(self):
-        return self.sizer.EffectiveRowsCount
-    
-    def col(self):
-        return self.sizer.EffectiveColsCount
     
     def onchar(self, evt):
         key = chr(evt.KeyCode)

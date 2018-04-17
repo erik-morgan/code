@@ -38,6 +38,8 @@ class TextField(wx.Panel):
         return self.text.Value
     
     def text_size(self, txt, font=None):
+        if not txt:
+            return (320, -1)
         if font:
             dc = wx.WindowDC(self)
             attrs = dc.GetFullTextExtent(txt, font=font)
