@@ -1,6 +1,6 @@
 import gui
 import pub_config as config
-import pypub
+from pypub import Pypub
 import wx
 
 class PypubApp:
@@ -14,6 +14,9 @@ class PypubApp:
     
     def oninit(self):
         fields = self.mainframe.pack_fields()
+        pypub = Pypub(fields, self.onerror)
+        pypub.parseOutline()
+        pypub.fileCheck()
         # Progress Steps:
         #   Parsing outline...
         #   Checking for files...
@@ -29,7 +32,7 @@ class PypubApp:
         if set(fields) != set(self.dirs):
             config.dump_dirs('\n'.join(fields))
     
-    def onerror(self):
+    def onerror(self, err_msg):
         # raise error dialog listing missing files
         
 
