@@ -1,6 +1,12 @@
 import re
 from lxml import etree
 
+# TODO: Add support for roman numeral volume numbers
+# REQUIRES PROJECT: TO BE ITS OWN LINE
+# CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
+# THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
+# Use 2-digit revs, even for nc (00)
+
 class OutlineParser:
     ns = {
         'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
@@ -15,37 +21,21 @@ class OutlineParser:
         self.init_regx()
         self.init_parser()
     
-    def init_parser(self):
-        self.ptext = [''.join(t for t in p.itertext()) for p in self.doc]
-        props = self.get_props(*self.ptext[0:5])
-        self.xpub = etree.Element('project', props)
-        xsect = '//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]'
-        self.sections = self.doc.xpath(xsect, namespaces=xns)
-    
-    def parse(self):
-        # TODO: Add support for roman numeral volume numbers
-        # REQUIRES PROJECT: TO BE ITS OWN LINE
-        # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
-        # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
-        for index, sect in enumerate(self.sections):
-            doc_index = self.doc.index(sect)
-            pdata = self.ptext[doc_index]
-            if not self.ptext[doc_index + 1]:
-                self.add_phase(pdata)
-                continue
-            else:
-                self.add_unit(pdata)
-            next_doc_index = self.doc.index(self.sections[index + 1])
-            self.parse_sect(self.ptext[doc_index + 1:next_doc_index])
-        return self.xpub
-    
     def init_regx(self):
         self.regx = {
             'split': re.compile(r'\t+'),
             'draw': re.compile(r'[-0-9]{6}', re.I),
             'proc': re.compile(r'^([A-Z]{2,6}\d{4}\S*|BTC ?\d\d)'),
             'phase': re.compile(r' PHASE| PROCEDURES?|[\t].*)')
+            'rev': re.compile(r'[\S\s]*rev ([A-Z0-9]+)[\S\s]*', re.I)
         }
+    
+    def init_parser(self):
+        self.ptext = [''.join(t for t in p.itertext()) for p in self.doc]
+        props = self.get_props(*self.ptext[0:5])
+        self.xpub = etree.Element('project', props)
+        xsect = '//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]'
+        self.sections = self.doc.xpath(xsect, namespaces=xns)
     
     def get_props(self, sys, cust, proj, rig, sm):
         props = {
@@ -74,11 +64,7 @@ class OutlineParser:
             if self.regx['draw'].match(para):
                 self._add_draw(para, tsplit)
             elif self.regx['proc'].match(para):
-                self._add_proc(para)
-            elif tsplit[0].beginswith('Rev'):
-                self._proc.set('rev', tsplit[0][-2:])
-            elif 'ADVISORY' in para:
-                self._proc.set('advisory', 'True')
+                self._add_proc(para, '\n'.join(pdata))
     
     def add_phase(self, phase_text):
         title = self.regx['phase'].sub('', phase_text)
@@ -103,9 +89,19 @@ class OutlineParser:
         if self.draft and 'bluesheet' in para.lower():
             draw.set('bs', 'True')
     
-    def _add_proc(self, para):
-        procid = self.regx['proc'].match(para)[0]
-        self._proc = etree.SubElement(self._unit, 'procedure', id=self.format_id(procid))
+    def _add_proc(self, para, sect_text):
+        proc = {
+            'id': self.format_id(self.regx['proc'].match(para)[0]),
+        }
+        rev = self.regx['rev'].sub(self._rev_repl, sect_text)
+        proc['rev'] = rev[-2:]
+        proc['filename'] = proc['id'] + rev
+        if 'advisory' in sect_text.lower():
+            proc['advisory'] = 'True'
         if self.draft and 'bluesheet' in para.lower():
-            self._proc.set('bs', 'True')
+            proc['bs'] = 'True'
+        etree.SubElement(self._unit, 'procedure', proc))
+    
+    def _rev_repl(self, match_obj):
+        return '.R' + (match_obj[1] if match_obj[1].isdigit() else '00')
     

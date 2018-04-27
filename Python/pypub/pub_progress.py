@@ -14,9 +14,10 @@ from wxbutton import PubButton
 # Saving [sm name (same as proj folder)]
 
 class PypubProgress(wx.Dialog):
-    def __init__(self, colors):
+    def __init__(self, colors, on_abort):
         super().__init__(self, None)
         self.colors = colors
+        self.on_abort = on_abort
         self.BackgroundColour = self.colors['bg']
         self.ForegroundColour = self.colors['fg']
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
@@ -30,7 +31,7 @@ class PypubProgress(wx.Dialog):
         self.add_abort()
         self.SetSizerAndFit(self.sizer)
         self.Centre()
-        self.Show(True)
+        self.ShowModal()
     
     def add_message(self, msg):
         self.message = wx.StaticText(self, label=msg, style=wx.ALIGN_LEFT)
@@ -62,7 +63,7 @@ class PypubProgress(wx.Dialog):
     def on_close(self, evt):
         confirm = wx.MessageBox('Are you sure you want to abort?', 'Confirm', wx.YES_NO|wx.CANCEL)
         if confirm == wx.YES:
-            self.Destroy()
+            self.on_abort('Operation aborted')
     
     def init_prog(self, msg, rng=1):
         self.set_msg(msg)

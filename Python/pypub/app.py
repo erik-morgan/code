@@ -1,40 +1,48 @@
 import gui
 import pub_config as config
 from pypub import Pypub
+from pub_progress import PypubProgress
+from pub_error_dialog import ErrorDialog
 from send2trash import send2trash
 import wx
+
+# add clean_up function for aborted process
+# add font to pub_config and pass to gui windows
 
 class PypubApp:
     def __init__(self):
         self.app = wx.App()
-        self.mainframe = gui.PypubGUI('pypub', self.oninit, self.onquit)
+        self.mainframe = gui.PypubGUI('pypub', self.on_click)
         self.mainframe.init_gui(config.colors())
         dir_list = config.load_dirs()
         self.dirs = [f'{d[0]}={d[2]}' for d in dir_list if d[0] != 'proj']
         self.mainframe.build_gui(dir_list)
     
-    def oninit(self):
-        fields = self.mainframe.pack_fields()
-        self.mainframe.Destroy()
-        pypub = Pypub(fields)
-        pypub.parseOutline()
-        pypub.fileCheck()
-        # convert pypub functions to this_style from camelcase
-        # probably going to need custom exception/error class
-        # otherwise: if pypub displays error in messagebox, it can close
-        # all the gui parts, but this function will continue
-        send2trash(bytes(pypub.opub))
-    
-    def onquit(self):
-        fields = self.mainframe.pack_fields()
+    def on_click(self, evt=None):
+        self.fields = self.mainframe.pack_fields()
         self.mainframe.Destroy()
         if set(fields) != set(self.dirs):
             config.dump_dirs('\n'.join(fields))
+        if evt and evt.EventObject.Name == 'binit':
+            self.on_init()
+    
+    def on_init(self):
+        self.prog = PypubProgress(config.colors(), self.on_error)
+        pypub = Pypub(fields, self.prog)
+        try:
+            pypub.get_pub()
+            pypub.file_check()
+            pypub.build_pub()
+            send2trash(bytes(pypub.opub))
+        except (OutlineError, MissingFileError) as err:
+            self.on_error(err.message)
     
     def on_error(self, err_msg):
-        wx.MessageBox(err_msg, 'Error', wx.OK)
+        self.prog.Destroy()
+        ed = ErrorDialog(err_msg)
+        ed.Centre()
+        ed.ShowModal()
     
-
 if __name__ == '__main__':
     app = PypubApp()
     

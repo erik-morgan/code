@@ -8,13 +8,12 @@ from wxfield import TextField
 
 class PypubGUI(wx.Frame):
     
-    def __init__(self, title, oninit, onquit):
-        self.oninit = oninit
-        self.onquit = onquit
+    def __init__(self, title, on_click):
+        self.on_click = on_click
         super().__init__(None, title=title)
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
         self.Bind(wx.EVT_CHAR_HOOK, self.onchar)
-        self.Bind(wx.EVT_CLOSE, self.onquit)
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
     
     def init_gui(self, colors):
         self.colors = colors
@@ -32,9 +31,9 @@ class PypubGUI(wx.Frame):
             self.sizer.Add(self.vsizer, 0, wx.EXPAND)
         self.hsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.hsizer.AddStretchSpacer(1)
-        self.build_button('Quit', 'bquit', self.onquit, self.add_quit)
+        self.build_button('Quit', 'bquit', self.on_click, self.add_quit)
         self.hsizer.AddSpacer(8)
-        self.build_button('Run', 'binit', self.oninit, self.add_init)
+        self.build_button('Run', 'binit', self.on_click, self.add_init)
         self.hsizer.AddSpacer(16)
         self.sizer.Add(self.hsizer, 0, wx.EXPAND)
         self.sizer.Add((-1, 16), 1, wx.EXPAND)
@@ -90,7 +89,7 @@ class PypubGUI(wx.Frame):
         key = chr(evt.KeyCode)
         mod = evt.GetModifiers()
         if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
-            self.quit_app()
+            self.on_click()
         evt.DoAllowNextEvent()
     
     def pack_fields(self):
@@ -98,4 +97,5 @@ class PypubGUI(wx.Frame):
         for field in self.fields:
             field_list.append(f'{field.name}={field.value}')
         return field_list
+    
     
