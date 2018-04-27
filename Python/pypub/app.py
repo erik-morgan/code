@@ -1,6 +1,7 @@
 import gui
 import pub_config as config
 from pypub import Pypub
+from send2trash import send2trash
 import wx
 
 class PypubApp:
@@ -14,27 +15,25 @@ class PypubApp:
     
     def oninit(self):
         fields = self.mainframe.pack_fields()
-        pypub = Pypub(fields, self.onerror)
+        self.mainframe.Destroy()
+        pypub = Pypub(fields)
         pypub.parseOutline()
         pypub.fileCheck()
-        # Progress Steps:
-        #   Parsing outline...
-        #   Checking for files...
-        #   Building manual...
-        #       Processing RP####
-        #   Assembling manual...
-        # pass fields to pypub init function
-        # then begin phase 2 (progress window and 
-        # error dialog listing missing files)
+        # convert pypub functions to this_style from camelcase
+        # probably going to need custom exception/error class
+        # otherwise: if pypub displays error in messagebox, it can close
+        # all the gui parts, but this function will continue
+        send2trash(bytes(pypub.opub))
     
     def onquit(self):
         fields = self.mainframe.pack_fields()
+        self.mainframe.Destroy()
         if set(fields) != set(self.dirs):
             config.dump_dirs('\n'.join(fields))
     
-    def onerror(self, err_msg):
-        # raise error dialog listing missing files
-        
+    def on_error(self, err_msg):
+        wx.MessageBox(err_msg, 'Error', wx.OK)
+    
 
 if __name__ == '__main__':
     app = PypubApp()

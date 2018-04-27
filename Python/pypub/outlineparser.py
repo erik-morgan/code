@@ -2,27 +2,32 @@ import re
 from lxml import etree
 
 class OutlineParser:
+    ns = {
+        'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
+        'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+    }
+    
     def __init__(self, xdoc):
-        self.ns = {
-            'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
-            'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
-        }
-        self.doc = etree.fromstring(re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc))[0]
+        doc = re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc)
+        self.doc = etree.fromstring(doc)[0]
         for node in self.doc.xpath('//w:p[./w:pPr//w:strike]', namespaces=xns):
             self.doc.remove(node)
         self.init_regx()
+        self.init_parser()
+    
+    def init_parser(self):
+        self.ptext = [''.join(t for t in p.itertext()) for p in self.doc]
+        props = self.get_props(*self.ptext[0:5])
+        self.xpub = etree.Element('project', props)
+        xsect = '//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]'
+        self.sections = self.doc.xpath(xsect, namespaces=xns)
     
     def parse(self):
         # TODO: Add support for roman numeral volume numbers
         # REQUIRES PROJECT: TO BE ITS OWN LINE
         # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
         # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
-        self.ptext = [''.join(t for t in p.itertext()) for p in self.doc]
-        props = self.get_props(*self.ptext[0:5])
-        self.xpub = etree.Element('project', props)
-        xsect = '//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]'
-        self.sections = self.doc.xpath(xsect, namespaces=xns)
-        for index, sect in enumerate(sections):
+        for index, sect in enumerate(self.sections):
             doc_index = self.doc.index(sect)
             pdata = self.ptext[doc_index]
             if not self.ptext[doc_index + 1]:
@@ -30,7 +35,7 @@ class OutlineParser:
                 continue
             else:
                 self.add_unit(pdata)
-            next_doc_index = self.doc.index(sections[index + 1])
+            next_doc_index = self.doc.index(self.sections[index + 1])
             self.parse_sect(self.ptext[doc_index + 1:next_doc_index])
         return self.xpub
     

@@ -60,17 +60,20 @@ class PypubProgress(wx.Dialog):
         evt.DoAllowNextEvent()
     
     def on_close(self, evt):
-        confirm = wx.MessageBox('Are you sure you want to abort?', wx.YES_NO|wx.CANCEL)
+        confirm = wx.MessageBox('Are you sure you want to abort?', 'Confirm', wx.YES_NO|wx.CANCEL)
         if confirm == wx.YES:
             self.Destroy()
     
     def init_prog(self, msg, rng=1):
         self.set_msg(msg)
-        self.range = rng
-        self.prog_inc = self.prog_bar.Size.Width / rng
+        self.set_rng(rng)
     
     def set_msg(self, msg_txt=''):
         self.msg.Label = msg_txt
+    
+    def set_rng(self, rng):
+        self.range = rng
+        self.prog_inc = self.prog_bar.Size.Width / rng
     
     def update(self, new_msg=None):
         if new_msg:

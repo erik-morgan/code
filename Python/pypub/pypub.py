@@ -2,6 +2,7 @@ from pathlib import Path
 from lxml import etree
 from zipfile import ZipFile
 from outlineparser import OutlineParser
+from pub_progress import PypubProgress
 
 # Remove .opub.xml after finished
 # Stop putting pull lists into outline folder
@@ -19,19 +20,23 @@ from outlineparser import OutlineParser
 
 class Pypub:
 
-    def __init__(self, dir_list, err_func):
+    def __init__(self, dir_list):
         for directory in dir_list:
             name, path = directory.split('=', 1)
             setattr(self, name, Path(path))
         self.opub = self.proj / '.opub.xml'
-        self.onerror = err_func
         self.docx = list(self.proj.rglob('*Outline.docx'))
+        self.prog = PypubProgress(config.colors())
         if not self.docx:
-            self.onerror('No outline found in project directory. Outlines must end in "Outline.docx".')
+            self.on_error('No outline found in project directory. Outlines must end in "Outline.docx".')
         else:
             self.docx = self.docx[0]
             self.docx_mtime = self.docx.stat().st_mtime
-
+    
+    # split parseOutline into get_pub and parse_outline methods
+    # consider making outlineparser less stand-alone:
+    #   split up the parse method, and loop through sections in this class
+    
     def parseOutline(self):
         if self.opub.exists() and self.opub.stat().st_mtime < self.docx_mtime:
             self.pub = etree.fromstring(self.opub.read_bytes())
@@ -39,6 +44,7 @@ class Pypub:
             with ZipFile(self.docx) as zip:
                 xdoc = zip.open('word/document.xml').read()
             self.parser = OutlineParser(xdoc)
+            self.prog.init_prog('Parsing Outline...', len(self.parser.sections))
             self.pub = self.parser.parse()
             self.opub.write_bytes(etree.tostring(self.pub))
     
@@ -68,10 +74,14 @@ class Pypub:
         docs = procs | draws
         missing = docs - set(self.files)
         if missing:
-            self.onerror('Unable to find the following files:\n' + '\n'.join(missing))
+            self.on_error('Unable to find the following files:\n' + '\n'.join(missing))
     
     def buildPub(pub):
         # write jsx function to handle indd files:
         # must accept the file to use, the drawings, and the output
         # then use pdftk or a python pdf library to compile everything
         pass
+    
+        
+    
+    
