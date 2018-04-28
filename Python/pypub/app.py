@@ -34,7 +34,7 @@ class PypubApp:
             pypub.file_check()
             pypub.build_pub()
             send2trash(bytes(pypub.opub))
-        except (OutlineError, MissingFileError) as err:
+        except (OutlineError, MissingFileError, AppendixError) as err:
             self.on_error(err.message)
     
     def on_error(self, err_msg):

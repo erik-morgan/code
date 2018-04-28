@@ -2,7 +2,7 @@ from path_lib import Path
 from lxml import etree
 from zipfile import ZipFile
 from outlineparser import OutlineParser
-from pub_exceptions import OutlineError, MissingFileError
+from pub_exceptions import OutlineError, MissingFileError, AppendixError
 
 # Use INDD RPs with TOCs in front instead of separate files?
 # Ignore advisory, and stick it in to INDD
@@ -13,6 +13,13 @@ from pub_exceptions import OutlineError, MissingFileError
 # TODO: add handling of third party documents for appendix
 # TODO: introductions and pdf cover locations
 # TODO: add intros and back cover to PDF location
+# Consider using R00 for Rev NC
+# 
+# IMPORTANT:
+#   Start discussion about killing individual TOCs
+#   If I require appendix sections to be pre-built, I can ignore third-party documents
+#   File Naming: SS0264.R7 (TOCs have .TOC after rev)
+
 
 class Pypub:
 
@@ -26,12 +33,14 @@ class Pypub:
             raise OutlineError()
         else:
             self.docx = self.docx[0]
-            self.docx_mtime = self.docx.stat().st_mtime
         self.prog = progress_dialog
     
     def get_pub(self):
         self.prog.init_prog('Parsing Outline...')
-        if self.opub.exists() and self.opub.stat().st_mtime < self.docx_mtime:
+        if self.opub.exists():
+            opub_mtime = self.opub.stat().st_mtime
+            docx_mtime = self.docx.stat().st_mtime
+        if opub_mtime and opub_mtime < docx_mtime:
             self.pub = etree.fromstring(self.opub.read_bytes())
         else:
             with ZipFile(self.docx) as zip:
@@ -54,19 +63,19 @@ class Pypub:
                 parser.add_unit(pdata)
             next_doc_index = parser.doc.index(parser.sections[index + 1])
             parser.parse_sect(parser.ptext[doc_index + 1:next_doc_index])
+        appendix = parser.xpub.xpath('//phase[@name="APPENDIX"]')
+        if len(appendix_units):
+            parser.xpub.remove(appendix)
+            parser.xpub.set('appendix', 'True')
         return parser.xpub
     
     def file_check(self):
-        # store tocs like SS0264.R7.TOC.indd
-        # store pdfs like SS0264.R7.pdf
-        # store indd sources like SS0264.R7.indd
-        # consider using R0 for Rev NC
-        # get toc for each proc, and if proc not in pdf, check for source indd
-        # consider adding a function to check if each source indd has corresponding pdf
+        # add appendix check that raises AppendixError
         procs = self.pub.xpath('//procedure[not(@bs)]')
         procs = {proc.get('filename') for proc in procs}
         draws = set(self.pub.xpath('//drawing[not(@bs)]/@id'))
-        indd_lib, proc_lib, draw_lib = self._build_libs()
+        tpdocs = self.pub.xpath('//third-party[not(@bs)]')
+        indd_lib, proc_lib, draw_lib = self._build_libs(len(tpdocs) > 0)
         self.lib = {**indd_lib, **proc_lib, **draw_lib}
         self.files = []
         for proc in procs:
@@ -81,18 +90,24 @@ class Pypub:
         if missing:
             raise MissingFileError(missing)
     
-    def _build_lib(self):
+    def _build_lib(self, need_proc):
+        # i only need indd_lib b/c if i have that, then I can create toc or pdf
+        # check for toc/pdf at run-time, during unit processing
         indd_lib = {i.stem:i for i in self.indd.rglob('*.indd')}
-        proc_lib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
         draw_lib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
+        if need_proc:
+            proc_lib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
+        for draw in list(self.proj.rglob('[0-9]*pdf')):
+            draw_id = d.name.split('.')[0]
+            draw_lib[draw_id] = draw
         proj_docs = list(self.proj.glob('[!O]*/[!.]*'))
         for doc in proj_docs:
             if doc.suffix.lower() == 'indd':
                 indd_lib[doc.stem] = doc
-            elif doc.match('/[A-Z]*pdf'):
-                proc_lib[doc.stem] = doc
             elif doc.match('/[0-9]*pdf'):
                 draw_lib[doc.name.split('.')[0]] = doc
+            else:
+                proc_lib[doc.stem] = doc
         return indd_lib, proc_lib, draw_lib
     
     def future_file_check(self):

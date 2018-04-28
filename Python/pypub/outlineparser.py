@@ -5,7 +5,6 @@ from lxml import etree
 # REQUIRES PROJECT: TO BE ITS OWN LINE
 # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
 # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
-# third-party documents must have bookmarks before script is run
 # Use 2-digit revs, even for nc (00)?
 
 class OutlineParser:
@@ -66,15 +65,13 @@ class OutlineParser:
                 self._add_draw(para, tsplit)
             elif self.regx['proc'].match(para):
                 self._add_proc(para, '\n'.join(pdata))
-            else:
-                self._add_third_party(para)
     
     def add_phase(self, phase_text):
-        title = self.regx['phase'].sub('', phase_text)
-        self._phase = etree.SubElement(self.xpub, 'phase', title=title)
+        title = self.regx['phase'].sub('', phase_text.upper())
+        self._phase = subel(self.xpub, 'phase', {'title': title})
     
     def add_unit(self, unit_text):
-        self._unit = etree.SubElement(self._phase, 'unit')
+        self._unit = subel(self._phase, 'unit')
         if unit_text.beginswith('STACK-UP'):
             unit.set('title', 'Stack-Up and Sequence Drawings')
         elif unit_text.beginswith('CONDUCTOR'):
@@ -110,9 +107,6 @@ class OutlineParser:
         # return else '00' for NC in future
         return '.R' + (match_obj[1] if match_obj[1].isdigit() else '')
     
-    def _add_third_party(self, para):
-        doc_id = self.format_id(para.split()[0])
-        doc = etree.SubElement(self._unit, 'third-party', id=doc_id)
-        if self.draft and 'bluesheet' in para.lower():
-            doc.set('bs', 'True')
+    def subel(self, parent, name, attrs={}):
+        return etree.SubElement(parent, name, attrs)
     
