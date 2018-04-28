@@ -5,7 +5,8 @@ from lxml import etree
 # REQUIRES PROJECT: TO BE ITS OWN LINE
 # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
 # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
-# Use 2-digit revs, even for nc (00)
+# third-party documents must have bookmarks before script is run
+# Use 2-digit revs, even for nc (00)?
 
 class OutlineParser:
     ns = {
@@ -65,6 +66,8 @@ class OutlineParser:
                 self._add_draw(para, tsplit)
             elif self.regx['proc'].match(para):
                 self._add_proc(para, '\n'.join(pdata))
+            else:
+                self._add_third_party(para)
     
     def add_phase(self, phase_text):
         title = self.regx['phase'].sub('', phase_text)
@@ -94,14 +97,22 @@ class OutlineParser:
             'id': self.format_id(self.regx['proc'].match(para)[0]),
         }
         rev = self.regx['rev'].sub(self._rev_repl, sect_text)
-        proc['rev'] = rev[-2:]
+        if rev:
+            proc['rev'] = rev[-2:]
         proc['filename'] = proc['id'] + rev
         if 'advisory' in sect_text.lower():
             proc['advisory'] = 'True'
         if self.draft and 'bluesheet' in para.lower():
             proc['bs'] = 'True'
-        etree.SubElement(self._unit, 'procedure', proc))
+        etree.SubElement(self._unit, 'procedure', proc)
     
     def _rev_repl(self, match_obj):
-        return '.R' + (match_obj[1] if match_obj[1].isdigit() else '00')
+        # return else '00' for NC in future
+        return '.R' + (match_obj[1] if match_obj[1].isdigit() else '')
+    
+    def _add_third_party(self, para):
+        doc_id = self.format_id(para.split()[0])
+        doc = etree.SubElement(self._unit, 'third-party', id=doc_id)
+        if self.draft and 'bluesheet' in para.lower():
+            doc.set('bs', 'True')
     

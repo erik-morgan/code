@@ -1,4 +1,4 @@
-from pathlib import Path
+from path_lib import Path
 from lxml import etree
 from zipfile import ZipFile
 from outlineparser import OutlineParser
@@ -63,34 +63,18 @@ class Pypub:
         # consider using R0 for Rev NC
         # get toc for each proc, and if proc not in pdf, check for source indd
         # consider adding a function to check if each source indd has corresponding pdf
-        procs = []
-        for proc in self.pub.xpath('//procedure[not(@bs)]'):
-            rev = proc.get('rev', '')
-            if not rev or not rev.isdigit():
-                rev = ''
-            else:
-                rev = '.R' + str(rev)
-            procs.append(proc.get('id') + rev)
-        procs = set(procs)
+        procs = self.pub.xpath('//procedure[not(@bs)]')
+        procs = {proc.get('filename') for proc in procs}
         draws = set(self.pub.xpath('//drawing[not(@bs)]/@id'))
-        inddLib = {i.stem:i for i in self.indd.rglob('*.indd')}
-        procLib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
-        drawLib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
-        proj_docs = {f.stem:f for f in self.proj.rglob('*pdf')}
-        for proj_doc in proj_docs:
-            doc_name = proj_doc.name
-            if doc_name[0].isdigit():
-        proj_docs = list((self.proj / 'PDFs').glob('*pdf'))
-        procLib.update({p.stem:p for p in proj_docs})
-        proj_draws = list((self.proj / 'Pull').glob('*pdf'))
-        drawLib.update({d.name.split('.')[0]:d for d in proj_draws})
+        indd_lib, proc_lib, draw_lib = self._build_libs()
+        self.lib = {**indd_lib, **proc_lib, **draw_lib}
         self.files = []
         for proc in procs:
-            if proc in procLib:
-                self.files.append((proc, procLib[proc]))
+            if proc in proc_lib:
+                self.files.append((proc, proc_lib[proc]))
         for draw in draws:
-            if draw in drawLib:
-                self.files.append((draw, drawLib[draw]))
+            if draw in draw_lib:
+                self.files.append((draw, draw_lib[draw]))
         self.files = dict(self.files)
         docs = procs | draws
         missing = docs - set(self.files)
@@ -98,37 +82,18 @@ class Pypub:
             raise MissingFileError(missing)
     
     def _build_lib(self):
-        procs = self.pub.xpath('//procedure[not(@bs)]')
-        format_proc = lambda p: 
-        proc_ids = map((lambda p: ), procs)
-        procs = [p.get('id') + p.get('rev', '') for p in procs]
-        for proc in self.pub.xpath('//procedure[not(@bs)]'):
-            rev = proc.get('rev', '')
-            if not rev.isdigit():
-                rev = ''
-            else:
-                rev = '.R' + str(rev)
-            procs.append(proc.get('id') + rev)
-        procs = set(procs)
-        draws = set(self.pub.xpath('//drawing[not(@bs)]/@id'))
-        inddLib = {i.stem:i for i in self.indd.rglob('*.indd')}
-        procLib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
-        drawLib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
-        proj_docs = {f.stem:f for f in self.proj.rglob('*pdf')}
-        for proj_doc in proj_docs:
-            doc_name = proj_doc.name
-            if doc_name[0].isdigit():
-        proj_docs = list((self.proj / 'PDFs').glob('*pdf'))
-        procLib.update({p.stem:p for p in proj_docs})
-        proj_draws = list((self.proj / 'Pull').glob('*pdf'))
-        drawLib.update({d.name.split('.')[0]:d for d in proj_draws})
-        
-    def get_procs(self, proc_list):
-        for proc in proc_list:
-            proc_name = proc.get('id')
-            rev = proc.get('rev', '')
-            yield  + (rev + 
-    
+        indd_lib = {i.stem:i for i in self.indd.rglob('*.indd')}
+        proc_lib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
+        draw_lib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
+        proj_docs = list(self.proj.glob('[!O]*/[!.]*'))
+        for doc in proj_docs:
+            if doc.suffix.lower() == 'indd':
+                indd_lib[doc.stem] = doc
+            elif doc.match('/[A-Z]*pdf'):
+                proc_lib[doc.stem] = doc
+            elif doc.match('/[0-9]*pdf'):
+                draw_lib[doc.name.split('.')[0]] = doc
+        return indd_lib, proc_lib, draw_lib
     
     def future_file_check(self):
         # this version is for non-separate tocs
@@ -140,17 +105,17 @@ class Pypub:
             procs.append(proc.get('id') + rev)
         procs = set(procs)
         draws = set(self.pub.xpath('//drawing[not(@bs)]/@id'))
-        procLib = {i.stem:i for i in self.indd.glob('*.indd')}
-        drawLib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
+        proc_lib = {i.stem:i for i in self.indd.glob('*.indd')}
+        draw_lib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
         projDraws = list(self.proj.rglob('[0-9]*pdf'))
-        drawLib.update({d.name.split('.')[0]:d for d in projDraws})
+        draw_lib.update({d.name.split('.')[0]:d for d in projDraws})
         self.files = []
         for proc in procs:
-            if proc in procLib:
-                self.files.append((proc, procLib[proc]))
+            if proc in proc_lib:
+                self.files.append((proc, proc_lib[proc]))
         for draw in draws:
-            if draw in drawLib:
-                self.files.append((draw, drawLib[draw]))
+            if draw in draw_lib:
+                self.files.append((draw, draw_lib[draw]))
         self.files = dict(self.files)
         docs = procs | draws
         missing = docs - set(self.files)
