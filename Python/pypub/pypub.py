@@ -90,25 +90,41 @@ class Pypub:
         if missing:
             raise MissingFileError(missing)
     
-    def _build_lib(self, need_proc):
+    def _build_lib(self):
         # i only need indd_lib b/c if i have that, then I can create toc or pdf
         # check for toc/pdf at run-time, during unit processing
+        lib_paths = [
+            (self.indd, '*.indd'),
+            (self.draw, '*.pdf'),
+            (self.proj, '[!O]*/[!.]*')
+        ]
+        lib_list = [f for d, g in lib_paths for f in d.rglob(g)]
+        lib_files = []
+        for f in lib_files:
+            
+        
+        
+        lib = list(self.indd.rglob()) + list(self.draw.rglob())
+        
         indd_lib = {i.stem:i for i in self.indd.rglob('*.indd')}
         draw_lib = {d.name.split('.')[0]:d for d in self.draw.rglob('*.pdf')}
-        if need_proc:
-            proc_lib = {p.stem:p for p in self.pdfs.rglob('*.pdf')}
-        for draw in list(self.proj.rglob('[0-9]*pdf')):
-            draw_id = d.name.split('.')[0]
-            draw_lib[draw_id] = draw
-        proj_docs = list(self.proj.glob('[!O]*/[!.]*'))
+        proj_docs = list(self.proj.rglob())
         for doc in proj_docs:
+            if doc.match('[0-9]*pdf'):
+                draw_lib[doc.name.split('.')[0]] = doc
             if doc.suffix.lower() == 'indd':
                 indd_lib[doc.stem] = doc
-            elif doc.match('/[0-9]*pdf'):
-                draw_lib[doc.name.split('.')[0]] = doc
-            else:
-                proc_lib[doc.stem] = doc
         return indd_lib, proc_lib, draw_lib
+    
+#####################################################################
+    def _lib_gen(self, path_list):
+        for p in path_list:
+            pparts = p.name.lower().split('.')
+            if pparts[-1] == 'pdf' and pparts[0][0].isdigit():
+                yield (pparts[0], p)
+            else:
+                yield (pparts[0:-1], p)
+#####################################################################
     
     def future_file_check(self):
         # this version is for non-separate tocs

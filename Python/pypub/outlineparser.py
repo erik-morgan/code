@@ -6,38 +6,36 @@ from lxml import etree
 # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
 # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
 # Use 2-digit revs, even for nc (00)?
+# standardize drawing descriptions and attach as metadata to drawing library files
 
 class OutlineParser:
-    ns = {
-        'vt': 'http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes',
-        'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+    rx = {
+        'split': re.compile(r'\t+'),
+        'draw': re.compile(r'[0-9]{5}'),
+        'proc': re.compile(r'^([A-Z]{2,6}\d{4}\S*|BTC ?\d\d)'),
+        'phase': re.compile(r' PHASE| PROCEDURES?|[\t].*)')
+        'rev': re.compile(r'[\S\s]*rev ([A-Z0-9]+)[\S\s]*', re.I),
+        'clean': re.compile(r'\b[rw]:| xmlns[^>]+'),
     }
     
     def __init__(self, xdoc):
-        doc = re.sub(r'<w:(tab|br)/>', '<w:t>\t</w:t>', xdoc)
-        self.doc = etree.fromstring(doc)[0]
-        for node in self.doc.xpath('//w:p[./w:pPr//w:strike]', namespaces=xns):
-            self.doc.remove(node)
-        self.init_regx()
-        self.init_parser()
+        self._clean_doc(xdoc)
+        self.ptext = [self.get_ptxt(p) for p in self.doc]
+        self.sections = self.doc.xpath('//p[.//u and .//b and .//t'
+            'and not(starts-with(.//text(), "TABLE")) '
+            'and not(starts-with(.//text(), "INTRO"))]')
     
-    def init_regx(self):
-        self.regx = {
-            'split': re.compile(r'\t+'),
-            'draw': re.compile(r'[-0-9]{6}', re.I),
-            'proc': re.compile(r'^([A-Z]{2,6}\d{4}\S*|BTC ?\d\d)'),
-            'phase': re.compile(r' PHASE| PROCEDURES?|[\t].*)')
-            'rev': re.compile(r'[\S\s]*rev ([A-Z0-9]+)[\S\s]*', re.I)
-        }
-    
-    def init_parser(self):
-        self.ptext = [''.join(t for t in p.itertext()) for p in self.doc]
-        props = self.get_props(*self.ptext[0:5])
+    def _clean_doc(self, xdoc):
+        xdoc = self.rx['clean'].sub('', xdoc)
+        self.doc = etree.fromstring(xdoc)[0]
+        props = self.get_props(self.doc[0:5])
         self.xpub = etree.Element('project', props)
-        xsect = '//w:p[not(./w:pPr//w:strike) and .//w:u and .//w:b and position() > 2]'
-        self.sections = self.doc.xpath(xsect, namespaces=xns)
+        for strike in self.doc.xpath('//p[./pPr/rPr/strike]'):
+            self.doc.remove(strike)
     
-    def get_props(self, sys, cust, proj, rig, sm):
+    def get_props(self, props):
+        props = [self.get_ptxt(node) for node in props]
+        sys, cust, proj, rig, sm = props
         props = {
             'sys': sys.split('\t')[0],
             'cust': cust.split(': ', 1)[-1],
@@ -60,14 +58,26 @@ class OutlineParser:
         for para in pdata:
             if not para:
                 continue
-            tsplit = self.regx['split'].split(para)
-            if self.regx['draw'].match(para):
-                self._add_draw(para, tsplit)
-            elif self.regx['proc'].match(para):
+            tdiv = [s.strip() for s in self.rx['split'].split(para) if len(s)]
+            if self.rx['draw'].match(tdiv[0]):
+                self._add_draw(para, tdiv)
+            elif self.rx['proc'].match(para):
                 self._add_proc(para, '\n'.join(pdata))
     
+    def get_ptxt(self, para):
+        # test speed of targeted para.xpath vs general para.iter('r'); no longer needed?
+        para_text = ''
+        for el in para.xpath('./r/*[last()]'):
+            if el.tag == 't':
+                para_text += el.text
+            if el.tag == 'tab' and para_text[-1] != '\t':
+                para_text = para_text.strip() + '\t'
+            if el.tag == 'br':
+                break
+        return para_text
+    
     def add_phase(self, phase_text):
-        title = self.regx['phase'].sub('', phase_text.upper())
+        title = self.rx['phase'].sub('', phase_text.upper())
         self._phase = subel(self.xpub, 'phase', {'title': title})
     
     def add_unit(self, unit_text):
@@ -79,21 +89,20 @@ class OutlineParser:
         elif 'TEST OPTION' in unit_text:
             unit.set('title', 'BOP Test Options')
     
-    def format_id(self, data):
-        data = data.replace('/', '-')
-        return data.replace(' ', '')
-    
-    def _add_draw(self, para, tsplit):
-        draw = etree.SubElement(self._unit, 'drawing', id=self.format_id(tsplit[0]))
-        draw.text = tsplit[1]
+    def _add_draw(self, para, tdiv):
+        draw = {
+            'id': self.format_id(tdiv[0])
+        }
+        draw = subel(self._unit, 'drawing', id=)
+        draw.text = tdiv[1]
         if self.draft and 'bluesheet' in para.lower():
             draw.set('bs', 'True')
     
     def _add_proc(self, para, sect_text):
         proc = {
-            'id': self.format_id(self.regx['proc'].match(para)[0]),
+            'id': self.format_id(self.rx['proc'].match(para)[0]),
         }
-        rev = self.regx['rev'].sub(self._rev_repl, sect_text)
+        rev = self.rx['rev'].sub(self._rev_repl, sect_text)
         if rev:
             proc['rev'] = rev[-2:]
         proc['filename'] = proc['id'] + rev
@@ -109,4 +118,8 @@ class OutlineParser:
     
     def subel(self, parent, name, attrs={}):
         return etree.SubElement(parent, name, attrs)
+    
+    def format_id(self, data):
+        data = data.replace('/', '-')
+        return data.replace(' ', '')
     
