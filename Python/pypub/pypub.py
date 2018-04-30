@@ -51,7 +51,7 @@ class Pypub:
     
     def parse_outline(self, xdoc):
         parser = OutlineParser(xdoc)
-        self.prog.set_rng(len(parser.sections))
+        self.prog.set_rng(parser.init_parser())
         for index, sect in enumerate(parser.sections):
             doc_index = parser.doc.index(sect)
             pdata = parser.ptext[doc_index]

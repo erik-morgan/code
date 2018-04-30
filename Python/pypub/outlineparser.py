@@ -6,7 +6,9 @@ from lxml import etree
 # CONSIDER IGNORING REVS BC IT SHOULD USE MAIN LIBRARY &
 # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
 # Use 2-digit revs, even for nc (00)?
+# return else '00' for NC in future in _rev_repl function
 # standardize drawing descriptions and attach as metadata to drawing library files
+# make sure deleting all strikes is okay; what if only a side note is strike-thru?
 
 class OutlineParser:
     rx = {
@@ -19,23 +21,24 @@ class OutlineParser:
     }
     
     def __init__(self, xdoc):
-        self._clean_doc(xdoc)
-        self.ptext = [self.get_ptxt(p) for p in self.doc]
-        self.sections = self.doc.xpath('//p[.//u and .//b and .//t'
-            'and not(starts-with(.//text(), "TABLE")) '
-            'and not(starts-with(.//text(), "INTRO"))]')
-    
-    def _clean_doc(self, xdoc):
         xdoc = self.rx['clean'].sub('', xdoc)
         self.doc = etree.fromstring(xdoc)[0]
-        props = self.get_props(self.doc[0:5])
-        self.xpub = etree.Element('project', props)
-        for strike in self.doc.xpath('//p[./pPr/rPr/strike]'):
-            self.doc.remove(strike)
     
-    def get_props(self, props):
-        props = [self.get_ptxt(node) for node in props]
-        sys, cust, proj, rig, sm = props
+    def init_parser(self):
+        self.ptext = {}
+        self.sections = []
+        for para, text in self.para_gen():
+            if para.find('strike'):
+                self.doc.remove(para)
+                continue
+            if sect_test(para, text):
+                self.sections.append(para)
+            self.ptext[para] = text
+        self.get_props()
+        return len(self.sections)
+    
+    def get_props(self):
+        sys, cust, proj, rig, sm = list(self.ptext.values())[0:5]
         props = {
             'sys': sys.split('\t')[0],
             'cust': cust.split(': ', 1)[-1],
@@ -52,7 +55,20 @@ class OutlineParser:
             i = smparts.index('rev')
             props['rev'] = smparts[i + 1]
         self.draft = props['draft'] = 'draft' in sm.lower()
-        return props
+        self.xpub = etree.Element('project', props)
+    
+    def para_gen(self):
+        def _parse_para(para):
+            for node in para.iter('t', 'tab', 'br'):
+                if node.tag == 'br':
+                    break
+                if node.tag == 't':
+                    para_text = (para_text or '') + node.text
+                elif node.tag == 'tab' and para_text[-1] != '\t':
+                    para_text = para_text.strip() + '\t'
+            return para_text
+        for para in self.doc.iter('p'):
+            yield (para, _parse_para(para) or '')
     
     def parse_sect(self, pdata):
         for para in pdata:
@@ -63,18 +79,6 @@ class OutlineParser:
                 self._add_draw(para, tdiv)
             elif self.rx['proc'].match(para):
                 self._add_proc(para, '\n'.join(pdata))
-    
-    def get_ptxt(self, para):
-        # test speed of targeted para.xpath vs general para.iter('r'); no longer needed?
-        para_text = ''
-        for el in para.xpath('./r/*[last()]'):
-            if el.tag == 't':
-                para_text += el.text
-            if el.tag == 'tab' and para_text[-1] != '\t':
-                para_text = para_text.strip() + '\t'
-            if el.tag == 'br':
-                break
-        return para_text
     
     def add_phase(self, phase_text):
         title = self.rx['phase'].sub('', phase_text.upper())
@@ -113,7 +117,6 @@ class OutlineParser:
         etree.SubElement(self._unit, 'procedure', proc)
     
     def _rev_repl(self, match_obj):
-        # return else '00' for NC in future
         return '.R' + (match_obj[1] if match_obj[1].isdigit() else '')
     
     def subel(self, parent, name, attrs={}):
@@ -122,4 +125,10 @@ class OutlineParser:
     def format_id(self, data):
         data = data.replace('/', '-')
         return data.replace(' ', '')
+    
+    def sect_test(self, sect, text):
+        sect_tags = {e.tag for e in sect.iter()}
+        if {'b', 'u', 't'} <= sect_tags and not text[0:5] in 'TABLE INTRO':
+                return True
+        return False
     
