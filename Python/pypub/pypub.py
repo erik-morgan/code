@@ -51,11 +51,20 @@ class Pypub:
     
     def parse_outline(self, xdoc):
         parser = OutlineParser(xdoc)
-        self.prog.set_rng(parser.init_parser())
-        for index, sect in enumerate(parser.sections):
-            doc_index = parser.doc.index(sect)
-            pdata = parser.ptext[doc_index]
+        parser.get_sections()
+        self.prog.set_rng(parser.sect_len)
+        for i, sect in enumerate(parser.sections):
+            text = parser.get_text(para)
+            if text[0:5] in 'TABLE INTRO':
+                continue
+            if 'APPENDIX' in text:
+                parser.doc.set('appendix', 'True')
+            this_index = parser.doc.index(sect)
+            parser.add_sect(text, this_index)
+            next_index = parser.doc.index(parser.sections[i + 1]) if i < parser.sect_len else -1
+            parser.parse_sect(this_index, next_index)
             self.prog.update()
+
             if not parser.ptext[doc_index + 1]:
                 parser.add_phase(pdata)
                 continue
