@@ -51,27 +51,16 @@ class Pypub:
     
     def parse_outline(self, xdoc):
         parser = OutlineParser(xdoc)
-        parser.get_sections()
-        self.prog.set_rng(parser.sect_len)
-        for i, sect in enumerate(parser.sections):
-            text = parser.get_text(para)
-            if text[0:5] in 'TABLE INTRO':
-                continue
+        self.prog.set_rng(len(parse.sections))
+        for sect in parser.sections:
+            text = sect[0]
             if 'APPENDIX' in text:
                 parser.doc.set('appendix', 'True')
-            this_index = parser.doc.index(sect)
-            parser.add_sect(text, this_index)
-            next_index = parser.doc.index(parser.sections[i + 1]) if i < parser.sect_len else -1
-            parser.parse_sect(this_index, next_index)
-            self.prog.update()
-
-            if not parser.ptext[doc_index + 1]:
-                parser.add_phase(pdata)
-                continue
             else:
-                parser.add_unit(pdata)
-            next_doc_index = parser.doc.index(parser.sections[index + 1])
-            parser.parse_sect(parser.ptext[doc_index + 1:next_doc_index])
+                parser.add_sect(sect)
+            self.prog.update()
+            
+            
         appendix = parser.xpub.xpath('//phase[@name="APPENDIX"]')
         if len(appendix_units):
             parser.xpub.remove(appendix)
