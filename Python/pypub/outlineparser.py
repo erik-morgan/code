@@ -17,6 +17,7 @@ class OutlineParser:
         self.doc = etree.fromstring(xdoc)[0]
         self.get_props()
         self.sections = list(self.get_sections())
+        self.doc_list = []
 
     def get_sections(self):
         for para in self.doc.iter('p'):
@@ -76,7 +77,7 @@ class OutlineParser:
             elif re.match(r'[A-Z]{2,6}\d{4}|BTC ?\d\d', par):
                 par = par.replace('BTC ', 'BTC')
                 text = '\n'.join(sections).lower()
-                rev = re.sub(r'(?s)(.+\brev ?(\w\w))?.*', r'\2', text)
+                rev = re.sub(r'(?s)(.+\brev ?(\d+))?.*', r'\2', text)
                 self._add_proc(par, rev, sect_bs, 'advisory' in text)
             sections.remove(par):
     
@@ -84,28 +85,23 @@ class OutlineParser:
         draw = {'id': tsplit[0]}
         if self.draft and 'bluesheet' in para.lower():
             draw['bs'] = 'True'
-        draw = subel(self._unit, 'drawing', draw)
+        else:
+            self.doc_list.append(tsplit[0])
+        draw = subel(self._unit, 'dw', draw)
         draw.text = tsplit[1]
     
     def _add_proc(self, text, rev, sect_bs, adv):
         proc = {
             'id': '-'.join(re.split(r'\W', text.split()[0])),
-            'rev': rev
+            'rev': rev,
         }
-        proc['filename'] = proc['id'] + (f'.R{rev}' if rev else '')
-        if 'bluesheet' in text.lower():
-            proc['bs'] = 'True'
         if adv:
             proc['advisory'] = 'True'
-        subel(self._unit, 'procedure', proc)
-    
-    def _rev_repl(self, match_obj):
-        return '.R' + (match_obj[1] if match_obj[1].isdigit() else '')
+        if sect_bs or 'bluesheet' in text.lower():
+            proc['bs'] = 'True'
+        else:
+            self.doc_list.append(proc['id'] + (f'.R{rev}' if rev else ''))
+        subel(self._unit, 'rp', proc)
     
     def subel(self, parent, name, attrs={}):
         return etree.SubElement(parent, name, attrs)
-    
-    def format_id(self, data):
-        data = data.replace('/', '-')
-        return data.replace(' ', '')
-    

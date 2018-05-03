@@ -68,6 +68,8 @@ class PypubProgress(wx.Dialog):
     def init_prog(self, msg, rng=1):
         self.set_msg(msg)
         self.set_rng(rng)
+        if not self.Shown:
+            self.init_win()
     
     def set_msg(self, msg_txt=''):
         self.msg.Label = msg_txt
