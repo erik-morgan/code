@@ -1,4 +1,4 @@
-from path_lib import Path
+from os import path, scandir, walk
 from lxml import etree
 from zipfile import ZipFile
 import re
@@ -16,6 +16,8 @@ from pub_exceptions import OutlineError, MissingFileError, AppendixError
 # TODO: add intros and back cover to PDF location
 # Consider using R00 for Rev NC
 # 
+# f for f in gen_expr if 'Outline.docx' in f
+# 
 # IMPORTANT:
 #   Start discussion about killing individual TOCs
 #   File Naming: SS0264.R7 (TOCs have .TOC after rev)
@@ -25,14 +27,13 @@ from pub_exceptions import OutlineError, MissingFileError, AppendixError
 
 class Pypub:
 
-    def __init__(self, dir_list, progress_dialog):
-        self.dir_list = []
-        for directory in dir_list:
+    def __init__(self, dirs, progress_dialog):
+        for directory in dirs:
             name, path = directory.split('=', 1)
-            setattr(self, name, Path(path))
-            self.dir_list.append(getattr(self, name))
-        self.opub = self.proj / '.opub.xml'
-        self.docx = list(self.proj.rglob('*Outline.docx'))
+            setattr(self, name, path)
+        self.opub = path.join(self.proj, '.opub.xml')
+        self.proj_files = list(self.idir(self.proj, False))
+        self.docx = [f for f in self.proj_files if 'Outline.docx' in f]
         if not self.docx:
             raise OutlineError()
         else:
@@ -40,17 +41,17 @@ class Pypub:
         self.prog = progress_dialog
     
     def get_pub(self):
-        if self.opub.exists():
+        if path.is_file(self.opub):
             opub_mtime = self.opub.stat().st_mtime
             docx_mtime = self.docx.stat().st_mtime
         if opub_mtime and opub_mtime < docx_mtime:
-            self.pub = etree.fromstring(self.opub.read_bytes())
+            self.pub = etree.parse(self.opub).getroot()
         else:
             with ZipFile(self.docx) as zip:
                 xdoc = zip.open('word/document.xml').read()
             self.pub = self.parse_outline(xdoc)
             self.prog.set_msg('Saving parsed outline...')
-            self.opub.write_bytes(etree.tostring(self.pub))
+            etree.ElementTree(self.pub).write(self.opub)
             self.prog.update()
     
     def parse_outline(self, xdoc):
@@ -74,33 +75,54 @@ class Pypub:
         if self.pub.get('appendix') and 'Appendix' not in self.lib:
             raise AppendixError
     
-    def _build_lib(self):
-        dir_list = [self.indd, self.draw, self.proj]
-        lib = dict(f for d in dir_list for f in d.rglob('*[ip][dn]*'))
+    def gen_lib(self):
+        dir_list = [
+            self.idir(self.indd),
+            self.idir(self.draw),
+            self.proj_files
+        ]
+        file_gen = (f for d in dir_list for f in d)
+        for file in file_gen:
+            # FUCK. cant use str path to get name
+            # just remake with os.walk (into list of lists or handle split there)
+            if '.indd' in file.lower():
+                yield ()
+        file_
+        list(self.idir(self.indd)) + 
+        self.indd
+        for f in self.idir(self.dirs):
+            
+        file_list = [for d in dirs for f in d.rglob('*.*')]
+        lib = dict(f for d in dirs for f in d.rglob('*[ip][dn]*'))
         return lib
     
-    def _build_lib(self):
-        dir_list = [self.indd, self.draw, self.proj]
-        lib = dict(f for d in dir_list for f in self.parse_dir(d))
-        return lib
-    
-    def parse_dir(self, dir_path):
-        for item in dir_path.iterdir():
-            if item.is_dir():
-                yield from self.parse_dir(item)
+############################################################
+    def idir(self, dirpath, parts=True):
+        file_list = []
+        for root, dirs, files in walk(dirpath):
+            if parts:
+                file_list.extend([(root, f, f.split('.')[-1]) for f in files])
+############################################################
+        with scandir(dirpath) as d:
+            entries = list(d)
+        for entry in entries:
+            if entry.is_file():
+                yield entry.path
             else:
-                ext = item.suffix.lower()
-                if ext == 'indd':
-                    yield (item.stem, item)
-                elif ext == 'pdf':
-                    yield (item.split('.')[0], item)
-    
+                yield from self.iterdir(entry.path)
+
     def build_pub(pub):
         # write jsx function to handle indd files:
         # must accept the file to use, the drawings, and the output
         # then use pdftk or a python pdf library to compile everything
         pass
     
+#    def findir(self, parent_dir, look_for, files_only=True):
+#        for root, folds, files in walk(parent_dir):
+#            if not files_only:
+#                files += folds
+#            for f in files:
+#                if look_for in f:
+#                    return path.join(root, f)
+#        return None
         
-    
-    

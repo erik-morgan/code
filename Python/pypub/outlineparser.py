@@ -13,7 +13,9 @@ from lxml import etree
 
 class OutlineParser:
     def __init__(self, xdoc):
-        xdoc = re.sub(r'\b[rw]:| xmlns[^>]+', '', xdoc)
+        if isinstance(xdoc, bytes):
+            xdoc = xdoc.decode()
+        xdoc = re.sub(r'\b[rw]:| xmlns[^>]+| encoding=\S+', '', xdoc)
         self.doc = etree.fromstring(xdoc)[0]
         self.get_props()
         self.sections = list(self.get_sections())
