@@ -1,7 +1,7 @@
-from os import path, scandir, walk
+from os import path, walk
 from lxml import etree
 from zipfile import ZipFile
-import re
+import fnmatch as fn
 from outlineparser import OutlineParser
 from pub_exceptions import OutlineError, MissingFileError, AppendixError
 
@@ -32,8 +32,7 @@ class Pypub:
             name, path = directory.split('=', 1)
             setattr(self, name, path)
         self.opub = path.join(self.proj, '.opub.xml')
-        self.proj_files = list(self.idir(self.proj, False))
-        self.docx = [f for f in self.proj_files if 'Outline.docx' in f]
+        self.docx = self.idir(self.proj, '*Outline.docx')
         if not self.docx:
             raise OutlineError()
         else:
@@ -41,6 +40,7 @@ class Pypub:
         self.prog = progress_dialog
     
     def get_pub(self):
+        # os.path.getmtime(path)
         if path.is_file(self.opub):
             opub_mtime = self.opub.stat().st_mtime
             docx_mtime = self.docx.stat().st_mtime
@@ -75,16 +75,18 @@ class Pypub:
         if self.pub.get('appendix') and 'Appendix' not in self.lib:
             raise AppendixError
     
+################################################################################
     def gen_lib(self):
+        fgen = (jp(p, f) for p, ds, fs in os.walk(root) for f in fs)
+        return ((splits['.indd' in f.lower()](f, '.', 1)[0], f) for f in fgen)
+        
         dir_list = [
-            self.idir(self.indd),
+            [(f.split('.')[-1], f) for f in self.idir(self.indd, '*indd')],
             self.idir(self.draw),
             self.proj_files
         ]
         file_gen = (f for d in dir_list for f in d)
         for file in file_gen:
-            # FUCK. cant use str path to get name
-            # just remake with os.walk (into list of lists or handle split there)
             if '.indd' in file.lower():
                 yield ()
         file_
@@ -95,34 +97,18 @@ class Pypub:
         file_list = [for d in dirs for f in d.rglob('*.*')]
         lib = dict(f for d in dirs for f in d.rglob('*[ip][dn]*'))
         return lib
+################################################################################
     
-############################################################
-    def idir(self, dirpath, parts=True):
-        file_list = []
-        for root, dirs, files in walk(dirpath):
-            if parts:
-                file_list.extend([(root, f, f.split('.')[-1]) for f in files])
-############################################################
-        with scandir(dirpath) as d:
-            entries = list(d)
-        for entry in entries:
-            if entry.is_file():
-                yield entry.path
-            else:
-                yield from self.iterdir(entry.path)
-
+    def idir(self, dirpath, pattern=None):
+        jp = path.join
+        fgen = (jp(p, f) for p, ds, fs in walk(dirpath) for f in fs)
+        if pattern:
+            return fn.filter(list(fgen), pattern)
+        return list(fgen)
+    
     def build_pub(pub):
         # write jsx function to handle indd files:
         # must accept the file to use, the drawings, and the output
         # then use pdftk or a python pdf library to compile everything
         pass
     
-#    def findir(self, parent_dir, look_for, files_only=True):
-#        for root, folds, files in walk(parent_dir):
-#            if not files_only:
-#                files += folds
-#            for f in files:
-#                if look_for in f:
-#                    return path.join(root, f)
-#        return None
-        
