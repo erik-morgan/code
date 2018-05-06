@@ -28,17 +28,20 @@ class PypubApp:
     
     def on_init(self):
         prog = PypubProgress(config.colors(), self.on_error)
-        pypub = Pypub(fields, prog)
+        prog.init_prog('Loading Outline...')
         try:
-            prog.init_prog('Parsing Outline...')
-            pypub.get_pub()
-############################################################
-# init prog bw pypub methods
-############################################################
+            pypub = Pypub(fields, prog)
+            prog.update()
+            if not getattr(pypub, 'pub'):
+                pypub.init_parser()
+                prog.init_prog('Parsing Outline...', pypub.parse_range)
+                pypub.parse_outline(prog.update)
+                prog.init_prog('Saving Outline...')
+                pypub.save_opub()
+                prog.update()
             prog.init_prog('Checking for files...')
             pypub.file_check()
             pypub.build_pub()
-############################################################
             send2trash(bytes(pypub.opub))
         except (OutlineError, MissingFileError, AppendixError) as err:
             self.on_error(err.message)

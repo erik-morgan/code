@@ -2,8 +2,6 @@ import wx
 from wxbutton import PubButton
 from wxfield import TextField
 
-# NOTES:
-# Remove panel and use boxsizers. Current setup segfaulted in tests
 # TODO: check spacing/layout
 
 class PypubGUI(wx.Frame):

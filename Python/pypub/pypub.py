@@ -1,4 +1,5 @@
-from os import path, walk
+from os import walk
+from os.path import is_file, join, getmtime
 from lxml import etree
 from zipfile import ZipFile
 import fnmatch as fn
@@ -28,83 +29,66 @@ from pub_exceptions import OutlineError, MissingFileError, AppendixError
 class Pypub:
 
     def __init__(self, dirs, progress_dialog):
+        self.dir_list = []
         for directory in dirs:
             name, path = directory.split('=', 1)
             setattr(self, name, path)
-        self.opub = path.join(self.proj, '.opub.xml')
-        self.docx = self.idir(self.proj, '*Outline.docx')
+            self.dir_list.append(getattr(self, name))
+        self.opub = join(self.proj, '.opub.xml')
+        self.docx = fn.filter(list(self.idir(self.proj)), '*Outline.docx')
         if not self.docx:
             raise OutlineError()
         else:
             self.docx = self.docx[0]
+        if is_file(self.opub) and getmtime(self.opub) < getmtime(self.docx):
+            self.pub = etree.parse(self.opub).getroot()
         self.prog = progress_dialog
     
-    def get_pub(self):
-        # os.path.getmtime(path)
-        if path.is_file(self.opub):
-            opub_mtime = self.opub.stat().st_mtime
-            docx_mtime = self.docx.stat().st_mtime
-        if opub_mtime and opub_mtime < docx_mtime:
-            self.pub = etree.parse(self.opub).getroot()
-        else:
-            with ZipFile(self.docx) as zip:
-                xdoc = zip.open('word/document.xml').read()
-            self.pub = self.parse_outline(xdoc)
-            self.prog.set_msg('Saving parsed outline...')
-            etree.ElementTree(self.pub).write(self.opub)
-            self.prog.update()
+    def save_opub(self):
+        self.prog.set_msg('Saving parsed outline...')
+        etree.ElementTree(self.pub).write(self.opub)
+        self.prog.update()
     
-    def parse_outline(self, xdoc):
-        parser = OutlineParser(xdoc)
-        self.prog.set_rng(len(parse.sections))
+    def init_parser(self):
+        with ZipFile(self.docx) as zip:
+            xdoc = zip.open('word/document.xml').read()
+        self.parser = OutlineParser(xdoc)
+        self.parse_range = len(parser.sections)
+    
+    def parse_outline(self, on_sect_done):
         for sect in parser.sections:
             if 'APPENDIX' in sect[0]:
                 parser.doc.set('appendix', 'True')
             else:
                 parser.add_sect(sect)
-            self.prog.update()
-        return parser.xpub
+            on_sect_done()
+        self.pub = parser.xpub
     
     def file_check(self):
         docs = set(parser.doc_list)
         self.prog.set_rng(len(docs))
-        self.lib = self._build_lib()
+        self.lib = dict(item for item in self.build_lib())
         missing = docs - set(self.lib)
         if missing:
             raise MissingFileError(missing)
         if self.pub.get('appendix') and 'Appendix' not in self.lib:
             raise AppendixError
     
-################################################################################
-    def gen_lib(self):
-        fgen = (jp(p, f) for p, ds, fs in os.walk(root) for f in fs)
-        return ((splits['.indd' in f.lower()](f, '.', 1)[0], f) for f in fgen)
-        
-        dir_list = [
-            [(f.split('.')[-1], f) for f in self.idir(self.indd, '*indd')],
-            self.idir(self.draw),
-            self.proj_files
-        ]
-        file_gen = (f for d in dir_list for f in d)
-        for file in file_gen:
-            if '.indd' in file.lower():
-                yield ()
-        file_
-        list(self.idir(self.indd)) + 
-        self.indd
-        for f in self.idir(self.dirs):
-            
-        file_list = [for d in dirs for f in d.rglob('*.*')]
-        lib = dict(f for d in dirs for f in d.rglob('*[ip][dn]*'))
-        return lib
-################################################################################
+    def build_lib(self):
+        splits = {True: str.rsplit, False: str.split}
+        for fpath, fname in self.idir(self.dir_list, False):
+            yield splits[fn.fnmatch('*.indd')](fname, '.', 1)[0], join(fpath, fname)
     
-    def idir(self, dirpath, pattern=None):
-        jp = path.join
-        fgen = (jp(p, f) for p, ds, fs in walk(dirpath) for f in fs)
-        if pattern:
-            return fn.filter(list(fgen), pattern)
-        return list(fgen)
+    def idir(self, dirpaths, join_path=True):
+        if instanceof(dirpaths, str):
+            dirpaths = [dirpaths]
+        for dirpath in dirpaths:
+            for path, dirs, flist in os.walk(dirpath):
+                for f in flist:
+                    if join_path:
+                        yield join(path, f)
+                    else:
+                        yield path, f
     
     def build_pub(pub):
         # write jsx function to handle indd files:
