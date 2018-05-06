@@ -6,18 +6,37 @@ from wxfield import TextField
 
 class PypubGUI(wx.Frame):
     
-    def __init__(self, title, on_click):
-        self.on_click = on_click
+    def __init__(self, title):
         super().__init__(None, title=title)
         self.Font = wx.Font(12, wx.MODERN, wx.NORMAL, wx.NORMAL, False, 'Pypub')
-        self.Bind(wx.EVT_CHAR_HOOK, self.onchar)
-        self.Bind(wx.EVT_CLOSE, self.on_quit)
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_char)
+    
+    def bind_close(self, close_func):
+        self.Bind(wx.EVT_CLOSE, close_func)
     
     def init_gui(self, colors):
-        self.colors = colors
-        self.BackgroundColour = colors['bg']
-        self.ForegroundColour = colors['fg']
+        for color_name in ['bg', 'fg', 'butbg', 'butfg', 'actbg', 'acfg']:
+            color = colors.get(color_name, wx.NullColour)
+            setattr(self, color_name, color)
+        self.BackgroundColour = self.bg
+        self.ForegroundColour = self.fg
+        self.browse = wx.DirSelector
         self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.AddSpacer(16)
+    
+    def add_row(self, name, label, val):
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.fields.append(TextField(self, val, 'f' + name))
+        hsizer.Add(self.fields[-1], 1, wx.RIGHT|wx.BOTTOM|wx.LEFT, 16)
+        self.browsers.append(PubButton(self, 'Browse', 'b' + name, self.butbg))
+        hsizer.Add()
+            (PubButton('Browse', 'b' + name), 0, wx.RIGHT|wx.BOTTOM, 16)
+        self.sizer.AddMany([
+            (wx.StaticText(self, dir_label), 0, wx.EXPAND|wx.LEFT, 16) #, style=wx.ALIGN_LEFT
+            ((-1, 8), 0, wx.EXPAND),
+            
+        ])
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
     
     def build_gui(self, dirs_list):
         self.fields = []
@@ -37,6 +56,11 @@ class PypubGUI(wx.Frame):
         self.sizer.Add((-1, 16), 1, wx.EXPAND)
     
     def build_row(self, name, label, value):
+        self.row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.row_sizer.AddSpacer(16)
+            self.build_row(name, label, val)
+            self.row_sizer.AddSpacer(16)
+            self.sizer.Add(self.vsizer, 0, wx.EXPAND)
         self.vsizer = wx.BoxSizer(wx.VERTICAL)
         self.vsizer.AddSpacer(16)
         self.build_label(label)
@@ -47,14 +71,14 @@ class PypubGUI(wx.Frame):
         self.build_button('Browse', 'b' + name, self.browse)
         self.vsizer.Add(self.hsizer, 0, wx.EXPAND)
     
-    def build_label(self, label_text):
-        label = wx.StaticText(self, label_text, style=wx.ALIGN_LEFT)
-        self.vsizer.Add(label, 1)
-    
-    def build_field(self, value, name):
-        field = TextField(self, value, name, True)
-        self.hsizer.Add(field, 1, wx.EXPAND)
+    def _add_field(self, value, name):
+        field = TextField(self, value, name)
         self.fields.append(field)
+        return field
+    
+    def _add_browse(self, label, name):
+        button = PubButton(self, label, name, self.butbg)
+        button.Bind(wx.EVT_BUTTON, self.browse)
     
     def build_button(self, label, name, handler, callafter=None):
         button = PubButton(self, label=label, name=name)
@@ -83,7 +107,7 @@ class PypubGUI(wx.Frame):
             wx.Window.FindWindowByName(fname).value = dirdlg
         evt.Skip()
     
-    def onchar(self, evt):
+    def on_char(self, evt):
         key = chr(evt.KeyCode)
         mod = evt.GetModifiers()
         if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
