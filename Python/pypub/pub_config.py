@@ -2,11 +2,12 @@ from wx import Colour
 from pathlib import Path
 
 configfile = Path(__file__).parent.resolve() / 'config'
+# TODO: validate pubdirs data in controller
 pubdirs = (
-    ('indd', 'InDesign Folder'),
-    ('pdfs', 'PDFs Folder'),
-    ('draw', 'Drawings Folder'),
-    ('proj', 'Project Folder')
+    ('indd', 'InDesign'),
+    ('pdfs', 'PDFs'),
+    ('draw', 'Drawings'),
+    ('proj', 'Project')
 )
 
 def colors(color_name=None):

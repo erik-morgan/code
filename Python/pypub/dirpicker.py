@@ -1,111 +1,98 @@
 import wx
 from mdbutton import Button
-from mdfield import TextField
-
-# MAY NOT NEED UNIQUE NAMES WITH NEW DIRPICKER REFACTOR:
-# if name != 'dirpicker':
-#     self.name = name
-# label.Name = getattr(self, 'name', 'label')
 
 class DirPicker(wx.Panel):
     def __init__ (self, parent,
                   size = wx.DefaultSize,
                   style = wx.TAB_TRAVERSAL,
-                  labelText = 'Select a directory:',
+                  labelText = 'Folder Path:',
                   initValue = '',
                   buttonText = 'Browse',
-                  dialogTitle = '',
+                  dialogTitle = 'Choose a folder',
                   startDir = '.',
-                  tooltip = 'Browse to select a directory',
-                  dialogClass = wx.DirDialog,
+                  pathCallback = None,
                   newDir = False,
                   name = 'dirpicker'):
         self.labelText = labelText
         self.initValue = initValue
         self.buttonText = buttonText
-        self.tooltip = tooltip
         self.dialogTitle = dialogTitle
         self.startDir = startDir
-        self.dialogClass = dialogClass
+        self.callback = pathCallback
         self.newDir = newDir
-        self.BackgroundColour = parent.BackgroundColour
-        self.ForegroundColour = parent.ForegroundColour
-        self.font = parent.Font
+        self.Font = parent.Font
+        self.value = property(self.getValue, self.setValue)
+        self.createPicker(parent, size, style, name)
+        self.setColors(parent.BackgroundColour, parent.ForegroundColour)
         
-        self.createDialog(parent, size, style, name)
-        
-    def createDialog(self, parent, size, style, name):
+    def createPicker(self, parent, size, style, name):
         super().__init__(self, parent, style=style, name=name)
         self.SetMinSize(size)
-        
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        
         self.label = self.makeLabel()
-        vsizer.Add(self.label, 0, wx.CENTER)
-        
+        vsizer.Add(self.label, 0, wx.CENTER|wx.TOP, 16)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        fieldSizer = self.makeField()
-        hsizer.Add(fieldSizer, 1, wx.EXPAND)
-        
+        field, fieldSizer = self.makeField()
+        hsizer.Add(fieldSizer, 1, wx.RIGHT, 16)
         self.button = self.makeButton()
-        hsizer.Add(self.button, 0, wx.RIGHT, 16)
-        
-        vsizer.Add(hsizer, 1, wx.EXPAND)
-        vsizer.Fit(self)
-        
+        hsizer.Add(self.button, 0)
+        vsizer.Add(hsizer, 1, wx.EXPAND|wx.TOP, 8)
         self.SetAutoLayout(True)
-        self.SetSizer(vsizer)
+        self.SetSizerAndFit(vsizer)
         self.Layout()
         if instanceof(size, tuple):
             size = wx.Size(size)
         self.SetSize(-1, -1, size.width, size.height, wx.SIZE_USE_EXISTING)
     
-    def onBrowse(self, ev=None):
-        style = 0
-        if not self.newDir:
-            style |= wx.DD_DIR_MUST_EXIST
-        dialog = self.dialogClass(self,
-                                  message = self.dialogTitle,
-                                  defaultPath = self.startDir,
-                                  style = style)
-        if dialog.ShowModal() == wx.ID_OK:
-            self.SetValue(dialog.GetPath())
-        dialog.Destroy()
-    
     def makeLabel(self):
         label = wx.StaticText(self, -1, self.labelText, style=wx.ALIGN_LEFT)
-        self.inheritAttrs(label)
         self.sizeText(label, self.labelText)
         return label
     
     def makeField(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.field = wx.TextCtrl(self, value=self.initValue)
-        self.field.ToolTip = self.tooltip
-        self.inheritAttrs(self.field)
-        self.sizeText(self.field, self.initValue)
-        sizer.Add(self.field, 0, wx.EXPAND)
+        field = wx.TextCtrl(self, value=self.initValue)
+        field.ToolTip = f'Path to: {self.labelText}'
+        self.sizeText(field, self.initValue)
+        sizer.Add(field, 0, wx.EXPAND)
         
         line = wx.Panel(self, size=(-1, 1))
         line.BackgroundColour = self.ForegroundColour
         sizer.Add(line, 0, wx.EXPAND)
-        return sizer
+        return field, sizer
     
     def makeButton(self):
         button = Button(self, self.buttonText)
-        button.ToolTip = self.tooltip
+        button.ToolTip = f'Click to browse to: {self.labelText}'
         button.Bind(wx.EVT_BUTTON, self.onBrowse)
         return button
     
-    def styleButton(self, bg, fg):
-        self.button.setColors(bg, fg)
+    def setColors(self, bgcolor=None, fgcolor=None):
+        for win in [self, self.label, self.field]:
+            if bgcolor:
+                win.BackgroundColour = bgcolor
+            if fgcolor:
+                win.ForegroundColour = fgcolor
     
-    def inheritAttrs(self, widget):
-        widget.BackgroundColour = self.BackgroundColour
-        widget.ForegroundColour = self.ForegroundColour
-        widget.Font = self.Font
+    def setCallback(self, callbackFunc):
+        self.callback = callbackFunc
+    
+    def getValue(self):
+        return self.field.Value
+    
+    def setValue(self, value):
+        self.field.Value = value
+        if self.callback:
+            self.callback(value)
+    
+    def onBrowse(self, ev=None):
+        style = wx.DD_DEFAULT_STYLE
+        if not self.newDir:
+            style |= wx.DD_DIR_MUST_EXIST
+        dialog = wx.DirSelector(self.dialogTitle, self.startDir, style)
+        if dialog:
+            self.Value = dialog.GetPath()
     
     def sizeText(self, widget, value):
         if not value:
