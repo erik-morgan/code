@@ -8,8 +8,11 @@ import wx
 
 # add clean_up function for aborted process
 # add font to pub_config and pass to gui windows
+# add help dialog
+# ALWAYS save the dirs when exiting the gui
 
-class PypubApp:
+class PypubApp(wx.App):
+    
     def __init__(self):
         self.app = wx.App()
         self.mainframe = gui.PypubGUI('pypub', self.on_click)
@@ -43,7 +46,7 @@ class PypubApp:
             pypub.file_check()
             pypub.build_pub()
             send2trash(bytes(pypub.opub))
-        except (OutlineError, MissingFileError, AppendixError) as err:
+        except (OutlineError, MissingFileError, AppendixError, ConfigDirError) as err:
             self.on_error(err.message)
     
     def on_error(self, err_msg):

@@ -1,7 +1,6 @@
 class OutlineError(Exception):
     def __init__(self):
         self.message = 'No outline found in project directory. Outlines must end in "Outline.docx".'
-    
 
 class AppendixError(Exception):
     def __init__(self):
@@ -19,3 +18,10 @@ class AppendixError(Exception):
 class MissingFileError(Exception):
     def __init__(self, missing_files):
         self.message = 'Unable to find the following files:\n' + '\n'.join(missing_files)
+
+class ConfigDirError(Exception):
+    def __init__(self):
+        self.message = ('pubdirs in Configuration class are invalid.\n'
+                        'pubdirs must be a list with label names, and must have a Project item.')
+#        self.message = ('pubdirs in Configuration class are invalid.\n'
+#                        'pubdirs must be a dictionary with var_name_no_spaces: label_name pairs, and must have a proj:Projects item.')

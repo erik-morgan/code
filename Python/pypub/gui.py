@@ -6,77 +6,63 @@ from dirpicker import DirPicker
 # TODO: figure out quitting actions
 # TODO: add app.py handler func for tracking field values
 
-class PypubGUI(wx.Frame):
+class PypubGUI:
     
-    def __init__(self, title):
-        super().__init__(None, title=title)
+    def __init__(self, title, colors):
+        self.app = wx.App()
+        self.frame = wx.Frame(None, title=title)
+        self.colors = colors
+        self.BackgroundColour = colors.get('bg', wx.NullColour)
+        self.ForegroundColour = colors.get('fg', wx.NullColour)
         self.Font = wx.Font(wx.FontInfo(12).Family(wx.MODERN))
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.Bind(wx.EVT_CLOSE, self.quitApp)
         self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
     
-    def bindClose(self, closeFunc):
-        self.Bind(wx.EVT_CLOSE, closeFunc)
+    def initGUI(self):
+        self.frame.SetSizerAndFit(self.sizer)
+        self.frame.Show()
+        self.app.MainLoop()
     
-    def initGUI(self, colors):
-        self.colors = colors
-        self.BackgroundColour = self.colors['bg']
-        self.ForegroundColour = self.colors['fg']
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-    
-    def addRow(self, name, label, val, dirCallback=None):
-        picker = DirPicker(self,
-                           labelText = label + ' Folder',
+    def addRow(self, name, val, dirCallback=None):
+        picker = DirPicker(self.frame,
+                           labelText = name + ' Folder',
                            initValue = val,
-                           dialogTitle = f'Select the {label} folder',
+                           dialogTitle = f'Select the {name} folder',
                            name = name)
         picker.button.setColors(self.colors['butbg'])
         if dirCallback:
             picker.setCallback(dirCallback)
         self.sizer.Add(picker, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 16)
     
-    def addActions(self, clickCallback):
+    def addActions(self, onQuit, onInit):
+        if wx.Window.FindWindowByName('bquit'):
+            return
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
         bsizer.AddStretchSpacer()
         
-        bquit = Button(self, 'Quit', 'bquit')
-        bquit.setColors(self.colors['butbg'])
-        bquit.Bind(wx.EVT_BUTTON, clickCallback())
+        bquit = Button(self.frame, 'Quit', 'bquit')
+        bquit.setColors(self.colors.get('butbg'), wx.NullColour)
+        bquit.Bind(wx.EVT_BUTTON, onQuit)
         bsizer.Add(bquit, 0, wx.ALIGN_RIGHT)
         
-        binit = Button(self, 'Run', 'binit')
-        binit.setColors(self.colors['actbg'], self.colors['actfg'])
+        binit = Button(self.frame, 'Run', 'binit')
+        binit.setColors(self.colors.get('actbg', wx.NullColour),
+                        self.colors.get('actfg', wx.NullColour))
         binit.enable(False)
-        bquit.Bind(wx.EVT_BUTTON, clickCallback())
+        bquit.Bind(wx.EVT_BUTTON, onInit)
         bsizer.Add(binit, 0)
-        self.sizer.Add(bsizer, 0, wx.EXPAND)
+        self.sizer.Add(bsizer, 0, wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, 16)
     
-    def setInitCallback(self, initFunc):
-        self.onInit = initFunc
-    
-    def setQuitCallback(self, quitFunc):
-        self.onQuit = quitFunc
-    
-    def getFields(self):
-        # may not even be necessary if I use callbacks
-        pass
-    
-    def addQuit(self, button):
-        button.setColors(self.colors['butBg'])
-        self.hsizer.Add(button, 0, wx.EXPAND|wx.ALIGN_RIGHT)
-    
-    def addInit(self, button):
-        button.setColors(self.colors['actBg'], self.colors['actFg'])
-        button.enable(False)
-        self.hsizer.Add(button, 0, wx.EXPAND)
-    
-    def quit(self):
+    def quitApp(self):
         if self.onQuit:
             self.onQuit()
-        self.Destroy()
+        wx.CallAfter(self.frame.Destroy())
     
     def onChar(self, evt):
         key = chr(evt.KeyCode)
         mod = evt.GetModifiers()
         if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
-            self.quit()
+            self.frame.Close()
         evt.DoAllowNextEvent()
     
