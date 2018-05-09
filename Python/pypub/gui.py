@@ -16,7 +16,7 @@ class PypubGUI:
         self.ForegroundColour = colors.get('fg', wx.NullColour)
         self.Font = wx.Font(wx.FontInfo(12).Family(wx.MODERN))
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.Bind(wx.EVT_CLOSE, self.quitApp)
+        self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
     
     def initGUI(self):
@@ -35,28 +35,37 @@ class PypubGUI:
             picker.setCallback(dirCallback)
         self.sizer.Add(picker, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 16)
     
-    def addActions(self, onQuit, onInit):
+    def addActions(self, callback):
         if wx.Window.FindWindowByName('bquit'):
             return
+        self.callback = callback
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
         bsizer.AddStretchSpacer()
         
         bquit = Button(self.frame, 'Quit', 'bquit')
         bquit.setColors(self.colors.get('butbg'), wx.NullColour)
-        bquit.Bind(wx.EVT_BUTTON, onQuit)
         bsizer.Add(bquit, 0, wx.ALIGN_RIGHT)
         
         binit = Button(self.frame, 'Run', 'binit')
         binit.setColors(self.colors.get('actbg', wx.NullColour),
                         self.colors.get('actfg', wx.NullColour))
         binit.enable(False)
-        bquit.Bind(wx.EVT_BUTTON, onInit)
         bsizer.Add(binit, 0)
         self.sizer.Add(bsizer, 0, wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, 16)
+        
+        bquit.Bind(wx.EVT_BUTTON, self.onQuit)
+        binit.Bind(wx.EVT_BUTTON, self.onInit)
     
-    def quitApp(self):
-        if self.onQuit:
-            self.onQuit()
+    def onQuit(self, evt):
+        self.frame.Close()
+    
+    def onInit(self, evt):
+        if self.callback:
+            self.callback(True)
+    
+    def onClose(self, evt=None):
+        if self.callback:
+            self.callback(False)
         wx.CallAfter(self.frame.Destroy())
     
     def onChar(self, evt):
@@ -66,3 +75,5 @@ class PypubGUI:
             self.frame.Close()
         evt.DoAllowNextEvent()
     
+    # must either do onclose or bind close event for clicking x on window dec
+    # add setOnClose and setOnInit methods

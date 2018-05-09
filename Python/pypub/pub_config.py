@@ -1,22 +1,14 @@
-from pathlib import Path
-from pub_exceptions import ConfigDirError
+from os import path
+from pub_exceptions import ConfigFileError
 
 class Configuration:
     
     def __init__(self):
-        self.configFile = Path(__file__).parent.resolve() / 'config'
-        pubdirs = ['InDesign', 'PDFs', 'Drawings', 'Project']
-        if pubdirs and 'Project' in pubdirs and isinstance(pubdirs, list):
-            self.pubdirs = pubdirs
-        else:
-            raise ConfigDirError
-#        self.pubdirs = {
-#            'indd': 'InDesign',
-#            'pdfs': 'PDFs',
-#            'draw': 'Drawings',
-#            'proj': 'Project'
-#        }
-        
+        self.configFile = path.join(path.dirname(__file__), 'config')
+        if not path.exists(self.configFile):
+            raise ConfigFileError
+        self.dirs = {}
+    
     def getColors(self):
         return {
             'bg': (238, 238, 238),
@@ -28,20 +20,25 @@ class Configuration:
             'disfg': (177, 177, 177)
         }
     
-    def load_dirs():
-        opt_char, opts =  '=', {}
-        dir_list = []
-        if configfile.exists():
-            lines = configfile.read_text().splitlines()
-            for line in lines:
-                key, val = line.split(opt_char, 1)
-                opts[key.strip()] = val.strip()
-        for name, label in pubdirs:
-            dir_opts = (name, label, opts.get(name, ''))
-            dir_list.append(dir_opts)
-        return dir_list
+    def getDirs(self):
+        dirs = {}
+        with open(self.configFile) as f:
+            lines = [ln.strip().split('=', 1) for ln in f if '=' in ln]
+        dirs = {k.strip():v.strip() for k, v in lines}
+        if 'Project' not in dirs:
+            raise ConfigFileError
+        for name in dirs:
+            if name == 'Project' or not path.exists(dirs[name]):
+                dirs[name] = ''
+        self.dirs = dirs
+        return dirs
     
-    def dump_dirs(dirtext):
-        dirtext = ''.join(dirtext)
-        configfile.write_text(dirtext)
+    def setDirs(newDirs):
+        for name in newDirs:
+            if not path.exists(newDirs[name]):
+                newDirs[name] = self.dirs[name]
+        if newDirs != self.dirs:
+            with open(self.configFile, 'w') as f:
+                f.write('\n'.join(f'{k} = {v}' for k, v in newDirs.items()))
+    
     

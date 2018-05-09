@@ -19,9 +19,11 @@ class MissingFileError(Exception):
     def __init__(self, missing_files):
         self.message = 'Unable to find the following files:\n' + '\n'.join(missing_files)
 
-class ConfigDirError(Exception):
+class ConfigFileError(Exception):
     def __init__(self):
-        self.message = ('pubdirs in Configuration class are invalid.\n'
-                        'pubdirs must be a list with label names, and must have a Project item.')
-#        self.message = ('pubdirs in Configuration class are invalid.\n'
-#                        'pubdirs must be a dictionary with var_name_no_spaces: label_name pairs, and must have a proj:Projects item.')
+        self.message = ('Error parsing config file in Configuration class.\n'
+                        'Pypub requires a file named "config" (no extension) to exist in the application directory, and it must adhere to these simple rules:\n'
+                        '  1. Each line is a key=value pair. Key is a directory label, and value (directory path) is optional.\n'
+                        '     Example line: Drawings = /User/Folder/Desktop/Drawings\n'
+                        '  2. One of the lines MUST have a "Project" key, but the value for Project will be ignored.\n'
+                        '  3. Labels should be single words')

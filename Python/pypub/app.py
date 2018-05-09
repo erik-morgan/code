@@ -1,5 +1,5 @@
-import gui
-import pub_config as config
+from gui import PypubGUI
+from pub_config import Configuration
 from pypub import Pypub
 from pub_progress import PypubProgress
 from pub_error_dialog import ErrorDialog
@@ -10,6 +10,8 @@ import wx
 # add font to pub_config and pass to gui windows
 # add help dialog
 # ALWAYS save the dirs when exiting the gui
+# put callbacks in here; no need to send to GUI; test button names, and close from here
+# still need closeCallback bc of ctrl+q
 
 class PypubApp(wx.App):
     

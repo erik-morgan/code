@@ -31,6 +31,8 @@ class Button(wxb.GenButton):
             self.BackgroundColour = wx.NullColour
             self.ForegroundColour = wx.NullColour
     
+    def click(self)
+    
     def setColors(self, bg=None, fg=None):
         self.bg = bg if bg else self.bg
         self.fg = fg if fg else self.fg
