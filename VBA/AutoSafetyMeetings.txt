@@ -1,0 +1,80 @@
+Option Explicit
+Public regxCache As Object
+
+Sub OnInit()
+    Dim app As Object, ns As Outlook.NameSpace, WithEvents newMail As Outlook.Items
+    Set app = Application
+    Set regxCache = CreateObject("VBScript.RegExp")
+    Set ns = app.GetNamespace("MAPI")
+    Set newMail = ns.GetDefaultFolder(olFolderInbox).Items
+End Sub
+
+Private Sub newMail_ItemAdd(ByVal msg As Object)
+    Dim attach As Object, paths As Object, name As String
+    If msg.Class = olMailItem And InStr(UCase(msg.Subject), "WEEKLY SAFETY TOPICS") Then
+        Set paths = CreateObject("Scripting.Dictionary")
+        For Each attach In msg.Attachments
+            name = attach.DisplayName
+            If UCase(name) Like "##-##*docx" Then
+                filePath = Environ("TEMP") & "\" & name
+                attach.SaveAsFile filePath
+                paths(name) = filePath
+            End If
+        Next attach
+        ProcessSafetyDoc(paths)
+    End If
+End Sub
+
+Sub ProcessSafetyDocs(ByRef paths As Object)
+    Dim fs As Object, root As Object, signSheet As Object, fileItem As Object, rootPath As String
+    rootPath = Environ("USERPROFILE") & "\Desktop\Safety Meetings"
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    If Not fs.FolderExists(rootPath) Then
+        fs.CreateFolder(rootPath)
+    End If
+    Set root = fs.GetFolder(rootPath)
+    For Each fileItem In root.Files
+        If InStr(UCase(fileItem.Name), "HSE-11-0088") Then
+            Set signSheet = fileItem
+            Exit For
+        End If
+    Next fileItem
+    If signSheet Is Nothing Then
+        Set signSheet = 
+    
+End Sub
+
+Function GetSignIn(ByRef localRoot As Object) As Object
+    ' [Attachment] HSE-11-0088
+    ' Advanced Query Syntax (AQS): "attachment:HSE-11-0088"
+    ' PR_SEARCH_ATTACHMENTS = "http://schemas.microsoft.com/mapi/proptag/0x0EA5001E"
+    ' @SQL="urn:schemas:httpmail:attachmentfilename LIKE '%HSE-11-0088%'"
+    ' Application.AdvancedSearch(folderNames, "(urn:schemas:httpmail:attachmentfilename LIKE '%test.jpg%')", true, Type.Missing)
+    ' @SQL= prefix with .Restrict, not .AdvancedSearch
+End Function
+
+Sub GetParas()
+    Dim para as Paragraph, docName As String, xlFields As Object, xlCells as Object
+    Set xlFields = CreateObject("Scripting.Dictionary")
+    Set xlCells = CreateObject("Scripting.Dictionary")
+    ' ActiveDocument.PrintOut
+End Sub
+
+Sub GetNames()
+    Dim ws As Worksheet, rng As Range, names() As Variant, nm As String
+    Set ws = Application.ActiveWorkbook.ActiveSheet
+    "HSE-11-0088"
+End Sub
+
+Function regx(ByRef pat As String, Optional ByVal i As Boolean) As Object
+    If Not regxCache.Exists(pat) Then
+        Dim rx As Object
+        Set rx = CreateObject("VBScript.RegExp")
+        rx.Global = True
+        rx.IgnoreCase = IIf(i, True, False)
+        rx.Pattern = pat
+        Set regxCache(pat) = rx
+        Set rx = Nothing
+    End If
+    Set regx = regxCache(pat)
+End Sub

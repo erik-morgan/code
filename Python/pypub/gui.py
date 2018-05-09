@@ -1,5 +1,5 @@
 import wx
-from wxbutton import Button
+from mdbutton import Button
 from dirpicker import DirPicker
 
 # TODO: check spacing/layout

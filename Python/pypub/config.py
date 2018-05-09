@@ -1,24 +1,23 @@
 from os import path
 from pub_exceptions import ConfigFileError
 
-class Configuration:
+class AppConfig:
+    
+    colors = {
+        'bg': (238, 238, 238),
+        'fg': (33, 33, 33),
+        'butbg': (224, 224, 224),
+        'actbg': (33, 150, 243),
+        'actfg': (255, 255, 255),
+        'disbg': (209, 209, 209),
+        'disfg': (177, 177, 177)
+    }
     
     def __init__(self):
         self.configFile = path.join(path.dirname(__file__), 'config')
         if not path.exists(self.configFile):
             raise ConfigFileError
         self.dirs = {}
-    
-    def getColors(self):
-        return {
-            'bg': (238, 238, 238),
-            'fg': (33, 33, 33),
-            'butbg': (224, 224, 224),
-            'actbg': (33, 150, 243),
-            'actfg': (255, 255, 255),
-            'disbg': (209, 209, 209),
-            'disfg': (177, 177, 177)
-        }
     
     def getDirs(self):
         dirs = {}

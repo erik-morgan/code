@@ -1,10 +1,9 @@
 from gui import PypubGUI
-from pub_config import Configuration
-from pypub import Pypub
-from pub_progress import PypubProgress
+from config import AppConfig
+#from pypub import Pypub
+#from pub_progress import PypubProgress
 from pub_error_dialog import ErrorDialog
 from send2trash import send2trash
-import wx
 
 # add clean_up function for aborted process
 # add font to pub_config and pass to gui windows
@@ -16,9 +15,12 @@ import wx
 class PypubApp(wx.App):
     
     def __init__(self):
-        self.app = wx.App()
-        self.mainframe = gui.PypubGUI('pypub', self.on_click)
-        self.mainframe.init_gui(config.colors())
+        try:
+            self.config = Configuration()
+        except ConfigFileError as err:
+            self.onError(err.message)
+        self.view = PypubGUI('pypub', self.on_click)
+        self.mainframe.init_gui(config.getColors())
         dir_list = config.load_dirs()
         self.dirs = [f'{d[0]}={d[2]}' for d in dir_list if d[0] != 'proj']
         self.mainframe.build_gui(dir_list)
@@ -48,14 +50,13 @@ class PypubApp(wx.App):
             pypub.file_check()
             pypub.build_pub()
             send2trash(bytes(pypub.opub))
-        except (OutlineError, MissingFileError, AppendixError, ConfigDirError) as err:
+        except (OutlineError, MissingFileError, AppendixError, ConfigFileError) as err:
             self.on_error(err.message)
     
     def on_error(self, err_msg):
-        self.prog.Destroy()
-        ed = ErrorDialog(err_msg)
-        ed.Centre()
-        ed.ShowModal()
+        ed = ErrorDialog(getattr(self, 'view', None), self.config.getColors())
+        ed.setMessage(err_msg)
+        ed.launch()
     
 if __name__ == '__main__':
     app = PypubApp()
