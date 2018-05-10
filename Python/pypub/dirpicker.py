@@ -1,5 +1,5 @@
 import wx
-from mdbutton import Button
+from mdbutton import MDButton
 
 class DirPicker(wx.Panel):
     def __init__ (self, parent,
@@ -32,7 +32,7 @@ class DirPicker(wx.Panel):
         self.label = self.makeLabel()
         vsizer.Add(self.label, 0, wx.CENTER|wx.TOP, 16)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        field, fieldSizer = self.makeField()
+        self.field, fieldSizer = self.makeField()
         hsizer.Add(fieldSizer, 1, wx.RIGHT, 16)
         self.button = self.makeButton()
         hsizer.Add(self.button, 0)
@@ -57,23 +57,27 @@ class DirPicker(wx.Panel):
         self.sizeText(field, self.initValue)
         sizer.Add(field, 0, wx.EXPAND)
         
-        line = wx.Panel(self, size=(-1, 1))
-        line.BackgroundColour = self.ForegroundColour
-        sizer.Add(line, 0, wx.EXPAND)
+        self.line = wx.Panel(self, size=(-1, 1))
+        sizer.Add(self.line, 0, wx.EXPAND)
         return field, sizer
     
     def makeButton(self):
-        button = Button(self, self.buttonText)
+        button = MDButton(self, self.buttonText)
         button.ToolTip = f'Click to browse to: {self.labelText}'
         button.Bind(wx.EVT_BUTTON, self.onBrowse)
         return button
     
     def setColors(self, bgcolor=None, fgcolor=None):
-        for win in [self, self.label, self.field]:
-            if bgcolor:
-                win.BackgroundColour = bgcolor
-            if fgcolor:
-                win.ForegroundColour = fgcolor
+        if bgcolor:
+            self.BackgroundColour = bgcolor
+            self.label.BackgroundColour = bgcolor
+            self.field.BackgroundColour = bgcolor
+        if fgcolor:
+            self.ForegroundColour = fgcolor
+            self.label.ForegroundColour = fgcolor
+            self.field.ForegroundColour = fgcolor
+            self.button.ForegroundColour = fgcolor
+            self.line.BackgroundColour = fgcolor
     
     def setCallback(self, callbackFunc):
         self.callback = callbackFunc

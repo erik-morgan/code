@@ -6,9 +6,9 @@ from dirpicker import DirPicker
 # TODO: figure out quitting actions
 # TODO: add app.py handler func for tracking field values
 
-class PypubGUI:
+class PypubGUI(wx.Frame):
     
-    def __init__(self, title, colors):
+    def __init__(self, title):
         self.app = wx.App()
         self.frame = wx.Frame(None, title=title)
         self.colors = colors

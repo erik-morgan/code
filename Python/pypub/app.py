@@ -11,6 +11,7 @@ from send2trash import send2trash
 # ALWAYS save the dirs when exiting the gui
 # put callbacks in here; no need to send to GUI; test button names, and close from here
 # still need closeCallback bc of ctrl+q
+# ALSO validate colors, which means another freaking exception
 
 class PypubApp(wx.App):
     
