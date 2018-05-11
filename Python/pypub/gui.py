@@ -14,7 +14,7 @@ class PypubGUI(wx.Frame):
         self.colors = colors
         self.BackgroundColour = colors.get('bg', wx.NullColour)
         self.ForegroundColour = colors.get('fg', wx.NullColour)
-        self.Font = wx.Font(wx.FontInfo(12).Family(wx.MODERN))
+        self.Font = wx.Font(wx.FontInfo(11))
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
