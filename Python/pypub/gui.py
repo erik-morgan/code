@@ -1,25 +1,28 @@
 import wx
-from mdbutton import Button
+from mdbutton import MDButton
 from dirpicker import DirPicker
+from error_dialog import ErrorDialog
 
 # TODO: check spacing/layout
-# TODO: figure out quitting actions
 # TODO: add app.py handler func for tracking field values
 
 class PypubGUI(wx.Frame):
     
-    def __init__(self, title):
+    def __init__(self, title, colors=None):
         self.app = wx.App()
         self.frame = wx.Frame(None, title=title)
-        self.colors = colors
-        self.BackgroundColour = colors.get('bg', wx.NullColour)
-        self.ForegroundColour = colors.get('fg', wx.NullColour)
-        self.Font = wx.Font(wx.FontInfo(11))
+        if not colors or not isinstance(colors, dict):
+            self.colors = {}
+        else:
+            self.colors = colors
+        self.frame.BackgroundColour = colors.get('bg', wx.NullColour)
+        self.frame.ForegroundColour = colors.get('fg', wx.NullColour)
+        self.setFont()
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
     
     def initGUI(self):
+        self.Bind(wx.EVT_CLOSE, self.onClose)
+        self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
         self.frame.SetSizerAndFit(self.sizer)
         self.frame.Show()
         self.app.MainLoop()
@@ -75,5 +78,14 @@ class PypubGUI(wx.Frame):
             self.frame.Close()
         evt.DoAllowNextEvent()
     
-    # must either do onclose or bind close event for clicking x on window dec
-    # add setOnClose and setOnInit methods
+    def onError(self, errorObject):
+        dialog = ErrorDialog(self.frame, errorObject)
+        dialog.raiseDialog()
+        if not self.app.IsMainLoopRunning():
+            self.app.MainLoop()
+    
+    def setFont(self):
+        self.frame.Font = wx.SystemSettings().GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        charwMax = wx.SystemSettings().GetMetric(wx.SYS_SCREEN_X) * 0.004
+        charw = self.frame.CharWidth
+        return self.frame.Font.Scaled(round(charw / charwMax, 1))

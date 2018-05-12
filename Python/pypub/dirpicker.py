@@ -22,18 +22,18 @@ class DirPicker(wx.Panel):
         self.newDir = newDir
         self.Font = parent.Font
         self.value = property(self.getValue, self.setValue)
+        self.BackgroundColour = parent.BackgroundColour
+        self.ForegroundColour = parent.ForegroundColour
         self.createPicker(parent, size, style, name)
-        self.setColors(parent.BackgroundColour, parent.ForegroundColour)
-        
+    
     def createPicker(self, parent, size, style, name):
         super().__init__(self, parent, style=style, name=name)
-        self.SetMinSize(size)
+        self.MinSize = size
         vsizer = wx.BoxSizer(wx.VERTICAL)
         self.label = self.makeLabel()
         vsizer.Add(self.label, 0, wx.CENTER|wx.TOP, 16)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.field, fieldSizer = self.makeField()
-        hsizer.Add(fieldSizer, 1, wx.RIGHT, 16)
+        hsizer.Add(self.makeField(), 1, wx.RIGHT, 16)
         self.button = self.makeButton()
         hsizer.Add(self.button, 0)
         vsizer.Add(hsizer, 1, wx.EXPAND|wx.TOP, 8)
@@ -46,38 +46,29 @@ class DirPicker(wx.Panel):
     
     def makeLabel(self):
         label = wx.StaticText(self, -1, self.labelText, style=wx.ALIGN_LEFT)
+        label.BackgroundColour = self.BackgroundColour
         self.sizeText(label, self.labelText)
         return label
     
     def makeField(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        field = wx.TextCtrl(self, value=self.initValue)
-        field.ToolTip = f'Path to: {self.labelText}'
-        self.sizeText(field, self.initValue)
-        sizer.Add(field, 0, wx.EXPAND)
+        self.field = wx.TextCtrl(self, value=self.initValue)
+        line = wx.Panel(self, size=(-1, 1))
+        self.field.BackgroundColour = self.BackgroundColour
+        self.field.ForegroundColour = line.BackgroundColour = self.ForegroundColour
+        self.field.ToolTip = f'Path to: {self.labelText}'
+        self.sizeText(self.field, self.initValue)
         
-        self.line = wx.Panel(self, size=(-1, 1))
-        sizer.Add(self.line, 0, wx.EXPAND)
-        return field, sizer
+        sizer.Add(self.field, 0, wx.EXPAND)
+        sizer.Add(line, 0, wx.EXPAND)
+        return sizer
     
     def makeButton(self):
         button = MDButton(self, self.buttonText)
         button.ToolTip = f'Click to browse to: {self.labelText}'
         button.Bind(wx.EVT_BUTTON, self.onBrowse)
         return button
-    
-    def setColors(self, bgcolor=None, fgcolor=None):
-        if bgcolor:
-            self.BackgroundColour = bgcolor
-            self.label.BackgroundColour = bgcolor
-            self.field.BackgroundColour = bgcolor
-        if fgcolor:
-            self.ForegroundColour = fgcolor
-            self.label.ForegroundColour = fgcolor
-            self.field.ForegroundColour = fgcolor
-            self.button.ForegroundColour = fgcolor
-            self.line.BackgroundColour = fgcolor
     
     def setCallback(self, callbackFunc):
         self.callback = callbackFunc
@@ -98,9 +89,8 @@ class DirPicker(wx.Panel):
         if dialog:
             self.Value = dialog.GetPath()
     
-    def sizeText(self, widget, value):
+    def sizeText(self, elem, value):
         if not value:
             return (320, -1)
-        w, h, d, e = self.GetFullTextExtent(value, self.Font)
-        widget.MinSize = (round(w * 1.2), h)
+        elem.MinSize = (round(self.CharWidth * 1.2), self.CharHeight)
     

@@ -2,7 +2,6 @@ from gui import PypubGUI
 from config import AppConfig
 #from pypub import Pypub
 #from pub_progress import PypubProgress
-from pub_error_dialog import ErrorDialog
 from send2trash import send2trash
 
 # add clean_up function for aborted process
