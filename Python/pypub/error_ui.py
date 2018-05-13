@@ -36,6 +36,7 @@ class ErrorDialog(wx.Dialog):
         button = MDButton(self, label='Dismiss')
         button.Font = self.Font
         button.setColors(bg, fg)
+        self.EscapeId = button.Id
         self.sizer.Add(button, 0, wx.CENTER|wx.ALIGN_CENTER|wx.ALL, 16)
     
     def onPaint(self, evt):
@@ -48,7 +49,6 @@ class ErrorDialog(wx.Dialog):
         # dc.DrawRectangle(1, 1, self.ClientSize.Width - 1.25, self.ClientSize.Height - 1.25)
     
     def raiseDialog(self):
-        self.Bind(wx.EVT_BUTTON, lambda e: self.Destroy())
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.SetSizerAndFit(self.sizer)
         self.CentreOnParent()

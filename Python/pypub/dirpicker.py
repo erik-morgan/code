@@ -40,7 +40,7 @@ class DirPicker(wx.Panel):
         self.SetAutoLayout(True)
         self.SetSizerAndFit(vsizer)
         self.Layout()
-        if instanceof(size, tuple):
+        if isinstance(size, tuple):
             size = wx.Size(size)
         self.SetSize(-1, -1, size.width, size.height, wx.SIZE_USE_EXISTING)
     

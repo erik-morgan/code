@@ -1,11 +1,8 @@
 from gui import PypubGUI
 from config import AppConfig
-#from pypub import Pypub
-#from pub_progress import PypubProgress
 from send2trash import send2trash
 
 # add clean_up function for aborted process
-# add font to pub_config and pass to gui windows
 # add help dialog
 # ALWAYS save the dirs when exiting the gui
 # put callbacks in here; no need to send to GUI; test button names, and close from here
@@ -15,11 +12,19 @@ from send2trash import send2trash
 class PypubApp(wx.App):
     
     def __init__(self):
+        self.config = AppConfig()
+        self.view = PypubGUI('pypub', self.config.colors)
         try:
-            self.config = Configuration()
-        except ConfigFileError as err:
-            self.onError(err.message)
-        self.view = PypubGUI('pypub', self.on_click)
+            self.config.loadDirs()
+        except ConfigError as err:
+            self.view.onError(err)
+        # 
+        # SOLUTION IS TO PUT EVERYTHING ELSE INTO AN ELSE CLAUSE FOR TRY
+        # THAT WAY, THE APP WILL JUST END EXECUTION IF CONFIGERROR, AND
+        # MAINLOOP WILL ONLY BE INITIALIZED IF THERE IS NO CONFIGERROR
+        # ALTERNATIVES: subclass wx.App, or call wx.Exit if not in MainLoop
+        # apparently destroying the top window does NOT end execution;
+        # 
         self.mainframe.init_gui(config.getColors())
         dir_list = config.load_dirs()
         self.dirs = [f'{d[0]}={d[2]}' for d in dir_list if d[0] != 'proj']
@@ -52,11 +57,6 @@ class PypubApp(wx.App):
             send2trash(bytes(pypub.opub))
         except (OutlineError, MissingFileError, AppendixError, ConfigFileError) as err:
             self.on_error(err.message)
-    
-    def on_error(self, err_msg):
-        ed = ErrorDialog(getattr(self, 'view', None), self.config.getColors())
-        ed.setMessage(err_msg)
-        ed.launch()
     
 if __name__ == '__main__':
     app = PypubApp()

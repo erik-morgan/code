@@ -1,5 +1,5 @@
 from os import path
-from pub_exceptions import ConfigFileError
+from exceptions import ConfigError
 
 class AppConfig:
     
@@ -15,24 +15,30 @@ class AppConfig:
     
     def __init__(self):
         self.configFile = path.join(path.dirname(__file__), 'config')
-        if not path.exists(self.configFile):
-            raise ConfigFileError
-        self.dirs = {}
+        if isinstance(self.colors, dict):
+            for name, rgb in self.colors.items():
+                if not (isinstance(rgb, tuple) and len(rgb) in (3, 4) 
+                    and all(n in range(256) for n in rgb)):
+                    self.colors.pop(name)
+        else:
+            self.colors = {}
     
-    def getDirs(self):
+    def loadDirs(self):
+        if not path.exists(self.configFile):
+            raise ConfigError
         dirs = {}
         with open(self.configFile) as f:
             lines = [ln.strip().split('=', 1) for ln in f if '=' in ln]
         dirs = {k.strip():v.strip() for k, v in lines}
         if 'Project' not in dirs:
-            raise ConfigFileError
+            raise ConfigError
         for name in dirs:
             if name == 'Project' or not path.exists(dirs[name]):
                 dirs[name] = ''
         self.dirs = dirs
         return dirs
     
-    def setDirs(newDirs):
+    def saveDirs(self, newDirs):
         for name in newDirs:
             if not path.exists(newDirs[name]):
                 newDirs[name] = self.dirs[name]
