@@ -16,12 +16,13 @@ class PypubGUI(wx.Frame):
         self.setFont()
         self.sizer = wx.BoxSizer(wx.VERTICAL)
     
-    def initGUI(self):
-        self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
-        self.SetSizerAndFit(self.sizer)
-        self.Show()
-        self.app.MainLoop()
+    def startGUI(self):
+        if not self.app.IsMainLoopRunning():
+            self.addActions()
+            self.Bind(wx.EVT_CLOSE, self.closeHandler)
+            self.SetSizerAndFit(self.sizer)
+            self.Show()
+            self.app.MainLoop()
     
     def addRow(self, name, val, dirCallback=None):
         picker = DirPicker(self,
@@ -34,15 +35,15 @@ class PypubGUI(wx.Frame):
             picker.setCallback(dirCallback)
         self.sizer.Add(picker, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 16)
     
-    def addActions(self, callback):
+    def addActions(self):
         if wx.Window.FindWindowByName('bquit'):
             return
-        self.callback = callback
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
         bsizer.AddStretchSpacer()
         
         bquit = MDButton(self, 'Quit', 'bquit')
         bquit.setColors(self.colors.get('butbg'), wx.NullColour)
+        self.AcceleratorTable = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('Q'), bquit.Id)])
         bsizer.Add(bquit, 0, wx.ALIGN_RIGHT)
         
         binit = MDButton(self, 'Run', 'binit')
@@ -50,34 +51,22 @@ class PypubGUI(wx.Frame):
                         self.colors.get('actfg', wx.NullColour))
         binit.enable(False)
         bsizer.Add(binit, 0)
-        self.sizer.Add(bsizer, 0, wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, 16)
+        self.sizer.Add(bsizer, 0, wx.EXPAND|wx.ALL, 16)
         
-        bquit.Bind(wx.EVT_BUTTON, self.onQuit)
-        binit.Bind(wx.EVT_BUTTON, self.onInit)
+        bquit.Bind(wx.EVT_BUTTON, lambda e: self.Close())
+        binit.Bind(wx.EVT_BUTTON, self.onRun)
     
-    def onQuit(self, evt):
-        self.Close()
+    def onRun(self, evt):
+        pass
     
-    def onInit(self, evt):
-        if self.callback:
-            self.callback(True)
-    
-    def onClose(self, evt=None):
-        if self.callback:
-            self.callback(False)
+    def closeHandler(self, evt):
+        if self.onClose:
+            self.onClose()
         wx.CallAfter(self.Destroy())
-    
-    def onChar(self, evt):
-        key = chr(evt.KeyCode)
-        mod = evt.GetModifiers()
-        if mod == wx.MOD_CONTROL and chr(key) in 'Qq':
-            self.Close()
-        evt.DoAllowNextEvent()
     
     def onError(self, errorObject):
         with ErrorDialog(self, errorObject) as dialog:
             dialog.raiseDialog()
-        
     
     def setFont(self):
         self.Font = wx.SystemSettings().GetFont(wx.SYS_DEFAULT_GUI_FONT)

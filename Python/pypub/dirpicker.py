@@ -31,7 +31,7 @@ class DirPicker(wx.Panel):
         self.MinSize = size
         vsizer = wx.BoxSizer(wx.VERTICAL)
         self.label = self.makeLabel()
-        vsizer.Add(self.label, 0, wx.CENTER|wx.TOP, 16)
+        vsizer.Add(self.label, 0, wx.TOP, 16)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.Add(self.makeField(), 1, wx.RIGHT, 16)
         self.button = self.makeButton()
@@ -79,7 +79,7 @@ class DirPicker(wx.Panel):
     def setValue(self, value):
         self.field.Value = value
         if self.callback:
-            self.callback(value)
+            self.callback(self.Name, value)
     
     def onBrowse(self, ev=None):
         style = wx.DD_DEFAULT_STYLE

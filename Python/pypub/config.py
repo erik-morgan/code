@@ -36,7 +36,6 @@ class AppConfig:
             if name == 'Project' or not path.exists(dirs[name]):
                 dirs[name] = ''
         self.dirs = dirs
-        return dirs
     
     def saveDirs(self, newDirs):
         for name in newDirs:

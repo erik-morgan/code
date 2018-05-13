@@ -26,28 +26,20 @@ class PypubApp:
         except ConfigError as err:
             self.view.onError(err)
         else:
-            for dirName, dirPath in self.config.dirs.items():
-                self.view.addRow(dirName, dirPath, self.dirValue)
-            self.view.addActions(self.onAction)
-            self.view.initGUI()
+            self.dirs = self.config.dirs.copy()
+            for dirName, dirPath in self.dirs.items():
+                self.view.addRow(dirName, dirPath, self.onBrowse)
+            self.view.addActions()
+            self.view.startGUI()
     
-    def dirValue(self):
+    def onBrowse(self, dirName, dirPath):
+        self.dirs[dirName] = dirPath
+    
+    def initApp(self):
         pass
     
-    def onAction(self, initBool):
-        # probably not necessary; figure out alternative method of handling gui events
-        if initBool:
-            self.onInit()
-        else:
-            self.onQuit()
-    
-    def onInit(self):
-        pass
-    
-    def onQuit(self, newDirs=None):
-        # newDirs is just to remind me what goes here;
-        # figure out onPick execution path
-        self.config.saveDirs(newDirs)
+    def onClose(self):
+        self.config.saveDirs(self.dirs)
     
 
 if __name__ == '__main__':
