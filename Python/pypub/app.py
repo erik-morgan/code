@@ -1,5 +1,6 @@
 from gui import PypubGUI
 from config import AppConfig
+from exceptions import ConfigError
 from send2trash import send2trash
 
 # add clean_up function for aborted process
@@ -8,8 +9,14 @@ from send2trash import send2trash
 # put callbacks in here; no need to send to GUI; test button names, and close from here
 # still need closeCallback bc of ctrl+q
 # ALSO validate colors, which means another freaking exception
+# 
+# SOLUTION IS TO PUT EVERYTHING ELSE INTO AN ELSE CLAUSE FOR TRY
+# THAT WAY, THE APP WILL JUST END EXECUTION IF CONFIGERROR, AND
+# MAINLOOP WILL ONLY BE INITIALIZED IF THERE IS NO CONFIGERROR
+# ALTERNATIVES: subclass wx.App, or call wx.Exit if not in MainLoop
+# apparently destroying the top window does NOT end execution;
 
-class PypubApp(wx.App):
+class PypubApp:
     
     def __init__(self):
         self.config = AppConfig()
@@ -18,46 +25,31 @@ class PypubApp(wx.App):
             self.config.loadDirs()
         except ConfigError as err:
             self.view.onError(err)
-        # 
-        # SOLUTION IS TO PUT EVERYTHING ELSE INTO AN ELSE CLAUSE FOR TRY
-        # THAT WAY, THE APP WILL JUST END EXECUTION IF CONFIGERROR, AND
-        # MAINLOOP WILL ONLY BE INITIALIZED IF THERE IS NO CONFIGERROR
-        # ALTERNATIVES: subclass wx.App, or call wx.Exit if not in MainLoop
-        # apparently destroying the top window does NOT end execution;
-        # 
-        self.mainframe.init_gui(config.getColors())
-        dir_list = config.load_dirs()
-        self.dirs = [f'{d[0]}={d[2]}' for d in dir_list if d[0] != 'proj']
-        self.mainframe.build_gui(dir_list)
+        else:
+            for dirName, dirPath in self.config.dirs.items():
+                self.view.addRow(dirName, dirPath, self.dirValue)
+            self.view.addActions(self.onAction)
+            self.view.initGUI()
     
-    def on_click(self, evt=None):
-        self.fields = self.mainframe.pack_fields()
-        self.mainframe.Destroy()
-        if set(fields) != set(self.dirs):
-            config.dump_dirs('\n'.join(fields))
-        if evt and evt.EventObject.Name == 'binit':
-            self.on_init()
+    def dirValue(self):
+        pass
     
-    def on_init(self):
-        prog = PypubProgress(config.colors(), self.on_error)
-        prog.init_prog('Loading Outline...')
-        try:
-            pypub = Pypub(fields, prog)
-            prog.update()
-            if not getattr(pypub, 'pub'):
-                pypub.init_parser()
-                prog.init_prog('Parsing Outline...', pypub.parse_range)
-                pypub.parse_outline(prog.update)
-                prog.init_prog('Saving Outline...')
-                pypub.save_opub()
-                prog.update()
-            prog.init_prog('Checking for files...')
-            pypub.file_check()
-            pypub.build_pub()
-            send2trash(bytes(pypub.opub))
-        except (OutlineError, MissingFileError, AppendixError, ConfigFileError) as err:
-            self.on_error(err.message)
+    def onAction(self, initBool):
+        # probably not necessary; figure out alternative method of handling gui events
+        if initBool:
+            self.onInit()
+        else:
+            self.onQuit()
     
+    def onInit(self):
+        pass
+    
+    def onQuit(self, newDirs=None):
+        # newDirs is just to remind me what goes here;
+        # figure out onPick execution path
+        self.config.saveDirs(newDirs)
+    
+
 if __name__ == '__main__':
     app = PypubApp()
     
