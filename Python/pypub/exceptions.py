@@ -14,10 +14,9 @@ class AppendixError(PypubError):
 
 class ConfigError(PypubError):
     title = 'Trouble parsing config file'
-    message = '''Pypub requires a file named "config" (no extension) to exist in the application directory, and it must adhere to these simple rules:
-1. Each line is a key=value pair. Key is a directory label, and value (directory path) is optional.
-   Example line: Drawings = /User/Folder/Desktop/Drawings
-2. One of the lines MUST have a "Project" key, but the value for Project will be ignored.'''
+    message = '''Pypub requires a file named "config" (no extension) to exist in the application directory:
+Each line is a key=value pair. Key is a directory label, and value (directory path) is optional.
+Example Line: Drawings = /User/Folder/Desktop/Drawings'''
 
 class MissingFileError(PypubError):
     title = 'Trouble finding some required files:'

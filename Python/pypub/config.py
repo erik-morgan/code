@@ -30,19 +30,19 @@ class AppConfig:
         with open(self.configFile) as f:
             lines = [ln.strip().split('=', 1) for ln in f if '=' in ln]
         dirs = {k.strip():v.strip() for k, v in lines}
-        if 'Project' not in dirs:
-            raise ConfigError
         for name in dirs:
-            if name == 'Project' or not path.exists(dirs[name]):
+            if not path.exists(dirs[name]):
                 dirs[name] = ''
+        dirs['Project'] = ''
         self.dirs = dirs
     
     def saveDirs(self, newDirs):
+        self.dirs.pop('Project')
+        newDirs.pop('Project', None)
         for name in newDirs:
             if not path.exists(newDirs[name]):
                 newDirs[name] = self.dirs[name]
         if newDirs != self.dirs:
             with open(self.configFile, 'w') as f:
-                f.write('\n'.join(f'{k} = {v}' for k, v in newDirs.items()))
-    
+                f.write('\n'.join(f'{k}={v}' for k, v in newDirs.items()))
     

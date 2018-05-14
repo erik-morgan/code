@@ -4,13 +4,13 @@ from dirpicker import DirPicker
 from error_ui import ErrorDialog
 
 # TODO: check spacing/layout
-# TODO: add app.py handler func for tracking field values
 
 class PypubGUI(wx.Frame):
     
     def __init__(self, title, colors):
         self.app = wx.App()
         super().__init__(None, title=title)
+        self.colors = colors
         self.BackgroundColour = colors.get('bg', wx.NullColour)
         self.ForegroundColour = colors.get('fg', wx.NullColour)
         self.setFont()
@@ -39,19 +39,18 @@ class PypubGUI(wx.Frame):
         if wx.Window.FindWindowByName('bquit'):
             return
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
-        bsizer.AddStretchSpacer()
         
         bquit = MDButton(self, 'Quit', 'bquit')
         bquit.setColors(self.colors.get('butbg'), wx.NullColour)
         self.AcceleratorTable = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('Q'), bquit.Id)])
-        bsizer.Add(bquit, 0, wx.ALIGN_RIGHT)
+        bsizer.Add(bquit, 0, wx.TOP|wx.BOTTOM, 16)
         
         binit = MDButton(self, 'Run', 'binit')
         binit.setColors(self.colors.get('actbg', wx.NullColour),
                         self.colors.get('actfg', wx.NullColour))
         binit.enable(False)
-        bsizer.Add(binit, 0)
-        self.sizer.Add(bsizer, 0, wx.EXPAND|wx.ALL, 16)
+        bsizer.Add(binit, 0, wx.ALL, 16)
+        self.sizer.Add(bsizer, 0, wx.ALIGN_RIGHT|wx.TOP|wx.BOTTOM, 8)
         
         bquit.Bind(wx.EVT_BUTTON, lambda e: self.Close())
         binit.Bind(wx.EVT_BUTTON, self.onRun)
@@ -60,9 +59,9 @@ class PypubGUI(wx.Frame):
         pass
     
     def closeHandler(self, evt):
-        if self.onClose:
+        if hasattr(self, 'onClose'):
             self.onClose()
-        wx.CallAfter(self.Destroy())
+        self.Destroy()
     
     def onError(self, errorObject):
         with ErrorDialog(self, errorObject) as dialog:

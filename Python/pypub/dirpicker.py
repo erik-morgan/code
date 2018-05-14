@@ -9,40 +9,35 @@ class DirPicker(wx.Panel):
                   initValue = '',
                   buttonText = 'Browse',
                   dialogTitle = 'Choose a folder',
-                  startDir = '.',
                   pathCallback = None,
-                  newDir = False,
                   name = 'dirpicker'):
+        super().__init__(parent, style=style, name=name)
         self.labelText = labelText
         self.initValue = initValue
         self.buttonText = buttonText
         self.dialogTitle = dialogTitle
-        self.startDir = startDir
         self.callback = pathCallback
-        self.newDir = newDir
         self.Font = parent.Font
         self.value = property(self.getValue, self.setValue)
         self.BackgroundColour = parent.BackgroundColour
         self.ForegroundColour = parent.ForegroundColour
-        self.createPicker(parent, size, style, name)
+        self.createPicker()
+        if isinstance(size, tuple):
+            size = wx.Size(size)
+        self.SetSize(-1, -1, size.width, size.height, wx.SIZE_USE_EXISTING)
     
-    def createPicker(self, parent, size, style, name):
-        super().__init__(self, parent, style=style, name=name)
-        self.MinSize = size
+    def createPicker(self):
         vsizer = wx.BoxSizer(wx.VERTICAL)
         self.label = self.makeLabel()
         vsizer.Add(self.label, 0, wx.TOP, 16)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(self.makeField(), 1, wx.RIGHT, 16)
+        hsizer.Add(self.makeField(), 1, wx.RIGHT|wx.ALIGN_BOTTOM, 16)
         self.button = self.makeButton()
         hsizer.Add(self.button, 0)
-        vsizer.Add(hsizer, 1, wx.EXPAND|wx.TOP, 8)
+        vsizer.Add(hsizer, 1, wx.TOP, 8)
         self.SetAutoLayout(True)
         self.SetSizerAndFit(vsizer)
         self.Layout()
-        if isinstance(size, tuple):
-            size = wx.Size(size)
-        self.SetSize(-1, -1, size.width, size.height, wx.SIZE_USE_EXISTING)
     
     def makeLabel(self):
         label = wx.StaticText(self, -1, self.labelText, style=wx.ALIGN_LEFT)
@@ -53,7 +48,9 @@ class DirPicker(wx.Panel):
     def makeField(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.field = wx.TextCtrl(self, value=self.initValue)
+        self.field = wx.TextCtrl(self, value=self.initValue,
+            style=wx.TE_READONLY|wx.BORDER_NONE)
+        self.field.SetCanFocus(False)
         line = wx.Panel(self, size=(-1, 1))
         self.field.BackgroundColour = self.BackgroundColour
         self.field.ForegroundColour = line.BackgroundColour = self.ForegroundColour
@@ -82,15 +79,10 @@ class DirPicker(wx.Panel):
             self.callback(self.Name, value)
     
     def onBrowse(self, ev=None):
-        style = wx.DD_DEFAULT_STYLE
-        if not self.newDir:
-            style |= wx.DD_DIR_MUST_EXIST
-        dialog = wx.DirSelector(self.dialogTitle, self.startDir, style)
-        if dialog:
-            self.Value = dialog.GetPath()
+        self.Value = wx.DirSelector(self.dialogTitle, 
+            style=wx.DD_DEFAULT_STYLE|wx.DD_DIR_MUST_EXIST) or self.Value
     
     def sizeText(self, elem, value):
-        if not value:
-            return (320, -1)
-        elem.MinSize = (round(self.CharWidth * 1.2), self.CharHeight)
+        width = self.CharWidth * (len(value) * 1.2 if value else 80) # (320, -1)
+        elem.MinSize = (round(width), self.CharHeight)
     

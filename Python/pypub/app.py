@@ -5,16 +5,6 @@ from send2trash import send2trash
 
 # add clean_up function for aborted process
 # add help dialog
-# ALWAYS save the dirs when exiting the gui
-# put callbacks in here; no need to send to GUI; test button names, and close from here
-# still need closeCallback bc of ctrl+q
-# ALSO validate colors, which means another freaking exception
-# 
-# SOLUTION IS TO PUT EVERYTHING ELSE INTO AN ELSE CLAUSE FOR TRY
-# THAT WAY, THE APP WILL JUST END EXECUTION IF CONFIGERROR, AND
-# MAINLOOP WILL ONLY BE INITIALIZED IF THERE IS NO CONFIGERROR
-# ALTERNATIVES: subclass wx.App, or call wx.Exit if not in MainLoop
-# apparently destroying the top window does NOT end execution;
 
 class PypubApp:
     
@@ -31,12 +21,13 @@ class PypubApp:
                 self.view.addRow(dirName, dirPath, self.onBrowse)
             self.view.addActions()
             self.view.startGUI()
+            # self.view.onClose = self.onClose
     
     def onBrowse(self, dirName, dirPath):
         self.dirs[dirName] = dirPath
     
     def initApp(self):
-        pass
+        print(f'Execution complete...Results:\n{self.dirs}')
     
     def onClose(self):
         self.config.saveDirs(self.dirs)
