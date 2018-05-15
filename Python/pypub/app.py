@@ -1,7 +1,7 @@
 from gui import PypubGUI
 from config import AppConfig
 from exceptions import ConfigError
-from send2trash import send2trash
+# from send2trash import send2trash
 
 # add clean_up function for aborted process
 # add help dialog
@@ -16,21 +16,16 @@ class PypubApp:
         except ConfigError as err:
             self.view.onError(err)
         else:
-            self.dirs = self.config.dirs.copy()
-            for dirName, dirPath in self.dirs.items():
-                self.view.addRow(dirName, dirPath, self.onBrowse)
-            self.view.addActions()
-            self.view.startGUI()
-            # self.view.onClose = self.onClose
+            for dirName, dirPath in self.config.dirs.items():
+                self.view.addRow(dirName, dirPath)
+            self.view.startGUI(self.onAction)
     
-    def onBrowse(self, dirName, dirPath):
-        self.dirs[dirName] = dirPath
-    
-    def initApp(self):
-        print(f'Execution complete...Results:\n{self.dirs}')
-    
-    def onClose(self):
-        self.config.saveDirs(self.dirs)
+    def onAction(self, actionFlag):
+        dirs = self.view.dirs
+        if actionFlag:
+            print(f'Execution complete...Results:\n{dirs}')
+        else:
+            self.config.saveDirs(dirs)
     
 
 if __name__ == '__main__':

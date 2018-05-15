@@ -1,24 +1,26 @@
 Option Explicit
 Public regxCache As Object
+Public ns As Outlook.NameSpace
+Public inbox As Outlook.Folder
 
 Sub OnInit()
-    Dim app As Object, ns As Outlook.NameSpace, WithEvents newMail As Outlook.Items
-    Set app = Application
+    Dim WithEvents inItems As Outlook.Items
     Set regxCache = CreateObject("VBScript.RegExp")
-    Set ns = app.GetNamespace("MAPI")
-    Set newMail = ns.GetDefaultFolder(olFolderInbox).Items
+    Set ns = Application.GetNamespace("MAPI")
+    Set inbox = ns.GetDefaultFolder(olFolderInbox)
+    Set inItems = inbox.Items
 End Sub
 
-Private Sub newMail_ItemAdd(ByVal msg As Object)
-    Dim attach As Object, paths As Object, name As String
+Private Sub inItems_ItemAdd(ByVal msg As Object)
+    Dim attach As Object, paths As Object, name As String, filePath As String
     If msg.Class = olMailItem And InStr(UCase(msg.Subject), "WEEKLY SAFETY TOPICS") Then
         Set paths = CreateObject("Scripting.Dictionary")
         For Each attach In msg.Attachments
             name = attach.DisplayName
             If UCase(name) Like "##-##*docx" Then
-                filePath = Environ("TEMP") & "\" & name
+                filePath = Environ("TEMP") & "\" & attach.FileName
                 attach.SaveAsFile filePath
-                paths(name) = filePath
+                paths(Left(name, 5)) = filePath
             End If
         Next attach
         ProcessSafetyDoc(paths)
@@ -33,24 +35,23 @@ Sub ProcessSafetyDocs(ByRef paths As Object)
         fs.CreateFolder(rootPath)
     End If
     Set root = fs.GetFolder(rootPath)
-    For Each fileItem In root.Files
-        If InStr(UCase(fileItem.Name), "HSE-11-0088") Then
-            Set signSheet = fileItem
-            Exit For
-        End If
-    Next fileItem
-    If signSheet Is Nothing Then
-        Set signSheet = 
-    
+    If Not fs.FileExists(rootPath & "\HSE-11-0088.xlsx") Then
+        FindSignIn root
+    End If
+    Set signSheet = fs.GetFile(rootPath & "\HSE-11-0088.xlsx")
+    ' HAVE TO PDF FIRST, THEN COMBINE LATER
 End Sub
 
-Function GetSignIn(ByRef localRoot As Object) As Object
-    ' [Attachment] HSE-11-0088
-    ' Advanced Query Syntax (AQS): "attachment:HSE-11-0088"
-    ' PR_SEARCH_ATTACHMENTS = "http://schemas.microsoft.com/mapi/proptag/0x0EA5001E"
-    ' @SQL="urn:schemas:httpmail:attachmentfilename LIKE '%HSE-11-0088%'"
-    ' Application.AdvancedSearch(folderNames, "(urn:schemas:httpmail:attachmentfilename LIKE '%test.jpg%')", true, Type.Missing)
-    ' @SQL= prefix with .Restrict, not .AdvancedSearch
+Sub FindSignIn(ByRef localRoot As Object)
+    Dim match As Outlook.Item, attach As Object, filter As String
+    filter = "@SQL=" & Chr(34) & "http://schemas.microsoft.com/mapi/proptag/0x0EA5001E" & Chr(34) & " ci_startswith 'HSE-11-0088'"
+    Set match = inbox.items.Restrict(filter)(1)
+    For Each attach in match.Attachments
+        If UCase(attach.DisplayName) Like "*HSE-11-0088*xlsx" Then
+            attach.SaveAsFile localRoot.Path & "\HSE-11-0088.xlsx"
+            Exit Sub
+        End If
+    Next attach
 End Function
 
 Sub GetParas()
@@ -63,7 +64,6 @@ End Sub
 Sub GetNames()
     Dim ws As Worksheet, rng As Range, names() As Variant, nm As String
     Set ws = Application.ActiveWorkbook.ActiveSheet
-    "HSE-11-0088"
 End Sub
 
 Function regx(ByRef pat As String, Optional ByVal i As Boolean) As Object

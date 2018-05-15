@@ -2,8 +2,7 @@ import wx
 from mdbutton import MDButton
 from dirpicker import DirPicker
 from error_ui import ErrorDialog
-
-# TODO: check spacing/layout
+# import wx.lib.inspection as inspect
 
 class PypubGUI(wx.Frame):
     
@@ -15,34 +14,35 @@ class PypubGUI(wx.Frame):
         self.ForegroundColour = colors.get('fg', wx.NullColour)
         self.setFont()
         self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.dirs = {}
     
-    def startGUI(self):
-        if not self.app.IsMainLoopRunning():
-            self.addActions()
-            self.Bind(wx.EVT_CLOSE, self.closeHandler)
-            self.SetSizerAndFit(self.sizer)
-            self.Show()
-            self.app.MainLoop()
+    def startGUI(self, callback):
+        self.onAction = callback
+        self.addActions()
+        self.Bind(wx.EVT_BUTTON, self.actionHandler)
+        self.Bind(wx.EVT_CLOSE, self.actionHandler)
+        self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
+        self.SetSizerAndFit(self.sizer)
+        self.Show()
+        # inspect.InspectionTool().Show()
+        self.app.MainLoop()
     
-    def addRow(self, name, val, dirCallback=None):
+    def addDir(self, name, val):
+        self.dirs[name] = val
         picker = DirPicker(self,
                            labelText = name + ' Folder',
                            initValue = val,
                            dialogTitle = f'Select the {name} folder',
+                           pathCallback = self.setDir,
                            name = name)
-        picker.button.setColors(self.colors['butbg'])
-        if dirCallback:
-            picker.setCallback(dirCallback)
+        picker.button.setColors(self.colors.get('butbg', wx.NullColour))
         self.sizer.Add(picker, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 16)
     
     def addActions(self):
-        if wx.Window.FindWindowByName('bquit'):
-            return
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
         
         bquit = MDButton(self, 'Quit', 'bquit')
-        bquit.setColors(self.colors.get('butbg'), wx.NullColour)
-        self.AcceleratorTable = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('Q'), bquit.Id)])
+        bquit.setColors(self.colors.get('butbg', wx.NullColour))
         bsizer.Add(bquit, 0, wx.TOP|wx.BOTTOM, 16)
         
         binit = MDButton(self, 'Run', 'binit')
@@ -51,25 +51,32 @@ class PypubGUI(wx.Frame):
         binit.enable(False)
         bsizer.Add(binit, 0, wx.ALL, 16)
         self.sizer.Add(bsizer, 0, wx.ALIGN_RIGHT|wx.TOP|wx.BOTTOM, 8)
-        
-        bquit.Bind(wx.EVT_BUTTON, lambda e: self.Close())
-        binit.Bind(wx.EVT_BUTTON, self.onRun)
     
-    def onRun(self, evt):
-        pass
+    def setDir(self, name, path):
+        self.dirs[name] = path
+        if all(self.dirs.values()):
+            binit = wx.Window.FindWindowByName('binit')
+            binit.enable(True)
     
-    def closeHandler(self, evt):
-        if hasattr(self, 'onClose'):
-            self.onClose()
-        self.Destroy()
+    def actionHandler(self, evt):
+        if evt.EventObject.Name == 'binit':
+            self.onAction(True)
+        else:
+            self.onAction(False)
+            self.Destroy()
     
     def onError(self, errorObject):
         with ErrorDialog(self, errorObject) as dialog:
             dialog.raiseDialog()
     
+    def onChar(self, ev):
+        if ev.GetModifiers() == wx.MOD_CONTROL and chr(ev.KeyCode) in 'Qq':
+            self.Close()
+        ev.DoAllowNextEvent()
+    
     def setFont(self):
         self.Font = wx.SystemSettings().GetFont(wx.SYS_DEFAULT_GUI_FONT)
-        charwMax = wx.SystemSettings().GetMetric(wx.SYS_SCREEN_X) * 0.004
+        charwMax = wx.SystemSettings().GetMetric(wx.SYS_SCREEN_X) * 0.0035
         charw = self.CharWidth
-        if charw < charwMax:
-            self.Font = self.Font.Scaled(round(charw / charwMax, 1))
+        self.Font = self.Font.Scaled(round(charwMax / charw, 1))
+    

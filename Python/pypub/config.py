@@ -4,7 +4,7 @@ from exceptions import ConfigError
 class AppConfig:
     
     colors = {
-        'bg': (238, 238, 238),
+        'bg': (245, 245, 245),
         'fg': (33, 33, 33),
         'butbg': (224, 224, 224),
         'actbg': (33, 150, 243),
