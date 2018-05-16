@@ -68,11 +68,6 @@ class PypubGUI(wx.Frame):
     
     def getProgress(self, onAbort=None):
         return ProgressDialog(self)
-#        dialog = ProgressDialog(self)
-#        if onAbort:
-#            dialog.raiseDialog(onAbort)
-#        else:
-#            dialog.raiseDialog()
     
     def onChar(self, ev):
         if ev.GetModifiers() == wx.MOD_CONTROL and chr(ev.KeyCode) in 'Qq':
