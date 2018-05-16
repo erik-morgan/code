@@ -1,3 +1,4 @@
+from observer import Observer
 from os import walk
 from os.path import is_file, join, getmtime
 from lxml import etree
@@ -17,8 +18,6 @@ from pub_exceptions import OutlineError, MissingFileError, AppendixError
 # TODO: add intros and back cover to PDF location
 # Consider using R00 for Rev NC
 # 
-# f for f in gen_expr if 'Outline.docx' in f
-# 
 # IMPORTANT:
 #   Start discussion about killing individual TOCs
 #   File Naming: SS0264.R7 (TOCs have .TOC after rev)
@@ -26,8 +25,8 @@ from pub_exceptions import OutlineError, MissingFileError, AppendixError
 # REGX FOR DRAWINGS:
 #     (\d-[0-9]|\d-[A-Z]{2}-|[A-Z]{2} ?|\d)\d{5}\S*
 
-class Pypub:
-
+class Pypub(Observer):
+    
     def __init__(self, dirs, progress_dialog):
         self.dir_list = []
         for directory in dirs:

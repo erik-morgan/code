@@ -2,7 +2,7 @@ import wx
 from mdbutton import MDButton
 from dirpicker import DirPicker
 from error_ui import ErrorDialog
-# import wx.lib.inspection as inspect
+from progress_ui import ProgressDialog
 
 class PypubGUI(wx.Frame):
     
@@ -24,7 +24,6 @@ class PypubGUI(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self.onChar)
         self.SetSizerAndFit(self.sizer)
         self.Show()
-        # inspect.InspectionTool().Show()
         self.app.MainLoop()
     
     def addDir(self, name, val):
@@ -40,11 +39,9 @@ class PypubGUI(wx.Frame):
     
     def addActions(self):
         bsizer = wx.BoxSizer(wx.HORIZONTAL)
-        
         bquit = MDButton(self, 'Quit', 'bquit')
         bquit.setColors(self.colors.get('butbg', wx.NullColour))
         bsizer.Add(bquit, 0, wx.TOP|wx.BOTTOM, 16)
-        
         binit = MDButton(self, 'Run', 'binit')
         binit.setColors(self.colors.get('actbg', wx.NullColour),
                         self.colors.get('actfg', wx.NullColour))
@@ -68,6 +65,14 @@ class PypubGUI(wx.Frame):
     def onError(self, errorObject):
         with ErrorDialog(self, errorObject) as dialog:
             dialog.raiseDialog()
+    
+    def getProgress(self, onAbort=None):
+        return ProgressDialog(self)
+#        dialog = ProgressDialog(self)
+#        if onAbort:
+#            dialog.raiseDialog(onAbort)
+#        else:
+#            dialog.raiseDialog()
     
     def onChar(self, ev):
         if ev.GetModifiers() == wx.MOD_CONTROL and chr(ev.KeyCode) in 'Qq':
