@@ -3,7 +3,7 @@ tell application "Finder"
     set fileList to (files of entire contents of root whose name extension is "p65") as alias list
     repeat with aFile in fileList
         set psName to characters 1 thru -5 of (name of aFile as text) as string
-        tell application "Adobe¨ PageMaker¨ 6.5"
+        tell application "AdobeÂ¨ PageMakerÂ¨ 6.5"
             evaluate ("Open \"" & (aFile as text) & "\"")
             evaluate ("printdoc 1, 0, 0, 0, \"\", 0, 0, 0, 0, 0, -2, 0, 0")
             evaluate ("printto \"Acrobat Distiller (PPD)\", \"\"")

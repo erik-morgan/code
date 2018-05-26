@@ -1,1 +1,45 @@
-' Converts project outlines to a format for another script to readily process its informationOption ExplicitSub OutlineFix()    Call RemoveHF    Dim doc As Document    Set doc = Application.ActiveDocument    Dim thisPara, tempstr As String    Dim para As Range    Dim isBold, isUnderline As Boolean    Dim tempNum, p As Integer    thisPara = doc.Paragraphs(1).Range.Text    doc.Paragraphs(1).Range.Text = Left(thisPara, InStr(1, thisPara, vbTab)) & vbCrLf    thisPara = doc.Paragraphs(2).Range.Text    tempNum = InStr(1, thisPara, "(") - 1    doc.Paragraphs(2).Range.Text = Mid(thisPara, 11, (tempNum - 11)) & vbCrLf    doc.Paragraphs(2).Range.InsertAfter Mid(thisPara, (tempNum + 2), InStr(1, thisPara, ")") - tempNum - 2) & vbCrLf    doc.Paragraphs(4).Range.Text = Right(doc.Paragraphs(4).Range.Text, Len(doc.Paragraphs(4).Range.Text) - 10)    doc.Paragraphs(5).Range.Text = Right(doc.Paragraphs(5).Range.Text, 5)    For p = 6 To doc.Paragraphs.Count        Set para = doc.Paragraphs(p).Range        If para.Font.Name = "Tekton Pro" And para.Font.Bold And para.Font.TextColor.RGB = RGB(0, 0, 0) Then           If doc.Paragraphs(p + 1).Range.Words(1) = "Rev" Then                doc.Paragraphs(p + 1).Range.Delete            End If        Else            para.Delete        End If    Next pEnd SubSub RemoveHF()    Dim sect As Section    Dim head As HeaderFooter    Dim foot As HeaderFooter        For Each sect In ActiveDocument.Sections        For Each head In sect.Headers            If head.Exists Then head.Range.Delete        Next head        For Each foot In sect.Footers            If foot.Exists Then foot.Range.Delete        Next foot    Next sectEnd Sub
+' Converts project outlines to a format for another script to readily process its information
+
+Option Explicit
+Sub OutlineFix()
+    Call RemoveHF
+    Dim doc As Document
+    Set doc = Application.ActiveDocument
+    Dim thisPara, tempstr As String
+    Dim para As Range
+    Dim isBold, isUnderline As Boolean
+    Dim tempNum, p As Integer
+    thisPara = doc.Paragraphs(1).Range.Text
+    doc.Paragraphs(1).Range.Text = Left(thisPara, InStr(1, thisPara, vbTab)) & vbCrLf
+    thisPara = doc.Paragraphs(2).Range.Text
+    tempNum = InStr(1, thisPara, "(") - 1
+    doc.Paragraphs(2).Range.Text = Mid(thisPara, 11, (tempNum - 11)) & vbCrLf
+    doc.Paragraphs(2).Range.InsertAfter Mid(thisPara, (tempNum + 2), InStr(1, thisPara, ")") - tempNum - 2) & vbCrLf
+    doc.Paragraphs(4).Range.Text = Right(doc.Paragraphs(4).Range.Text, Len(doc.Paragraphs(4).Range.Text) - 10)
+    doc.Paragraphs(5).Range.Text = Right(doc.Paragraphs(5).Range.Text, 5)
+    For p = 6 To doc.Paragraphs.Count
+        Set para = doc.Paragraphs(p).Range
+        If para.Font.Name = "Tekton Pro" And para.Font.Bold And para.Font.TextColor.RGB = RGB(0, 0, 0) Then
+           If doc.Paragraphs(p + 1).Range.Words(1) = "Rev" Then
+                doc.Paragraphs(p + 1).Range.Delete
+            End If
+        Else
+            para.Delete
+        End If
+    Next p
+End Sub
+
+Sub RemoveHF()
+    Dim sect As Section
+    Dim head As HeaderFooter
+    Dim foot As HeaderFooter
+    
+    For Each sect In ActiveDocument.Sections
+        For Each head In sect.Headers
+            If head.Exists Then head.Range.Delete
+        Next head
+        For Each foot In sect.Footers
+            If foot.Exists Then foot.Range.Delete
+        Next foot
+    Next sect
+End Sub

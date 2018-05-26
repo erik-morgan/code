@@ -143,4 +143,3 @@ function trimExtras2(theObjects, regx){
         }
     }
 }
-
