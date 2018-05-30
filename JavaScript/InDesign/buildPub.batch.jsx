@@ -1,7 +1,8 @@
 #target indesign
 
 /*
- * in python, copy all indd/pdfs to a project folder, & copy source file into dir with TOC if no pdf is found
+ * in python, copy all indd/pdfs to a project folder so this can check for pdf
+ * also check for pdf, and copy source file into dir with TOC if no pdf is found
  * 
  * Might have to replace literals with non-literals (eg find \\t replace with \t)
  * 
@@ -9,6 +10,10 @@
  * Check if doing SS0203-11.A.indd/SS0203-11.B.indd works for duplicate procedures
  * Add python code to determine whether multiple procs are duplicates
  *     (eg SS0284-02 always the same; SS0240 usually different)
+ * 
+ * REVISIT IDEA OF USING ONLY SOURCE FILES, AND ADDING TOCS TO BEGINNING:
+ *     ALWAYS ADD 2 PAGES TO BEGINNING. IF 2ND PAGE NOT NEEDED, SET MASTER TO NONE
+ *     SUPPRESS MASTER TEXT FRAMES ON TOC PAGES, AND DUPLICATE PAGE # TEXT FRAME FROM MASTER
  * 
  * DUE TO PYTHONS SUPERIOR LIST HANDLING, ORGANIZE DRAWINGS IN PYTHON, BEFORE SAVING PUBDATA
  * 
@@ -26,44 +31,64 @@ app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERAC
 main();
 
 function main () {
-    var pubFile = File(File($.fileName).path + '/pubdata.json');
-    pubFile.open();
-    var cmds = pubFile.read().split('\n');
-    pubFile.close();
-    // see what happens when you use activeDocument property with no open documents
-    if (app.documents.length)
-        doc = app.activeDocument;
-    mainStory = doc.stories.everyItem().getElements().sort(function (a, b) {
-        return a.length - b.length;
-    }).pop()
-    for (var i = 0; i < cmds.length; i++) {
-        eval(cmds[i]);
+    var pubFile = File(File($.fileName).path + '/pubdata.json'),
+        pub = $.evalFile(pubFile);
+    root = pub.root;
+    convertIDML();
+    tocify();
+    for (var name in pub.drawings) {
+        var indd = root.getFiles(name + '.TOC.indd')[0],
+            pdf = decodeURI(indd).replace(/indd$/i, 'pdf');
+        doc = app.open(indd);
+        addDrawings(pub.drawings[name]);
+        styleTOC();
+        addBookmark();
+        doc.exportFile(ExportFormat.PDF_TYPE, pdf, false);
     }
+    // may not be necessary if i use subprocess (or os.execute?)
+    makeBluesheets(pub.bluesheets);
+    pubFile.remove();
 }
 
-function makeINDD (inddPath) {
-    doc.links.everyItem().update();
-    for (var l = 0; l < doc.links.length; l++) {
-        if (doc.links[l].status == LinkStatus.LINK_MISSING) {
-            path = doc.links[l].filePath.replace(/.+?\/(?=share)/i, '');
-            path = path.replace(/\uF021/g, '*');
-            path = path.replace(/\uF022/g, ':');
-            if (File(path).exists)
-                doc.links[l].relink(File(path));
+function convertIDML () {
+    app.open(root.getFiles('*idml'), false);
+    while (app.documents.length) {
+        var doc = app.documents[0],
+            links = doc.links.everyItem().getElements(),
+            idml = decodeURI(doc.fullName),
+            newDoc = idml.replace(/idml$/i, 'indd');
+        for (var i = 0; i < links.length; i++) {
+            if (links[i].status == LinkStatus.LINK_MISSING) {
+                path = links[i].filePath.replace(/.+?\/(?=share)/i, '');
+                path = path.replace(/\uF021/g, '*');
+                path = path.replace(/\uF022/g, ':');
+                if (File(path).exists)
+                    links[i].relink(File(path));
+            }
+            links[i].update();
         }
+        doc.close(SaveOptions.YES, File(newDoc));
+        File(idml).remove();
     }
-    doc.save(File(inddPath));
 }
 
-function makePDF () {
-    var pdf = doc.fullName.absoluteURI.replace(/indd$/i, 'pdf');
-    doc.exportFile(ExportFormat.PDF_TYPE, File(pdf), false);
+function tocify () {
+    var indds = root.getFiles('*indd');
+    for (var i = indds.length - 1; i > -1; i--) {
+        if (!/\bTOC\b/i.test(indds[i].name))
+            makeTOC(indds[i]);
+    }
 }
 
-function makeTOC () {
-    var start = findChangeGrep({findWhat: '[\\S\\s]+', capitalization: Capitalization.ALL_CAPS})[0].paragraphs.length,
+function makeTOC (docFile) {
+    var doc = app.open(docFile, false),
+        mainStory = doc.stories.everyItem().getElements().sort(function (a, b) {
+            return a.length - b.length;
+        }).pop(),
+        start = findChangeGrep({findWhat: '[\\S\\s]+', capitalization: Capitalization.ALL_CAPS})[0].paragraphs.length,
         docName = decodeURI(doc.fullName).slice(0, -5),
         tocParas = [];
+    doc.viewPreferences.horizontalMeasurementUnits = doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
     if (!File(docName + '.pdf').exists)
         doc.exportFile(ExportFormat.PDF_TYPE, File(docName + '.pdf'), false);
     for (var p = start; p < mainStory.paragraphs.length; p++) {
@@ -97,18 +122,20 @@ function makeTOC () {
     mainStory.paragraphs[-2].applyParagraphStyle(doc.paragraphStyles.item('TOC Level 2'), true);
     mainStory.paragraphs[-1].applyParagraphStyle(doc.paragraphStyles.item('TOC Parts List'), true);
     doc.sections.add(doc.pages[0], {pageNumberStyle:PageNumberStyle.lowerRoman});
-    doc.save(File(doc.fullName.absoluteURI.replace(/indd$/i, 'TOC.indd')));
+    doc.close(SaveOptions.YES, File(docName + '.TOC.indd'));
 }
 
-function insertDrawings (draws, ills) {
-    var drawParas = ['Assembly Drawings and Parts Lists'].concat(draws);
-    if (ills)
-        drawParas = ['Illustrations'].concat(ills).concat(drawParas);
-    findChangeGrep({findWhat: '(?i)^(Illustrat|Assembly Draw)[\\S\\s]+'}, {changeTo: ''});
+function addDrawings (drawList) {
+    mainStory = doc.stories.everyItem().getElements().sort(function (a, b) {
+        return a.length - b.length;
+    }).pop();
+    findChangeGrep({findWhat: '(?i)^(Illustrat|Assembly Draw)[\\S\\s]+'}, {changeTo: 'Illustrations\\r'});
+    var drawText = 'Assembly Drawings and Parts Lists\r' + drawList.join('\r');
+    drawText = drawText.replace(/(^.+\r)((^\[ILL\].+\r)+)/m, 'Illustrations\r$2$1');
     doc.paragraphStyles.item('TOC Parts List').properties = {hyphenation: false, firstLineIndent: -1.75};
     doc.paragraphStyles.item('TOC Parts List').tabStops[0].position = 3.5;
-    mainStory.insertionPoints[-1].properties = {appliedParagraphStyle: 'TOC Parts List', contents: drawParas.join('\r')};
-    findChangeGrep({findWhat: '^(Illustrations|Assembly Drawings and Parts Lists)\\r'}, {appliedParagraphStyle: 'TOC Level 2'});
+    mainStory.insertionPoints[-1].properties = {appliedParagraphStyle: 'TOC Parts List', contents: drawText};
+    findChangeGrep({findWhat: '^((Illustrations|Assembly Drawings and Parts Lists)\\r)'}, {changeTo: '$1', appliedParagraphStyle: 'TOC Level 2'});
 }
 
 function styleTOC () {
@@ -134,7 +161,6 @@ function styleTOC () {
         plusFrame.parentStory.properties = ({appliedFont: 'ITC Bookman Std\tBold', pointSize: '24pt', justification: Justification.rightAlign, alignToBaseline: true});
         lastFrame.nextTextFrame = nextFrame;
     }
-    doc.save();
 }
 
 function addBookmark (title) {
@@ -169,9 +195,10 @@ function addBookmark (title) {
     doc.bookmarks.add(doc.pages[0], {name: title});
 }
 
-function makeBluesheet (name, msg, title) {
+function makeBluesheets (bslist) {
     for (var b = 0; b < bslist.length; b++) {
-        msg = 'This document is not currently available:\r' + msg;
+        var name = bslist[b].name,
+            msg = 'This document is not currently available:\r' + bslist[b].text;
         doc = app.documents.add(false, app.documentPresets.add({facingPages: false}));
         doc.pages[0].rectangles.add('Default', {geometricBounds: doc.pages[0].bounds, fillColor: doc.colors.add({space: ColorSpace.RGB, colorValue: [182,225,245]})});
         doc.pages[0].textFrames.add('Default', {geometricBounds: [0.75, 1, 10.25, 7.75], contents: msg});
