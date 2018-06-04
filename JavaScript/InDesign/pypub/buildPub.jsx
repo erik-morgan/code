@@ -1,48 +1,21 @@
-#target indesign
+﻿#target indesign
 
 /*
- * PYTHON NOTES:
- *     copy all indd/pdfs to a project folder, & copy source file into dir with TOC if no pdf is found
- *     determine whether multiple procs are duplicates (eg SS0284-02 always the same; SS0240 usually different)
- *     handle bluesheets in python, without jsx; if bluesheet item does not have an id, generate one
- *     require bluesheet formatting (no bs illustrations; unless i use bold formatting)
- *     clean drawing descriptions
- *     also handle this regex: [/(\d+)k/ig, '$1k']
- *     regexs = [[/\bmin.?\b/ig, 'Min.'],[/\bmax.?\b/ig, 'Max.'],[/\u2018|\u2019/ig, '\''],[/\u201C|\u201D/ig, '"'],[/\s*(\t|\r)+\s{0,}/ig, '$1'],[/^(420(056|295)-02).{0,}/ig, '$1\t18-3/4" Jet Sub'],[/(bb|bigbore).?(ii|2)/ig, 'BB II'],[/\bchsart\b/ig, 'Casing Hanger and Seal Assembly Running Tool'],[/\bsart\b/ig, 'Seal Assembly Running Tool'],[/-in\b/ig, '-In'],[/-out\b/ig, '-Out'],[/ & /ig, ' and '],[/mill and flush|m.?(&|and).?f/ig, 'Mill & Flush'],[/\bmpt\b/ig, 'Multi-Purpose Tool'],[/(three|3).?in.?(one|1)/ig, '3-in-1'],[/1st/ig, 'First'],[/2nd/ig, 'Second'],[/3rd/ig, 'Third'],[/\bpos\b/ig, 'Position'],[/\bolr\b/ig, 'Outer Lock Ring'],[/\bbr.style/ig, 'BR-Style'],[/f\/ ?/ig, 'for'],[/\b(.)x(.)/ig, '$1 x $2'],[/ {2,}/g, ' '],[/^\s|\s$/g, '']]
  * 
  * TRY USING ALL CAPS FOR BOOKMARKS...EVERY OTHER TITLE IS CAPS (RP, MAINTOC, TABS, ETC.)
  * 
- */
-
-prefs = {
-    alerts: app.scriptPreferences.userInteractionLevel,
-    preflight: app.preflightOptions.preflightOff,
-    links: app.linkingPreferences.checkLinksAtOpen
-}
-// DO PREFS IN AS/VBS
-app.scriptPreferences.enableRedraw = false;
-app.scriptPreferences.measurementUnit = MeasurementUnits.INCHES;
-app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
-app.preflightOptions.preflightOff = true;
-app.linkingPreferences.checkLinksAtOpen = false;
-// RESTORE PREFERENCES:
-// app.scriptPreferences.enableRedraw = true;
-// app.scriptPreferences.userInteractionLevel = prefs.alerts;
-// app.preflightOptions.preflightOff = prefs.preflight;
-// app.linkingPreferences.checkLinksAtOpen = prefs.links;
-
-main();
-
-/*
- * @param {String} docPath
- * @param {String} [drawings]
+ * @param {String} arguments[0]
+ * @param {String} arguments[1]
  * 
  */
+
 String.prototype.trim = function () {
     return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
 };
 
-function main () {
+main(arguments);
+
+function main (arguments) {
     docPath = arguments[0];
     openDoc(docPath);
     if (!/\bTOC\b/.test(docPath)) {
@@ -55,10 +28,12 @@ function main () {
         addBookmark();
         doc.save();
     }
+    doc.exportFile(ExportFormat.PDF_TYPE, File(doc.fullName.absoluteURI.replace(/indd$/i, 'pdf')), false);
+    doc.close();
 }
 
 function openDoc () {
-    doc = app.open(File(docPath), false);
+    doc = app.open(File(docPath)); //, false
     doc.viewPreferences.horizontalMeasurementUnits = doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
     if (!doc.saved) {
         for (var l = 0; l < doc.links.length; l++) {
@@ -82,26 +57,25 @@ function openDoc () {
 }
 
 function makeTOC () {
-    for (var p = mainStory.paragraphs.length - 1; p > -1; p--) {
+    var start = grep({findWhat: '\\A[\\S\\s]+', capitalization: Capitalization.ALL_CAPS})[0].paragraphs.length,
+        plen = mainStory.paragraphs.length;
+    if (mainStory.characters[-1].contents !== '\r')
+        mainStory.insertionPoints[-1].contents = '\r';
+    mainStory.insertionPoints[-1].properties = {contents: 'Table of Contents\r', appliedParagraphStyle: 'TOC'};
+    for (var p = start; p < plen; p++) {
         var para = mainStory.paragraphs[p],
             style = para.appliedParagraphStyle;
-        if (para.capitalization == style.capitalization && para.capitalization == Capitalization.ALL_CAPS)
-            break;
-        if (/Level/.test(style.name) && para.appliedFont.fullName == style.appliedFont.fullName) {
-            para.insertionPoints[-2].contents = '\t' + para.parentTextFrames[0].parentPage.name;
-            para.applyParagraphStyle(doc.paragraphStyles.item('TOC ' + style.name), true);
-        }
-        else
-            para.remove();
+        if (/Level [2-5]/.test(style.name) && para.appliedFont == style.appliedFont)
+            mainStory.insertionPoints[-1].properties = {
+                contents: para.contents.replace(/(?=\r)/, '\t' + para.parentTextFrames[0].parentPage.name),
+                appliedParagraphStyle: 'TOC ' + style.name
+            }
     }
-    mainStory.insertionPoints[-1].properties = {appliedParagraphStyle: 'TOC', contents: 'Table of Contents\r'};
-    mainStory.paragraphs[-1].move(LocationOptions.AFTER, mainStory.paragraphs[p]);
+    mainStory.paragraphs.itemByRange(start, plen - 1).remove();
     doc.pages.itemByRange(1, doc.pages.length - 1).remove();
     doc.spreads[0].splineItems.everyItem().remove();
-    for (var g = doc.groups.length - 1; g > -1; g--) {
-        if (doc.groups[g].allGraphics.length)
-            doc.groups[g].remove();
-    }
+    for (var g = doc.spreads[0].allGraphics.length - 1; g > -1; g--)
+        doc.spreads[0].allGraphics[g].parent.parent.remove();
     grep({findWhat: '\\A ?Page '}, {changeTo: ''}, {includeMasterPages: true});
     mainStory.insertionPoints[-1].contents = 'Assembly Drawings and Parts Lists\rPlace Holder';
     mainStory.paragraphs[-2].applyParagraphStyle(doc.paragraphStyles.item('TOC Level 2'), true);
@@ -114,7 +88,7 @@ function enterDrawings (drawingText) {
     grep({findWhat: '(?i)^(Illustr|Assembly)[\\S\\s]+'}, {changeTo: drawingText});
     var tocParas = grep({findWhat: '(?<=Contents\\r)[\\S\\s]+'})[0].paragraphs.everyItem().getElements();
     for (var p = 0; p < tocParas.length; p++) {
-        var tocPara = tocParas[p],
+        var tocPara = tocParas[p];
         tocPara.contents = tocPara.contents.trim().replace(/ *(\n|\t) */g, ('$1' == '\n' ? ' ' : '$1'));
         if (tocPara.contents.indexOf('\t') == -1)
             tocPara.properties.appliedParagraphStyle = 'TOC Level 2';
