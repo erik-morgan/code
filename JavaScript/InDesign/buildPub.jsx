@@ -1,35 +1,44 @@
-#target indesign
-#targetengine "pypub"
+﻿#target indesign
 
-prefs = {
-    alerts: app.scriptPreferences.userInteractionLevel,
-    preflight: app.preflightOptions.preflightOff,
-    links: app.linkingPreferences.checkLinksAtOpen
-}
+/*
+ * 
+ * TRY USING ALL CAPS FOR BOOKMARKS...EVERY OTHER TITLE IS CAPS (RP, MAINTOC, TABS, ETC.)
+ * 
+ * @param {String} arguments[0]
+ * @param {String} arguments[1]
+ * 
+ */
 
-app.scriptPreferences.properties = {
-    enableRedraw: false,
-    measurementUnit: MeasurementUnits.INCHES,
-    userInteractionLevel: UserInteractionLevels.NEVER_INTERACT
+app.scriptPreferences.measurementUnit = 2053729891;
+
+String.prototype.trim = function () {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
 };
-app.preflightOptions.preflightOff = true;
-app.linkingPreferences.checkLinksAtOpen = false;
 
-cleanUp = function () {
-    app.scriptPreferences.properties = {
-        enableRedraw: true,
-        userInteractionLevel: prefs.alerts
-    };
-    app.preflightOptions.preflightOff = prefs.preflight;
-    app.linkingPreferences.checkLinksAtOpen = prefs.links;
-    openDoc = grep = makeTOC = insertDrawings = styleTOC = null;
+main(arguments);
+
+function main (arguments) {
+    docPath = arguments[0];
+    openDoc(docPath);
+    if (!/\bTOC\b/.test(docPath)) {
+        if (!File(docPath.slice(0, -4) + 'pdf').exists)
+            doc.exportFile(ExportFormat.PDF_TYPE, File(docPath.slice(0, -4) + 'pdf'), false);
+        makeTOC();
+    }
+    if (arguments.length > 1) {
+        enterDrawings(arguments[1]);
+        addBookmark();
+        doc.save();
+        doc.exportFile(ExportFormat.PDF_TYPE, File(doc.fullName.absoluteURI.replace(/indd$/i, 'pdf')), false);
+    }
+    doc.close();
 }
 
-openDoc = function (docPath) {
-    doc = app.open(File(docPath), false);
+function openDoc () {
+    doc = app.open(File(docPath)); //, false
+    doc.viewPreferences.horizontalMeasurementUnits = doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
     if (!doc.saved) {
         for (var l = 0; l < doc.links.length; l++) {
-            // try status == 'lood'
             if (doc.links[l].status == LinkStatus.LINK_MISSING) {
                 path = doc.links[l].filePath.replace(/.+?\/(?=share)/i, '');
                 path = path.replace(/\uF021/g, '*');
@@ -42,69 +51,55 @@ openDoc = function (docPath) {
         }
         doc.save(File(docPath.slice(0, -4) + 'indd'));
         File(docPath).remove();
-        doc.exportFile(ExportFormat.PDF_TYPE, File(docPath.slice(0, -4) + 'pdf'), false);
     }
     mainStory = doc.stories.everyItem().getElements().sort(function (a, b) {
         return b.length - a.length;
     })[0];
 }
 
-grep = function (findPrefs, changePrefs, opts) {
-    app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
-    app.findChangeGrepOptions.properties = opts ? opts : {};
-    app.findGrepPreferences.properties = findPrefs;
-    app.changeGrepPreferences.properties = changePrefs ? changePrefs : {};
-    return changePrefs ? doc.changeGrep() : doc.findGrep();
-}
-
-makeTOC = function () {
-    for (var p = mainStory.paragraphs.length - 1; p > -1; p--) {
+function makeTOC () {
+    var start = grep({findWhat: '\\A[\\S\\s]+', capitalization: Capitalization.ALL_CAPS})[0].paragraphs.length,
+        plen = mainStory.paragraphs.length;
+    if (mainStory.characters[-1].contents !== '\r')
+        mainStory.insertionPoints[-1].contents = '\r';
+    mainStory.insertionPoints[-1].properties = {contents: 'Table of Contents\r', appliedParagraphStyle: 'TOC'};
+    for (var p = start; p < plen; p++) {
         var para = mainStory.paragraphs[p],
             style = para.appliedParagraphStyle;
-        if (para.capitalization == style.capitalization && para.capitalization == Capitalization.ALL_CAPS)
-            break;
-        if (/Level/.test(style.name) && para.appliedFont.fullName == style.appliedFont.fullName) {
-            para.insertionPoints[-2].contents = '\t' + para.parentTextFrames[0].parentPage.name;
-            para.applyParagraphStyle(doc.paragraphStyles.item('TOC ' + style.name), true);
-        }
-        else
-            para.remove();
+        if (/Level [2-5]/.test(style.name) && para.appliedFont == style.appliedFont)
+            mainStory.insertionPoints[-1].properties = {
+                contents: para.contents.replace(/(?=\r)/, '\t' + para.parentTextFrames[0].parentPage.name),
+                appliedParagraphStyle: 'TOC ' + style.name
+            }
     }
-    mainStory.insertionPoints[-1].properties = {appliedParagraphStyle: 'TOC', contents: 'Table of Contents\r'};
-    mainStory.paragraphs[-1].move(LocationOptions.AFTER, mainStory.paragraphs[p]);
+    mainStory.paragraphs.itemByRange(start, plen - 1).remove();
     doc.pages.itemByRange(1, doc.pages.length - 1).remove();
     doc.spreads[0].splineItems.everyItem().remove();
-    for (var g = doc.groups.length - 1; g > -1; g--) {
-        if (doc.groups[g].allGraphics.length)
-            doc.groups[g].remove();
-    }
+    for (var g = doc.spreads[0].allGraphics.length - 1; g > -1; g--)
+        doc.spreads[0].allGraphics[g].parent.parent.remove();
     grep({findWhat: '\\A ?Page '}, {changeTo: ''}, {includeMasterPages: true});
     mainStory.insertionPoints[-1].contents = 'Assembly Drawings and Parts Lists\rPlace Holder';
     mainStory.paragraphs[-2].applyParagraphStyle(doc.paragraphStyles.item('TOC Level 2'), true);
     mainStory.paragraphs[-1].applyParagraphStyle(doc.paragraphStyles.item('TOC Parts List'), true);
     doc.sections.add(doc.pages[0], {pageNumberStyle:PageNumberStyle.lowerRoman});
-    doc.save(File(doc.fullName.absoluteURI.replace(/\.(?=indd$)/i, '.TOC.')));
+    doc.save(File(docPath.replace(/\.(?=indd$)/i, '.TOC.')));
 }
 
-insertDrawings = function (draws) {
-    if (Object.prototype.toString.call(draws).slice(8, -1) !== 'Array')
-        draws = draws.split('\r');
-    grep({findWhat: '(?i)^(Illustrat|Assembly Draw)[\\S\\s]+'}, {changeTo: drawText, appliedParagraphStyle: 'TOC Parts List'});
-}
-
-styleTOC = function () {
-    doc.viewPreferences.horizontalMeasurementUnits = doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
-    doc.paragraphStyles.itemByRange('TOC Level 2', 'TOC Level 5').everyItem().properties = {keepAllLinesTogether: true, keepWithNext: 0, hyphenation: false, rightIndent: 0.5, lastLineIndent: -0.375};
-    doc.paragraphStyles.item('TOC Parts List').properties = {hyphenation: false, firstLineIndent: -1.75};
-    doc.paragraphStyles.item('TOC Parts List').tabStops[0].position = 3.5;
-    grep({findWhat: '([ \\n]+)'}, {changeTo: ' '});
-    grep({findWhat: '([ \\t]+)'}, {changeTo: '\\t'});
-    grep({findWhat: '^(Illustrat|Assembly Draw).+\\r'}, {appliedParagraphStyle: 'TOC Level 2', keepWithNext: 0});
-    var tocParas = grep({findWhat: '(.+\\t\\d+\\r)+'})[0].paragraphs.everyItem().getElements();
+function enterDrawings (drawingText) {
+    grep({findWhat: '(?i)^(Illustr|Assembly)[\\S\\s]+'}, {changeTo: drawingText});
+    var tocParas = grep({findWhat: '(?<=Contents\\r)[\\S\\s]+'})[0].paragraphs.everyItem().getElements();
     for (var p = 0; p < tocParas.length; p++) {
         var tocPara = tocParas[p];
-        if (tocPara.words[-1].horizontalOffset - tocPara.words[-2].insertionPoints[-1].horizontalOffset < 0.25)
-            tocPara.words[-2].insertionPoints[0].contents = '\n';
+        tocPara.contents = tocPara.contents.trim().replace(/ *(\n|\t) */g, ('$1' == '\n' ? ' ' : '$1'));
+        if (tocPara.contents.indexOf('\t') == -1)
+            tocPara.properties.appliedParagraphStyle = 'TOC Level 2';
+        else if (/\d{5}/.test(tocPara.contents))
+            tocPara.properties = {hyphenation: false, firstLineIndent: -1.75, tabList: [{position: 3.5, alignment: TabStopAlignment.LEFT_ALIGN}]};
+        else {
+            if (tocPara.words[-1].horizontalOffset - tocPara.words[-2].insertionPoints[-1].horizontalOffset < 0.25)
+                tocPara.words[-2].insertionPoints[0].contents = '\n';
+            tocPara.properties = {keepAllLinesTogether: true, keepWithNext: 0, hyphenation: false, rightIndent: 0.5, lastLineIndent: -0.375};
+        }
     }
     mainStory.textContainers[0].properties = {geometricBounds: [0.9375, 1, 10.25, 7.75], itemLayer: 'Default'};
     while (mainStory.overflows) {
@@ -118,10 +113,9 @@ styleTOC = function () {
         plusFrame.parentStory.properties = ({appliedFont: 'ITC Bookman Std\tBold', pointSize: '24pt', justification: Justification.rightAlign, alignToBaseline: true});
         lastFrame.nextTextFrame = nextFrame;
     }
-    doc.save();
 }
 
-addBookmark = function () {
+function addBookmark () {
     doc.bookmarks.everyItem().remove();
     var titleParas = grep({findWhat: '(?i)\\A[\\S\\s]+\\r(?=suggest|table)'})[0].paragraphs,
         title = '';
@@ -132,7 +126,7 @@ addBookmark = function () {
             return match.slice(0, -3) + (/(activat|chang|driv|ma[kt]|operat|releas|replac|retriev|servic|terminat|us)ing/i.test(match) ? 'e' : '');
         });
     title = titleParas.itemByRange(title ? 1 : 0, -1).contents.replace(/\s*(\r|\n)\s*/g, ' ');
-    title =  title.replace(/\b[A-Za-z]+\b/g, function (match) {
+    title =  title.replace(/\b[a-z]+\b/ig, function (match) {
         if (/^(a|about|above|across|after|along|and?|around|a[st]|before|behind|below|between|but|by|for|from|in|into|like|mid|near|next|nor|o[fnr]|onto|out|over|past|per|plus|save|so|than|then?|till?|to|under|until|unto|upon|via|with|within|without|x|yet)$/i.test(match))
             return match.toLowerCase();
         if (/^(i{2,3}|PSI|BOP|HPHT|HTHL|HCLD|MPT|CADA|DWHC|ROV|SS|BR|DW)$|^[^aeiou]+)$/i.test(match))
@@ -141,4 +135,12 @@ addBookmark = function () {
     });
     app.panels.item('Bookmarks').visible = false;
     doc.bookmarks.add(doc.pages[0], {name: title});
+}
+
+function grep (findPrefs, changePrefs, opts) {
+    app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
+    app.findChangeGrepOptions.properties = opts ? opts : {};
+    app.findGrepPreferences.properties = findPrefs;
+    app.changeGrepPreferences.properties = changePrefs ? changePrefs : {};
+    return changePrefs ? doc.changeGrep() : doc.findGrep();
 }
