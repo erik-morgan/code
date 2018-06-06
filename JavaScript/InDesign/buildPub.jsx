@@ -4,18 +4,36 @@
  * 
  * TRY USING ALL CAPS FOR BOOKMARKS...EVERY OTHER TITLE IS CAPS (RP, MAINTOC, TABS, ETC.)
  * 
- * @param {String} arguments[0]
- * @param {String} arguments[1]
- * 
  */
-
-app.scriptPreferences.measurementUnit = 2053729891;
 
 String.prototype.trim = function () {
     return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
 };
 
-main(arguments);
+prefs = {
+    script: app.scriptPreferences.properties,
+    preflight: app.preflightOptions.properties,
+    links: app.linkingPreferences.properties,
+    text: app.textPreferences.properties
+};
+
+app.scriptPreferences.properties = {enableRedraw: false, userInteractionLevel: 1699640946, measurementUnit: 2053729891};
+app.preflightOptions.properties = {preflightOff: true};
+app.linkingPreferences.properties = {checkLinksAtOpen: false};
+app.textPreferences.properties = {typographersQuotes: false};
+
+try {
+    main(arguments);
+}
+catch (e) {
+    // log errors
+}
+finally {
+    app.scriptPreferences.properties = prefs.script
+    app.preflightOptions.properties = prefs.preflight
+    app.linkingPreferences.properties = prefs.links
+    app.textPreferences.properties = prefs.text
+}
 
 function main (arguments) {
     docPath = arguments[0];
