@@ -1,74 +1,43 @@
-﻿#target indesign
+#target indesign
 
 /*
- * 
  * TRY USING ALL CAPS FOR BOOKMARKS...EVERY OTHER TITLE IS CAPS (RP, MAINTOC, TABS, ETC.)
- * 
+ * REFACTORING THIS FILE: CONSIDER LINE LENGTH, REDUCE DOM CALLS, & BENCHMARK
+                                                                                |
  */
 
-String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-};
-
-prefs = {
-    script: app.scriptPreferences.properties,
-    preflight: app.preflightOptions.properties,
-    links: app.linkingPreferences.properties,
-    text: app.textPreferences.properties
-};
-
-app.scriptPreferences.properties = {enableRedraw: false, userInteractionLevel: 1699640946, measurementUnit: 2053729891};
-app.preflightOptions.properties = {preflightOff: true};
-app.linkingPreferences.properties = {checkLinksAtOpen: false};
-app.textPreferences.properties = {typographersQuotes: false};
+var quotes = app.textPreferences.typographersQuotes,
+    arg = eval('(' + arguments[0] + ')');
 
 try {
-    main(arguments);
-}
-catch (e) {
-    // log errors
-}
-finally {
-    app.scriptPreferences.properties = prefs.script
-    app.preflightOptions.properties = prefs.preflight
-    app.linkingPreferences.properties = prefs.links
-    app.textPreferences.properties = prefs.text
+    config(false);
+    main();
+} catch (e) {
+    log(e);
+} finally {
+    config(true);
 }
 
-function main (arguments) {
-    docPath = arguments[0];
-    openDoc(docPath);
-    if (!/\bTOC\b/.test(docPath)) {
-        if (!File(docPath.slice(0, -4) + 'pdf').exists)
-            doc.exportFile(ExportFormat.PDF_TYPE, File(docPath.slice(0, -4) + 'pdf'), false);
+function main () {
+    openDoc();
+    if (arg.pdf)
+        exportPDF();
+    if (!/\bTOC\b/.test(doc.name))
         makeTOC();
-    }
-    if (arguments.length > 1) {
-        enterDrawings(arguments[1]);
-        addBookmark();
-        doc.save();
-        doc.exportFile(ExportFormat.PDF_TYPE, File(doc.fullName.absoluteURI.replace(/indd$/i, 'pdf')), false);
-    }
-    doc.close();
+    addDrawings(arg.drawings);
+    addBookmark();
+    doc.exportPDF();
+    doc.close(SaveOptions.YES);
 }
 
 function openDoc () {
-    doc = app.open(File(docPath)); //, false
-    doc.viewPreferences.horizontalMeasurementUnits = doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
+    doc = app.open(File(arg.doc), false);
+    doc.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.INCHES;
+    doc.viewPreferences.verticalMeasurementUnits = MeasurementUnits.INCHES;
     if (!doc.saved) {
-        for (var l = 0; l < doc.links.length; l++) {
-            if (doc.links[l].status == LinkStatus.LINK_MISSING) {
-                path = doc.links[l].filePath.replace(/.+?\/(?=share)/i, '');
-                path = path.replace(/\uF021/g, '*');
-                path = path.replace(/\uF022/g, ':');
-                if (File(path).exists)
-                    doc.links[l].relink(File(path));
-            }
-            else if (doc.links[l].status == LinkStatus.LINK_OUT_OF_DATE)
-                doc.links[l].update();
-        }
-        doc.save(File(docPath.slice(0, -4) + 'indd'));
-        File(docPath).remove();
+        relink();
+        doc.save(File(arg.doc.slice(0, -4) + 'indd'));
+        File(arg.doc).remove();
     }
     mainStory = doc.stories.everyItem().getElements().sort(function (a, b) {
         return b.length - a.length;
@@ -76,40 +45,45 @@ function openDoc () {
 }
 
 function makeTOC () {
-    var start = grep({findWhat: '\\A[\\S\\s]+', capitalization: Capitalization.ALL_CAPS})[0].paragraphs.length,
-        plen = mainStory.paragraphs.length;
-    if (mainStory.characters[-1].contents !== '\r')
-        mainStory.insertionPoints[-1].contents = '\r';
-    mainStory.insertionPoints[-1].properties = {contents: 'Table of Contents\r', appliedParagraphStyle: 'TOC'};
-    for (var p = start; p < plen; p++) {
-        var para = mainStory.paragraphs[p],
-            style = para.appliedParagraphStyle;
-        if (/Level [2-5]/.test(style.name) && para.appliedFont == style.appliedFont)
+    // see about adding tocstyleentries using parastyles.itemByRange(Level 2, Level 5)
+    var start = grep({findWhat: '^[^\\r]+\\r', capitalization: Capitalization.ALL_CAPS}).length,
+        paras = mainStory.paragraphs.everyItem().contents,
+        styles = mainStory.paragraphs.everyItem().appliedParagraphStyle;
+    mainStory.insertionPoints[-1].properties = 
+        {contents: '\rTable of Contents\r', appliedParagraphStyle: 'TOC'};
+    for (var p = start; p < paras.length; p++) {
+        if (styles[p].name.substr(0, 5) == 'Level')
             mainStory.insertionPoints[-1].properties = {
-                contents: para.contents.replace(/(?=\r)/, '\t' + para.parentTextFrames[0].parentPage.name),
-                appliedParagraphStyle: 'TOC ' + style.name
-            }
+                contents: paras[p].replace(/(?=\r)/, '\t' + 
+                    mainStory.paragraphs[p].parentTextFrames[0].parentPage.name),
+                appliedParagraphStyle: 'TOC ' + styles[p].name
+            };
     }
-    mainStory.paragraphs.itemByRange(start, plen - 1).remove();
-    doc.pages.itemByRange(1, doc.pages.length - 1).remove();
+    mainStory.paragraphs.itemByRange(start, p - 1).remove();
+    doc.spreads.itemByRange(1, -1).remove();
     doc.spreads[0].splineItems.everyItem().remove();
-    for (var g = doc.spreads[0].allGraphics.length - 1; g > -1; g--)
+    for (var g = doc.spreads[0].allGraphics.length - 1; g > -1; g--) {
         doc.spreads[0].allGraphics[g].parent.parent.remove();
+    }
     grep({findWhat: '\\A ?Page '}, {changeTo: ''}, {includeMasterPages: true});
-    mainStory.insertionPoints[-1].contents = 'Assembly Drawings and Parts Lists\rPlace Holder';
-    mainStory.paragraphs[-2].applyParagraphStyle(doc.paragraphStyles.item('TOC Level 2'), true);
-    mainStory.paragraphs[-1].applyParagraphStyle(doc.paragraphStyles.item('TOC Parts List'), true);
+    mainStory.insertionPoints[-1].properties = {
+        contents: 'Assembly Drawings and Parts Lists\r',
+        appliedParagraphStyle: 'TOC Level 2'
+    };
+    mainStory.insertionPoints[-1].properties = 
+        {contents: 'Place Holder', appliedParagraphStyle: 'TOC Parts List'};
+    mainStory.paragraphs[-1].appliedParagraphStyle = ;
     doc.sections.add(doc.pages[0], {pageNumberStyle:PageNumberStyle.lowerRoman});
-    doc.save(File(docPath.replace(/\.(?=indd$)/i, '.TOC.')));
+    doc.save(File(doc.fullName.absoluteURI.replace(/\.(?=indd$)/i, '.TOC.')));
 }
 
-function enterDrawings (drawingText) {
-    grep({findWhat: '(?i)^(Illustr|Assembly)[\\S\\s]+'}, {changeTo: drawingText});
+function addDrawings (drawingText) {
+    grep({findWhat: '(?i)^(Illustr|Assembly)[\\S\\s]*\\z'}, {changeTo: drawingText});
     var tocParas = grep({findWhat: '(?<=Contents\\r)[\\S\\s]+'})[0].paragraphs.everyItem().getElements();
     for (var p = 0; p < tocParas.length; p++) {
         var tocPara = tocParas[p];
-        tocPara.contents = tocPara.contents.trim().replace(/ *(\n|\t) */g, ('$1' == '\n' ? ' ' : '$1'));
-        if (tocPara.contents.indexOf('\t') == -1)
+        tocPara.contents = tocPara.contents.replace(/ *(\n|\t) */g, ('$1' == '\n' ? ' ' : '$1'));
+        if (tocPara.contents.indexOf('\t') < 0)
             tocPara.properties.appliedParagraphStyle = 'TOC Level 2';
         else if (/\d{5}/.test(tocPara.contents))
             tocPara.properties = {hyphenation: false, firstLineIndent: -1.75, tabList: [{position: 3.5, alignment: TabStopAlignment.LEFT_ALIGN}]};
@@ -147,7 +121,7 @@ function addBookmark () {
     title =  title.replace(/\b[a-z]+\b/ig, function (match) {
         if (/^(a|about|above|across|after|along|and?|around|a[st]|before|behind|below|between|but|by|for|from|in|into|like|mid|near|next|nor|o[fnr]|onto|out|over|past|per|plus|save|so|than|then?|till?|to|under|until|unto|upon|via|with|within|without|x|yet)$/i.test(match))
             return match.toLowerCase();
-        if (/^(i{2,3}|PSI|BOP|HPHT|HTHL|HCLD|MPT|CADA|DWHC|ROV|SS|BR|DW)$|^[^aeiou]+)$/i.test(match))
+        if (/^(i{2,3}|PSI|BOP|HPHT|HTHL|HCLD|MPT|CADA|DWHC|ROV|SS|BR|DW|[^AEIOU]+)$/i.test(match))
             return match.toUpperCase();
         return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
     });
@@ -156,9 +130,65 @@ function addBookmark () {
 }
 
 function grep (findPrefs, changePrefs, opts) {
+    /*
+     * LIST ALL GREPS USED IN SCRIPT & MAYBE SIMPLIFY THE CALLS
+    grep({findWhat: '^[^\\r]+\\r', capitalization: Capitalization.ALL_CAPS}).length
+    grep({findWhat: '\\A ?Page '}, {changeTo: ''}, {includeMasterPages: true})
+    grep({findWhat: '(?i)^(Illustr|Assembly)[\\S\\s]*\\z'}, {changeTo: drawingText})
+    grep({findWhat: '(?<=Contents\\r)[\\S\\s]+'})[0].paragraphs.everyItem().getElements()
+    
+     */
     app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
     app.findChangeGrepOptions.properties = opts ? opts : {};
     app.findGrepPreferences.properties = findPrefs;
     app.changeGrepPreferences.properties = changePrefs ? changePrefs : {};
     return changePrefs ? doc.changeGrep() : doc.findGrep();
+}
+
+function relink () {
+    Folder.current = File.fs == 'Macintosh' ? '/Volumes' : '/n';
+    var links = doc.links.everyItem().getElements();
+    for (var l = 0; l < links.length; l++) {
+        if (links[l].status == LinkStatus.LINK_MISSING) {
+            path = links[l].filePath;
+            path = path.replace(/.+?\/(share.+)/i, function (match, g1) {
+                if (File.fs == 'Macintosh')
+                    return g1.replace(/\uF021/g, '*').replace(/\uF022/g, ':');
+                else
+                    return g1.replace(/\*/g, String.fromCharCode(61473))
+                             .replace(/:/g, String.fromCharCode(61474));
+            });
+            if (File(path).exists)
+                links[l].relink(File(path));
+        }
+        else if (links[l].status == LinkStatus.LINK_OUT_OF_DATE)
+            links[l].update();
+    }
+}
+
+function exportPDF () {
+    var path = doc.fullName.absoluteURI.slice(0, -4) + 'pdf';
+    doc.exportFile(ExportFormat.PDF_TYPE, File(path), false);
+}
+
+function config (restore) {
+    app.scriptPreferences.enableRedraw = restore;
+    app.scriptPreferences.measurementUnit = MeasurementUnits.INCHES;
+    app.scriptPreferences.userInteractionLevel = 
+        restore ? UserInteractionLevels.INTERACT_WITH_ALL :
+                  UserInteractionLevels.NEVER_INTERACT;
+    app.preflightOptions.preflightOff = !restore;
+    app.linkingPreferences.checkLinksAtOpen = restore;
+    app.textPreferences.typographersQuotes = restore ? quotes : false;
+}
+
+function log (err) {
+    var logText = 'Error: ' + err.toString() + '\n' +
+                  'Message: ' + err.description + '\n' +
+                  'Line: ' + (err.hasOwnProperty('line') ? err.line : '?') + '\n' +
+                  'Stack: ' + $.stack);
+    var logFile = File(File($.fileName).path + '/buildPub.log');
+    logFile.open('w');
+    logFile.write(logText);
+    logFile.close();
 }
