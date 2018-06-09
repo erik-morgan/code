@@ -2,12 +2,28 @@
 
 /*
  * TRY USING ALL CAPS FOR BOOKMARKS...EVERY OTHER TITLE IS CAPS (RP, MAINTOC, TABS, ETC.)
- * REFACTORING THIS FILE: CONSIDER LINE LENGTH, REDUCE DOM CALLS, & BENCHMARK
-                                                                                |
+ * BLUESHEET = File('../bs.indd'),
  */
 
 var quotes = app.textPreferences.typographersQuotes,
-    arg = eval('(' + arguments[0] + ')');
+    arg = eval('(' + arguments[0] + ')'),
+    TOC_PROPS = {
+        keepAllLinesTogether: true,
+        keepWithNext: 0,
+        lastLineIndent: -0.375,
+        rightIndent: 0.5
+    },
+    TOC_PL_PROPS = {
+        firstLineIndent: -1.75,
+        keepAllLinesTogether: true,
+        tabList: [{position: 3.5, alignment: TabStopAlignment.LEFT_ALIGN}]
+    },
+    PLUS_PROPS = {
+        alignToBaseline: true,
+        appliedFont: 'ITC Bookman Std\tBold',
+        justification: Justification.rightAlign,
+        pointSize: '24pt'
+    };
 
 try {
     config(false);
@@ -45,8 +61,7 @@ function openDoc () {
 }
 
 function makeTOC () {
-    // see about adding tocstyleentries using parastyles.itemByRange(Level 2, Level 5)
-    var start = grep({findWhat: '^[^\\r]+\\r', capitalization: Capitalization.ALL_CAPS}).length,
+    var start = grep({findWhat: '^[^\\r]+\\r', ruleBelow: false}).length,
         paras = mainStory.paragraphs.everyItem().contents,
         styles = mainStory.paragraphs.everyItem().appliedParagraphStyle;
     mainStory.insertionPoints[-1].properties = 
@@ -79,73 +94,74 @@ function makeTOC () {
 
 function addDrawings (drawingText) {
     grep({findWhat: '(?i)^((Illustration|Assembly)[\\S\\s]+)?\\z'},
-        {changeTo: drawingText, appliedParagraphStyle: 'TOC Parts List'});
+         {changeTo: drawingText, appliedParagraphStyle: 'TOC Level 2'});
     grep({findWhat: ' *\\n *'}, {changeTo: ' '});
     var tabs = grep({findWhat: '\\t(?=\\d+\\r)'});
     for (var t = 0; t < tabs.length; t++) {
         var tab = tabs[t];
-        tab.paragraphs[0].properties = {keepAllLinesTogether: true,
-            keepWithNext: 0, hyphenation: false, rightIndent: 0.5, lastLineIndent: -0.375};
+        tab.paragraphs[0].properties = TOC_PROPS;
         if (tab.insertionPoints[-1].horizontalOffset - tab.horizontalOffset > 0.25)
             tab.paragraphs[0].words[-2].insertionPoints[0].contents = '\n';
     }
-    doc.paragraphStyles.item('TOC Level 2').properties = {hyphenation: false, firstLineIndent: -1.75,
-        tabList: [{position: 3.5, alignment: TabStopAlignment.LEFT_ALIGN}]};
-    grep({findWhat: '(Illustration|Assembly).+\\r'}, {appliedParagraphStyle: 'TOC Level 2'});
-    mainStory.textContainers[0].itemLayer = 'Default';
-    mainStory.textContainers[0].geometricBounds = [0.9375, 1, 10.25, 7.75];
+    grep({findWhat: '\d{5}'}, {appliedParagraphStyle: 'TOC Parts List'});
+    doc.paragraphStyles.item('TOC Parts List').properties = TOC_PL_PROPS;
+    doc.paragraphs.everyItem().hyphenation = false;
+    mainStory.textContainers[0].properties = {itemLayer: 'Default',
+        geometricBounds: [0.9375, 1, 10.25, 7.75]};
     while (mainStory.overflows) {
         var lastFrame = mainStory.textContainers[-1],
             lastRect = lastFrame.geometricBounds,
             plusFrame = lastFrame.parentPage.textFrames.add('Default', {
-                geometricBounds: [9.75, lastRect[1], 10.25, lastRect[3]],
-                contents: '+'
+                contents: '+',
+                geometricBounds: [9.75, lastRect[1], 10.25, lastRect[3]]
             }),
             nextPage = doc.pages.add(LocationOptions.AT_END),
             nextx = nextPage.documentOffset % 2 ? 0.75 : 9.5,
             nextFrame = nextPage.textFrames.add('Default', {
-                geometricBounds: [32/30, nextx, 10.25, nextx + 6.75]
+                geometricBounds: [32/30, nextx, 10.25, nextx + 6.75],
+                previousTextFrame: lastFrame
             });
-        lastFrame.geometricBounds = [lastRect[0], lastRect[1], lastRect[2] - 0.5, lastRect[3]];
-        plusFrame.parentStory.properties = ({appliedFont: 'ITC Bookman Std\tBold',
-            pointSize: '24pt', justification: Justification.rightAlign, alignToBaseline: true});
-        lastFrame.nextTextFrame = nextFrame;
+        lastFrame.geometricBounds = lastRect.splice(2, 1, lastRect[2] - 0.5);
+        plusFrame.parentStory.properties = PLUS_PROPS;
     }
 }
 
 function addBookmark () {
     doc.bookmarks.everyItem().remove();
-    var titleParas = grep({findWhat: '(?i)\\A[\\S\\s]+\\r(?=suggest|table)'})[0].paragraphs,
-        title = '';
-    if (/bookman/i.test(titleParas[0].appliedFont.fullName))
-        title = titleParas[0].contents.replace(/\b[a-z]+ing\b/ig, function (match) {
-            if (/^(run|set|ship)/i.test(match))
-                return match.slice(0, -4);
-            return match.slice(0, -3) + (/(activat|chang|driv|ma[kt]|operat|releas|replac|retriev|servic|terminat|us)ing/i.test(match) ? 'e' : '');
-        });
-    title = titleParas.itemByRange(title ? 1 : 0, -1).contents.replace(/\s*(\r|\n)\s*/g, ' ');
-    title =  title.replace(/\b[a-z]+\b/ig, function (match) {
-        if (/^(a|about|above|across|after|along|and?|around|a[st]|before|behind|below|between|but|by|for|from|in|into|like|mid|near|next|nor|o[fnr]|onto|out|over|past|per|plus|save|so|than|then?|till?|to|under|until|unto|upon|via|with|within|without|x|yet)$/i.test(match))
-            return match.toLowerCase();
-        if (/^(i{2,3}|PSI|BOP|HPHT|HTHL|HCLD|MPT|CADA|DWHC|ROV|SS|BR|DW|[^AEIOU]+)$/i.test(match))
-            return match.toUpperCase();
-        return match.charAt(0).toUpperCase() + match.substr(1).toLowerCase();
-    });
+    var title = grep({ruleBelow: false})[0].paragraphs.everyItem().contents;
+    if (/Bookman/.test(mainStory.paragraphs[0].appliedFont.fullName))
+        title[0] = changeTense(title[0]);
+    title = toTitleCase(title.join().replace(/\s*\r\s*/g, ' '));
     app.panels.item('Bookmarks').visible = false;
     doc.bookmarks.add(doc.pages[0], {name: title});
 }
 
+function toTitleCase (title) {
+    var lower = 'as at an about above across after along and around ' + 
+                'before behind below between but by for from in into like ' +
+                'near next of on or onto out over past so the then than to ' +
+                'under until via with within without x yet';
+    return title.replace(/\b[a-z]+\b/ig, function (match, i) {
+        if (/bigbore/i.test(match))
+            return 'BigBore';
+        if (RegExp('\\b' + match + '\\b', 'i').test(lower) && title[i - 1] !== '-')
+            return match.toLowerCase();
+        if (/^(III?|PSI|BOP|CADA|ROV|[^AEIOUY]+)$/i.test(match))
+            return match.toUpperCase();
+        return match[0].toUpperCase() + match.substr(1).toLowerCase();
+    });
+}
+
+function changeTense (str) {
+    var everbs = 'activating changing driving making mating operating ' +
+                 'releasing replacing retrieving servicing terminating using';
+    return str.replace(/\b[a-z]+ing\b/ig, function (match) {
+        return match.slice(0, /run|set|ship/i.test(match) -4 : -3) +
+            everbs.search(match.toLowerCase()) > -1 ? 'e' : '';
+    });
+}
+
 function grep (findPrefs, changePrefs, opts) {
-    /*
-     * LIST ALL GREPS USED IN SCRIPT & MAYBE SIMPLIFY THE CALLS
-    grep({findWhat: '^[^\\r]+\\r', capitalization: Capitalization.ALL_CAPS}).length
-    grep({findWhat: '\\A ?Page '}, {changeTo: ''}, {includeMasterPages: true})
-    grep({findWhat: '(?i)^((Illustration|Assembly)[\\S\\s]+)?\\z'}, {changeTo: drawingText, appliedParagraphStyle: 'TOC Parts List'})
-    grep({findWhat: ' *\\n *'}, {changeTo: ' '})
-    grep({findWhat: '\\t(?=\\d+\\r)'})
-    grep({findWhat: '(Illustration|Assembly).+\\r'}, {appliedParagraphStyle: 'TOC Level 2'})
-    grep({findWhat: '(?i)\\A[\\S\\s]+\\r(?=suggest|table)'})[0].paragraphs
-     */
     app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
     app.findChangeGrepOptions.properties = opts ? opts : {};
     app.findGrepPreferences.properties = findPrefs;
@@ -200,34 +216,3 @@ function log (err) {
     logFile.write(logText);
     logFile.close();
 }
-
-/*
- * name	PageMaker TOC style
- * titleStyle	[TOC ParagraphStyle]
- * title	Table of Contents
- * runIn	false
- * includeHidden	true
- * includeBookDocuments	false
- * createBookmarks	true
- * setStoryDirection	1752134266
- * numberedParagraphs	1952804469
- * tocStyleEntries:
- *     name		Level 2 (Tools)
- *     formatStyle		[object ParagraphStyle]
- *     pageNumberPosition		1634100590
- *     separator		^t
- *     separatorStyle		[Same style]
- *     
- *     name		Level 2
- *     formatStyle		[object ParagraphStyle]
- *     
- *     name		Level 3
- *     formatStyle		[object ParagraphStyle]
- *     
- *     name		Level 4
- *     formatStyle		[object ParagraphStyle]
- *     
- *     name		Level 5
- *     formatStyle		[object ParagraphStyle]
- * 
- */
