@@ -6,7 +6,6 @@ from subprocess import run
 #     determine whether multiple procs are duplicates (eg SS0284-02 always the same; SS0240 usually different)
 #     handle bluesheets in python, without jsx; if bluesheet item does not have an id, generate one
 #     require bluesheet formatting (no bs illustrations; unless i use bold formatting)
-#     clean drawing descriptions
 #     also handle this regex: [/(\d+)k/ig, '$1k']
 #     regexs = [[/\bmin.?\b/ig, 'Min.'],[/\bmax.?\b/ig, 'Max.'],[/\u2018|\u2019/ig, '\''],[/\u201C|\u201D/ig, '"'],[/\s*(\t|\r)+\s{0,}/ig, '$1'],[/^(420(056|295)-02).{0,}/ig, '$1\t18-3/4" Jet Sub'],[/(bb|bigbore).?(ii|2)/ig, 'BB II'],[/\bchsart\b/ig, 'Casing Hanger and Seal Assembly Running Tool'],[/\bsart\b/ig, 'Seal Assembly Running Tool'],[/-in\b/ig, '-In'],[/-out\b/ig, '-Out'],[/ & /ig, ' and '],[/mill and flush|m.?(&|and).?f/ig, 'Mill & Flush'],[/\bmpt\b/ig, 'Multi-Purpose Tool'],[/(three|3).?in.?(one|1)/ig, '3-in-1'],[/1st/ig, 'First'],[/2nd/ig, 'Second'],[/3rd/ig, 'Third'],[/\bpos\b/ig, 'Position'],[/\bolr\b/ig, 'Outer Lock Ring'],[/\bbr.style/ig, 'BR-Style'],[/f\/ ?/ig, 'for'],[/\b(.)x(.)/ig, '$1 x $2'],[/ {2,}/g, ' '],[/^\s|\s$/g, '']]
 # check for buildPub.log, because that means there was an error
@@ -31,7 +30,7 @@ class INDD:
         jsx += f'doc.stories[0].contents = \'{message}\'; '
         if title:
             jsx += ('app.panels.item(\'Bookmarks\').visible = false; '
-                    'doc.bookmarks.add(doc.pages[0], {name: "{title.replace('"', '\\"')}"}); ')
+                    'doc.bookmarks.add(doc.pages[0], {name: "{title}"}); ')
         jsx += 'doc.exportFile(ExportFormat.PDF_TYPE, File("{pdf}"), false); '
         jsx += 'doc.close(1852776480);'
         self.doScript([jsx])

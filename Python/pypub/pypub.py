@@ -7,19 +7,14 @@ import fnmatch as fn
 from outlineparser import OutlineParser
 from pub_exceptions import OutlineError, MissingFileError, AppendixError
 
-# Use INDD RPs with TOCs in front instead of separate files?
-# Ignore advisory, and stick it in to INDD
 # if there are no drawings matching with PL, try with just drawnum for drawings with -0x charts
 # standardize RP naming convention (regarding CC0104-MT vs CC0104-QTM-CR vs CC0104-01MT)
-# TODO: ADD TITLES TO RUNNING PROCEDURE LIBRARY AS METADATA
 # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
-# TODO: add handling of third party documents for appendix
 # TODO: introductions and pdf cover locations
 # TODO: add intros and back cover to PDF location
 # Consider using R00 for Rev NC
 # 
 # IMPORTANT:
-#   Start discussion about killing individual TOCs
 #   File Naming: SS0264.R7 (TOCs have .TOC after rev)
 # 
 # REGX FOR DRAWINGS:
