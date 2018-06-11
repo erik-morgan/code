@@ -8,7 +8,13 @@ from lxml import etree
 # THERE ARE CONSTANT TYPOS, BUT IT WOULD REQUIRE NEW TOCS EVERY TIME
 # Use 2-digit revs, even for nc (00)?; return else '00' for NC in future in _rev_repl function
 # standardize drawing descriptions and attach as metadata to drawing library files
-
+# was going to convert volume ints to roman numerals, but user needs to use correct, desired format
+# forbid "section" bluesheets; put the bluesheet next to the actual document
+#     investigate how bluesheets were denoted in that crazy outline that was missing like 6 procs
+############################################################
+# 
+# RESUME AT ADDPROC/ADDDRAW
+# 
 ############################################################
 
 class OutlineParser:
@@ -17,93 +23,88 @@ class OutlineParser:
             xdoc = xdoc.decode()
         xdoc = re.sub(r'\b[rw]:| xmlns[^>]+| encoding=\S+', '', xdoc)
         self.doc = etree.fromstring(xdoc)[0]
-        self.get_props()
-        self.sections = list(self.get_sections())
-        self.doc_list = []
-
-    def get_sections(self):
+    
+    def parse(self):
+        self.getProps()
         for para in self.doc.iter('p'):
             if list(para.iter('strike')):
                 continue
             if all(list(para.iter(tag)) for tag in 'ubt'):
-                if not sect[0][0:5] in 'TABLE INTRO':
-                    yield sect
-                sect = [self.get_text(para)]
-            elif sect:
-                sect.append(self.get_text(para))
-        yield sect
+                self.addSect(para)
+            else:
+                self.addPara(self.getText(para))
     
-    def get_props(self):
-        sys, cust, proj, rig, sm = [self.get_text(p) for p in self.doc[0:5]]
-        props = {
-            'sys': sys.split('\t')[0],
-            'cust': cust.split(': ', 1)[-1],
-            'proj': proj.split(': ', 1)[-1],
-            'rig': rig.split(': ')[-1],
-        }
-        sm = sm.split(': ')[-1].lower()
-        smparts = sm.split()
-        props['sm'] = smparts[0]
-        if 'vol' in sm:
-            i = smparts.index('volume')
-            props['vol'] = smparts[i + 1]
-        if 'rev' in sm:
-            i = smparts.index('rev')
-            props['rev'] = smparts[i + 1]
-        self.draft = props['draft'] = 'draft' in sm.lower()
-        self.xpub = etree.Element('project', props)
+    def getProps(self):
+        props = {}
+        props['sys'] = self.getText(0).split('\t')[0]
+        props['cust'] = self.getText(1).split(': ', 1)[-1]
+        for p in range(2, 5):
+            name, prop = self.getText(p).split(': ', 1)
+            if 'Project' in name or 'Rig' in name:
+                props['rig' if 'Rig' in name else 'proj'] = prop
+            elif 'Manual' in name:
+                props['sm'] = re.search(r'\d{4}', prop)[0]
+                if 'rev' in prop.lower():
+                    props['rev'] = re.search(r'Rev\S* (\d+)', prop, re.I)[1]
+                if 'vol' in prop.lower():
+                    props['vol'] = re.search(r'Vol\S* (\S+)', prop, re.I)[1]
+                self.draft = props['draft'] = 'draft' in prop.lower()
+        self.pub = etree.Element('project', props)
     
-    def get_text(self, para):
-        for node in para.iter('t', 'tab', 'br'):
-            if node.tag == 'br':
-                break
-            if node.tag == 't':
-                para_text = (para_text or '') + node.text
-            elif node.tag == 'tab' and para_text[-1] != '\t':
-                para_text = para_text.strip() + '\t'
-        return para_text.strip() if para_text else ''
-    
-    def add_sect(self, sect):
-        if not sect[1]:
-            title = re.sub(r' PHASE| PROCEDURES?|[\t].*)', '', sect[0])
-            self._phase = self.subel(self.xpub, 'phase', {'title': title})
+    def addSect(self, sect):
+        text = self.getText(sect)
+        if sect[0][0:5] in 'TABLE INTRO':
+            return None
+        if list(sect.getnext().iter('t')):
+            return etree.SubElement(self.pub[-1], 'unit', {'title': text})
         else:
-            self._unit = self.subel(self._phase, 'unit', {'title': sect[0]})
-            self.parse_sect([s for s in sect if len(sect)])
+            return etree.SubElement(self.pub, 'phase', {
+                'title': re.sub(r' PHASE| PROCEDURES?|\t.*)', '', text)
+            })
     
-    def parse_sect(self, sections):
-        sect_bs = 'bluesheet' in sections.pop(0).lower()
-        for par in sections:
-            if re.search(r'\d{5}', par):
-                self._add_draw(par.split('\t'))
-            elif re.match(r'[A-Z]{2,6}\d{4}|BTC ?\d\d', par):
-                par = par.replace('BTC ', 'BTC')
-                text = '\n'.join(sections).lower()
-                rev = re.sub(r'(?s)(.+\brev ?(\d+))?.*', r'\2', text)
-                self._add_proc(par, rev, sect_bs, 'advisory' in text)
-            sections.remove(par):
+    def addPara(self):
+        while True:
+            para = yield
+            if re.search(r'\d{5}', para):
+                self.addDraw(para)
+            elif para.lower().startswith('rev') and not 'NC' in para.upper():
+                proc.set('rev', para.split()[-1])
+            elif 'advisory' in para.lower():
+                proc.set('advisory', 'True')
+            elif re.match(r'[A-Z]{2,6} ?\d+', para):
+                proc = self.addProc(para)
     
-    def _add_draw(self, tsplit):
+    def addDraw(self, text):
+        # differentiate bw ills/draws
         draw = {'id': tsplit[0]}
         if self.draft and 'bluesheet' in para.lower():
             draw['bs'] = 'True'
-        else:
-            self.doc_list.append(tsplit[0])
-        draw = subel(self._unit, 'dw', draw)
+        # self.docList.append(tsplit[0])
+        draw = etree.SubElement(self.pub[-1][-1], 'dw', draw)
         draw.text = tsplit[1]
     
-    def _add_proc(self, text, rev, sect_bs, adv):
+    def addProc(self, text):
+        # para = para.replace('BTC ', 'BTC')
+        # rev = re.sub(r'(?is)(.+\brev ?(\d+))?.*', r'\2', text)
+        # CHANGE HOW ID IS PICKED; PROBABLY INSIST ON -## ONLY, NOT -MT
+        # CHECK FOR INLINE REV (IE BTC)
         proc = {
             'id': '-'.join(re.split(r'\W', text.split()[0])),
-            'rev': rev,
         }
-        if adv:
-            proc['advisory'] = 'True'
-        if sect_bs or 'bluesheet' in text.lower():
+        if 'bluesheet' in text.lower():
             proc['bs'] = 'True'
-        else:
-            self.doc_list.append(proc['id'] + (f'.R{rev}' if rev else ''))
-        subel(self._unit, 'rp', proc)
+        # self.docList.append(proc['id'] + (f'.R{rev}' if rev else ''))
+        return etree.SubElement(self.pub[-1][-1], 'rp', proc)
     
-    def subel(self, parent, name, attrs={}):
-        return etree.SubElement(parent, name, attrs)
+    def getText(self, p):
+        if isinstance(p, int):
+            p = self.doc[p]
+        for node in p.iter('t', 'tab', 'br'):
+            if node.tag == 'br':
+                break
+            if node.tag == 't':
+                paraText = (paraText or '') + node.text
+            elif node.tag == 'tab' and paraText[-1] != '\t':
+                paraText = paraText.strip() + '\t'
+        return paraText.strip() if paraText else ''
+    
