@@ -9,9 +9,7 @@ from lxml import etree
 # standardize drawing descriptions and attach as metadata to drawing library files
 # was going to convert volume ints to roman numerals, but user needs to use correct, desired format
 # forbid "section" bluesheets; put the bluesheet next to the actual document
-
 # ideally, figure out a more reliable way to remove namespaces
-# have to do styles bc of strikethru
 ############################################################
 
 class OutlineParser:
@@ -38,29 +36,40 @@ class OutlineParser:
     
     def parse(self):
         self.getProps()
-        phase = ''
-        paragen = self.addPara()
-        next(paragen)
-        for para in self.doc.iter('p'):
-            if list(para.iter('strike')):
+        numParas = len(doc) - 1
+        phasegen = self.parsePhase()
+        next(phasegen)
+        for i, para in enumerate(self.doc.iter('p')):
+            if para.find('strike'):
                 continue
-            ishead = all(list(para.iter(tag)) for tag in 'ubt')
-            if ishead and not list(para.getnext().iter('t')):
-                phase = re.sub(r'(?i) PHASE| PROCEDURES?|\t.*', '',
-                    self.getText(para))
-                if 'APPENDIX' in phase.upper():
-                    self.pub.set('appendix', 'True')
-                if phase.upper()[0:5] not in 'TABLE INTRO APPEN':
-                    etree.SubElement(self.pub, 'phase', {'title': phase})
-            elif phase and phase.upper()[0:5] not in 'TABLE INTRO APPEN':
-                if ishead:
-                    etree.SubElement(self.pub[-1], 'unit')
+            if all(para.find(tag) for tag in 'ubt'):
+                if i < numParas and para.getnext().find('t'):
+                    para.set('sect', 'True')
                 else:
-                    paragen.send(self.getText(para))
+                    phasegen.send(i)
     
-    def addPara(self):
+    def parsePhase(self):
         while True:
-            para = yield
+            phaseBeg = yield
+            phase = self.checkPhase(self.getText(phaseBeg).upper())
+            if not phase:
+                continue
+            phaseEnd = yield
+            for para in self.doc[phaseBeg:phaseEnd]:
+                strike = para.find('strike')
+                color = para.find('color')
+                if strike or (color and color.get('val') == '4F81BD'):
+                    continue
+                if para.get('sect'):
+                    if 'sect' in locals():
+                        self.parseSection(paras)
+                    sect = []
+                else:
+                    sect.append(self.getText(para))
+    
+    def parseSection(self, paras):
+        etree.SubElement(self.pub[-1], 'unit')
+        for para in paras:
             if re.search(r'\d{5}', para):
                 self.addDraw(para)
             elif para.lower().startswith('rev') and not 'NC' in para.upper():
@@ -117,6 +126,15 @@ class OutlineParser:
                 self.draft = 'draft' in prop.lower()
                 props['draft'] = str(self.draft)
         self.pub = etree.Element('project', props)
+    
+    def checkPhase(self, phase):
+        if 'TABLE OF' in phase or 'INTRO' in phase:
+            return None
+        if 'APPENDIX' in phase:
+            self.pub.set('appendix', 'True')
+            return None
+        phase = re.sub(r'(?i) PHASE| PROCEDURES?|\t.*', '', phase)
+        return etree.SubElement(self.pub, 'phase', {'title': phase})
     
     def getText(self, p):
         if isinstance(p, int):
