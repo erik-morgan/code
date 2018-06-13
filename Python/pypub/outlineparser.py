@@ -31,45 +31,34 @@ class OutlineParser:
             for pr in s.iter('pPr', 'rPr'):
                 for child in pr:
                     sprops += etree.tostring(child).decode()
+            # xdoc = xdoc.replace('<' + stype + ' val="' + sid + '"/>', sprops)
             xdoc = xdoc.replace(f'<{stype} val="{sid}"/>', sprops)
         return xdoc
     
     def parse(self):
         self.getProps()
-        numParas = len(doc) - 1
-        phasegen = self.parsePhase()
-        next(phasegen)
-        for i, para in enumerate(self.doc.iter('p')):
-            if para.find('strike'):
+        paragen = self.parsePara()
+        next(paragen)
+        for para in self.doc.iter('p'):
+            strike = list(para.iter('strike'))
+            color = para.find('.//color')
+            if strike or (color and color.get('val') == '4F81BD'):
                 continue
-            if all(para.find(tag) for tag in 'ubt'):
-                if i < numParas and para.getnext().find('t'):
-                    para.set('sect', 'True')
+            if all(list(para.iter(tag)) for tag in 'ubt'):
+                if list(para.getnext().iter('t')):
+                    etree.SubElement(self.pub[-1], 'unit')
                 else:
-                    phasegen.send(i)
+                    phase = self.checkPhase(para)
+                    if phase:
+                        etree.SubElement(self.pub, 'phase', {'title': phase})
+            elif 'phase' in locals() and phase:
+                paragen.send(para)
+        return self.pub
     
-    def parsePhase(self):
+    def parsePara(self):
         while True:
-            phaseBeg = yield
-            phase = self.checkPhase(self.getText(phaseBeg).upper())
-            if not phase:
-                continue
-            phaseEnd = yield
-            for para in self.doc[phaseBeg:phaseEnd]:
-                strike = para.find('strike')
-                color = para.find('color')
-                if strike or (color and color.get('val') == '4F81BD'):
-                    continue
-                if para.get('sect'):
-                    if 'sect' in locals():
-                        self.parseSection(paras)
-                    sect = []
-                else:
-                    sect.append(self.getText(para))
-    
-    def parseSection(self, paras):
-        etree.SubElement(self.pub[-1], 'unit')
-        for para in paras:
+            para = yield
+            para = self.getText(para)
             if re.search(r'\d{5}', para):
                 self.addDraw(para)
             elif para.lower().startswith('rev') and not 'NC' in para.upper():
@@ -127,15 +116,15 @@ class OutlineParser:
                 props['draft'] = str(self.draft)
         self.pub = etree.Element('project', props)
     
-    def checkPhase(self, phase):
-        if 'TABLE OF' in phase or 'INTRO' in phase:
-            return None
+    def checkPhase(self, para):
+        phase = self.getText(para).upper()
+        if 'TABLE OF' in phase or 'INTRO' in phase or 'OUTLINE' in phase:
+            return False
         if 'APPENDIX' in phase:
             self.pub.set('appendix', 'True')
-            return None
-        phase = re.sub(r'(?i) PHASE| PROCEDURES?|\t.*', '', phase)
-        return etree.SubElement(self.pub, 'phase', {'title': phase})
-    
+            return False
+        return re.sub(r'(?i) PHASE| PROCEDURES?|\t.*', '', phase)
+        
     def getText(self, p):
         if isinstance(p, int):
             p = self.doc[p]
