@@ -11,6 +11,7 @@ from pub_exceptions import OutlineError
 # TODO: if folders are on network, do os test to set network volume prefix (eg /Volumes vs N:/)
 # TODO: intros and pdf/back cover locations (move to PDFs?)
 # to order SUDs for buildpub, just call illustration and drawing xpaths separately
+# add check for empty phases/sections when parsing self.pub
 # 
 # IMPORTANT:
 #   File Naming: SS0264.R7 (TOCs have .TOC after rev;  consider using R00 for NC)
@@ -31,9 +32,7 @@ class Pypub(Observer):
             self.docx = self.docx[0]
     
     def parseOutline(self):
-        with ZipFile(self.docx) as zip:
-            xdoc = zip.open('word/document.xml').read()
-        parser = OutlineParser(xdoc)
+        parser = OutlineParser(self.docx)
         self.pub = parser.parse()
     
     def dirlist(self, dirpath, pattern=None):
