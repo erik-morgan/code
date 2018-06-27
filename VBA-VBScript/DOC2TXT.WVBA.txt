@@ -1,0 +1,16 @@
+Sub DOC2TXT()
+    Dim dirPath As String, doc As Document, newPath As String
+    dirPath = "/Users/HD6904/Erik/Procedure Status/outlines/"
+    docFile = Dir(dirPath)
+    Do While docFile <> ""
+        Debug.Print docFile
+        If InStr(LCase(docFile), ".doc") Then
+            Set doc = Documents.Open(dirPath & docFile)
+            ActiveDocument.SaveAs2 FileName:="/Users/HD6904/Erik/Procedure Status/outlines-txt-vba/" & doc.Name & ".txt", _
+                                   FileFormat:=wdFormatUnicodeText, _
+                                   LineEnding:=wdLFOnly
+            doc.Close SaveChanges:=False
+        End If
+        docFile = Dir
+    Loop
+End Sub

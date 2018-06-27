@@ -1,4 +1,4 @@
-﻿#target indesign
+#target indesign
 
 /*
  * THIS SCRIPT WILL PROCESS ALL INDD FILES & COULD THEORETICALLY BE USED WITH BATCH PROCESSING SCRIPT
@@ -6,115 +6,137 @@
  * STANDARDIZE STYLE SHEETS (INCLUDES CLEANING UP MANUALLY ENTERED NUMBERED LIST)
  * RELINK ARTWORK THAT WAS RENAMED
  * ADD DOCUMENT TITLE, AUTHOR, REVISION, SYSTEM, & MAYBE LINK NAMES AS METADATA
- * RE-EXPORT PDF IF NECESSARY
- * EXTRACT FOOTER INFO, TITLE, SYSTEM, ETC FOR LOG
- * EXTRACT LINK NAMES
+ * RE-EXPORT PDF
+ * EXTRACT FOOTER INFO, TITLE, SYSTEM, LINK NAMES
  * 
- * CAN'T DO FOLDER.SELECTDIALOG BC FOLDERS MAY HAVE MULTIPLE REVS
- * 
- * SHOULD ADD CHECKS FOR CANCELLED OPENDIALOGS
  * USE METADATA INSTEAD OF LOGGING, THEN EXTRACT & USE METADATA IN SEPARATE SCRIPTS
- * 
  * ALSO WRITE A COMPANION METADATA SCRIPT THAT AUTOMATICALLY UPDATES XMP DATA ON SAVE
  * AND PLACE IT INTO STARTUP SCRIPTS
  * 
+ * 
  */
 
-app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
-
-var doc, PSTYLES, CSTYLES, TSTYLES, LINKS = {},
-    SYSTEMS = {
-        'CC': 'Casing Connector System',
-        'CFS': 'Casing Connector System',
-        'CR': 'Completion Riser System',
-        'CRC': 'Completion Riser System',
-        'CRJ': 'Completion Riser System',
-        'CRM': 'Completion Riser System',
-        'CWS': 'Conventional Wellhead System',
-        'DR': 'Drilling Riser System',
-        'DRC': 'Drilling Riser System',
-        'DRM': 'Drilling Riser System',
-        'DTAP': 'Dril-Thru System',
-        'DTCC': 'Dril-Thru Casing Connector System',
-        'DTDR': 'Dril-Thru Drilling Riser System',
-        'DTMC': 'Dril-Thru Mudline Completion System',
-        'DTSC': 'Dril-Thru Subsea Completion System',
-        'DTSS': 'Dril-Thru Subsea Wellhead System',
-        'DTUW': 'Dril-Thru Unitized Wellhead System',
-        'DV': 'Valve System',
-        'FD': 'Fixed Diverter System',
-        'FDC': 'Fixed Diverter System',
-        'FDM': 'Fixed Diverter System',
-        'GVS': 'Gate Valve System',
-        'HPU': 'Production Controls System',
-        'MC': 'Mudline Completion System',
-        'MS': 'MS-10/MS-15 Mudline Suspension System',
-        'SC': 'Subsea Completion System',
-        'SCC': 'Subsea Completion System',
-        'SCJ': 'Subsea Completion System',
-        'SS': 'Subsea Wellhead System',
-        'SSC': 'Subsea Controls System',
-        'SSH': 'SS-15 BigBore II-H System',
-        'SSJ': 'Subsea Wellhead System',
-        'UW': 'Unitized Wellhead System',
-        'UWHTS': 'Unitized Wellhead Horizontal Tree System',
-        'UWHTSM': 'Unitized Wellhead Horizontal Tree System',
-        'WOC': 'Workover Controls System'
-    };
-
-loadStyles();
-
-if (!ExternalObject.AdobeXMPScript)
-    ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+STYLE_SHEET = app.scriptPreferences.scriptsFolder.getFiles('TWD Stylesheet.indd')[0];
+FILE_LIST = File('/path/to/text file/listing paths of procedures/to process.txt');
+NETWORK_PREFIX = File.fs == 'Macintosh' ? '/Volumes/' : '/n/';
+SYSTEMS = {
+    'CC': 'Casing Connector System',
+    'CFS': 'Casing Connector System',
+    'CR': 'Completion Riser System',
+    'CRC': 'Completion Riser System',
+    'CRJ': 'Completion Riser System',
+    'CRM': 'Completion Riser System',
+    'CWS': 'Conventional Wellhead System',
+    'DR': 'Drilling Riser System',
+    'DRC': 'Drilling Riser System',
+    'DRM': 'Drilling Riser System',
+    'DTAP': 'Dril-Thru System',
+    'DTCC': 'Dril-Thru Casing Connector System',
+    'DTDR': 'Dril-Thru Drilling Riser System',
+    'DTMC': 'Dril-Thru Mudline Completion System',
+    'DTSC': 'Dril-Thru Subsea Completion System',
+    'DTSS': 'Dril-Thru Subsea Wellhead System',
+    'DTUW': 'Dril-Thru Unitized Wellhead System',
+    'DV': 'Valve System',
+    'FD': 'Fixed Diverter System',
+    'FDC': 'Fixed Diverter System',
+    'FDM': 'Fixed Diverter System',
+    'GVS': 'Gate Valve System',
+    'HPU': 'Production Controls System',
+    'MC': 'Mudline Completion System',
+    'MS': 'MS-10/MS-15 Mudline Suspension System',
+    'SC': 'Subsea Completion System',
+    'SCC': 'Subsea Completion System',
+    'SCJ': 'Subsea Completion System',
+    'SS': 'Subsea Wellhead System',
+    'SSC': 'Subsea Controls System',
+    'SSH': 'SS-15 BigBore II-H System',
+    'SSJ': 'Subsea Wellhead System',
+    'UW': 'Unitized Wellhead System',
+    'UWHTS': 'Unitized Wellhead Horizontal Tree System',
+    'UWHTSM': 'Unitized Wellhead Horizontal Tree System',
+    'WOC': 'Workover Controls System'
+};
+DATA = {
+    id: '',
+    revision: '',
+    title: '',
+    desig: '',
+    system: '',
+    modified: '',
+    writers: [],
+    links: []
+};
+var doc;
 
 String.prototype.trim = function () {
     return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/ {2,}/g, ' ');
 };
 
-var fileList = File.openDialog('Select the file listing the paths to process:');
-fileList.open();
-var ends = fileList.lineFeed == 'Windows' ? '\r\n' : '\n',
-    filePaths = fileList.read(),
-    ;
-fileList.close();
+app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
 
-var linkFile = File.openDialog('Select the file listing the mapped links:');
-linkFile.open();
-var linkPaths = linkFile.read().split(ends);
-linkFile.close();
-for (var l = 0; l < linkPaths.length; l++) {
-    var link = linkPaths[l].split('\t');
-    LINKS[link[0]] = link[1];
-}
+// THIS HAS TO BE CONDENSED. MAYBE USE CONSTANT NOTATION...? (EG PUTTING DECLARATIONS AT TOP),
+// BUT STILL PUT A CHECK AFTER, TO ENSURE THEYRE PROVIDED
+if (initProcess())
+    main();
 
-main(filePaths.split(ends));
-
-function main (paths) {
+function main () {
+    var paths = parseFile(FILE_LIST);
     for (var p = 0; p < paths.length; p++) {
-        var path = paths[p].split('\t')[0],
-            ext = paths[p].split('\t')[1],
-            f = File(path);
-        if (!f.exists)
-            continue;
-        doc = app.open(f);
-        updateStyles();
-        // TEST XMPUTILS.SEPARATEARRAYITEMS WITH LINKS, BUT TRY NOT QUOTING, OR NOT ESCAPING QUOTES
-        // RETHINK HOW THIS FLOWS, BECAUSE DOC HAS TO CLOSE BEFORE ADDXMP IS CALLED
-        /*
-         * MOST METADATA IS ACCESSIBLE IN SCRIPT'S OTHER FUNCTIONS (EG NAME IN MAIN, LINKS IN RELINK), SO
-         * USE THOSE FUNCTIONS TO SIPHON OUT METADATA TO A GLOBAL VARIABLE, AND THEN PROCESS XMP AT END
-         */
+        var f = File(paths[p]);
+        if (f.exists) {
+            var path = f.path + '/' + getName(f.name.toUpperCase());
+            doc = app.open(f);
+            updateStyles();
+            updateLinks();
+            getData();
         doc.save(File(f.path + '/' + name + '.indd'));
         doc.exportFile(ExportFormat.PDF_TYPE, 
                        File(f.path + '/' + name + '.pdf'), false);
+            addXMP();
     }
 }
 
 function updateStyles () {
+    doc.importStyles(ImportFormat.TOC_STYLES_FORMAT, STYLE_SHEET);
+    // if twd agrees to table styles, uncomment the following line
+    // doc.importStyles(ImportFormat.TABLE_AND_CELL_STYLES_FORMAT, STYLE_SHEET);
+    if (doc.paragraphStyles.item('TOC Level 1').isValid)
+        doc.paragraphStyles.item('TOC Level 1').remove();
+}
+
+function updateLinks () {
+    var links = doc.links.everyItem().getElements().sort(function (a, b) {
+            return a.filePath == b.filePath ? 0 : (a.filePath > b.filePath ? 1 : -1);
+        }),
+        linkPaths = [];
+    for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        link.update();
+        if (link.status == LinkStatus.LINK_MISSING)
+            refactorLink(link);
+        if (link.filePath !== linkPaths[linkPaths.length - 1])
+            linkPaths.push(link.filePath);
+    }
+    DATA.links = linkPaths;
+}
+
+function refactorLink (link) {
+    // relink can take a string
+    // invalidChars & leading/trailing spaces = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', 'NUL', 'TAB', 'CR', 'LF'];
+    // first, replace all unicode dots, and then process the chars
+    // /, :, ", * are all dots
+    // 
+    var name = link.name,
+        path = link.filePath,
+        sep = path[path.length - name.length - 1],
+        parts = path.replace(/^.*(?=share)/i, NETWORK_PREFIX).split(sep);
     
 }
 
-function relink () {
+function getData () {
+    // at this point, DATA has id, revision, & links
+    // need title, desig, sys, mod & writers
     
 }
 
@@ -181,20 +203,6 @@ function getFooter () {
     return {'mod': mod || null, 'writers': writers || null};
 }
 
-function getLinks () {
-    // PROBLEM: LINK PATHS ARE PLATFORM-DEPENDENT (DOTS ON PC, ASTERISKS/SLASHES/COLONS/QUOTES ON MAC)
-    var links = doc.links.everyItem().filePath.sort();
-    for (var i = links.length - 1; i > -1; i--) {
-        if (links[i - 1] !== links[i]) {
-            links[i] = decodeURI(File(
-                links[i].replace(/^\W*[a-z]+\W*/i, '').replace('\\', '/')
-            ));
-        else
-            links.splice(i, 1);
-    }
-    return links;
-}
-
 function grep (findPrefs, changePrefs, opts) {
     app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
     app.findChangeGrepOptions.properties = opts ? opts : {};
@@ -203,9 +211,29 @@ function grep (findPrefs, changePrefs, opts) {
     return changePrefs ? doc.changeGrep() : doc.findGrep();
 }
 
-function loadStyles () {
-    var styleSheet = File.openDialog('Select the InDesign style sheet', '*.indd');
-    if (!styleSheet) return;
-    doc = app.open(styleSheet, false);
-    
+function getName (name) {
+    return name.replace(/^([^. ]+).(R(\d+))?.*/, function (m, g1, g2, g3) {
+        var id = g1.replace(/[^A-Z0-9]+/g, '').replace(/(\d\d)/g, '-$1');
+        id = id.replace(/([A-Z]+)-(\d\d)(-(\d\d))?/g, '$1$2$4');
+        DATA.id = id;
+        DATA.revision = g3 || 0;
+        return [id, g2 ? g2 : ''].join('.') + '.indd';
+    });
+}
+
+function initProcess () {
+    if (!STYLE_SHEET.exists || !FILE_LIST.exists)
+        return false;
+    if (!ExternalObject.AdobeXMPScript)
+        ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+    return true;
+}
+
+function parseFile (f) {
+    if (f.exists) {
+        f.open();
+        var lines = f.read().split(f.lineFeed == 'Windows' ? '\r\n' : '\n');
+        f.close();
+        return lines;
+    }
 }
