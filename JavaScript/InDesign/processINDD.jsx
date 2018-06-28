@@ -1,4 +1,6 @@
 #target indesign
+#include "polyfills.jsx";
+#include "procedure.jsx";
 
 /*
  * THIS SCRIPT WILL PROCESS ALL INDD FILES & COULD THEORETICALLY BE USED WITH BATCH PROCESSING SCRIPT
@@ -13,12 +15,13 @@
  * ALSO WRITE A COMPANION METADATA SCRIPT THAT AUTOMATICALLY UPDATES XMP DATA ON SAVE
  * AND PLACE IT INTO STARTUP SCRIPTS
  * 
- * 
+ * CONSIDER ADDING BEFORE_CLOSE EVENT HANDLER FOR SAVING/PDFING
  */
 
 STYLE_SHEET = app.scriptPreferences.scriptsFolder.getFiles('TWD Stylesheet.indd')[0];
 FILE_LIST = File('/path/to/text file/listing paths of procedures/to process.txt');
 NETWORK_PREFIX = File.fs == 'Macintosh' ? '/Volumes/' : '/n/';
+FAIL_LOG = File('/path/to/text file/to log/failures into.txt');
 SYSTEMS = {
     'CC': 'Casing Connector System',
     'CFS': 'Casing Connector System',
@@ -67,33 +70,37 @@ DATA = {
     writers: [],
     links: []
 };
-var doc;
 
-String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/ {2,}/g, ' ');
-};
-
-app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
-
-// THIS HAS TO BE CONDENSED. MAYBE USE CONSTANT NOTATION...? (EG PUTTING DECLARATIONS AT TOP),
-// BUT STILL PUT A CHECK AFTER, TO ENSURE THEYRE PROVIDED
-if (initProcess())
+if (initProcess()) {
+	wrapFunctions(processes)
+	// 
+	// MAKE PROCEDURE CONSTRUCTOR FUNCTION
+	// 
     main();
 
 function main () {
     var paths = parseFile(FILE_LIST);
-    for (var p = 0; p < paths.length; p++) {
-        var f = File(paths[p]);
-        if (f.exists) {
-            var path = f.path + '/' + getName(f.name.toUpperCase());
-            doc = app.open(f);
-            updateStyles();
-            updateLinks();
-            getData();
-        doc.save(File(f.path + '/' + name + '.indd'));
-        doc.exportFile(ExportFormat.PDF_TYPE, 
-                       File(f.path + '/' + name + '.pdf'), false);
-            addXMP();
+    paths.forEach(function (path, pathIndex) {
+        if (File(path).exists) {
+            doc = app.open(File(path));
+
+        if (f.exists)
+            processINDD(f);
+    }
+}
+
+function processINDD (fileObject) {
+    try {
+        updateStyles();
+        updateLinks();
+        addBookmark();
+        getData();
+        addXMP(getPath(fileObject));
+    } catch (e) {
+        app.documents.everyItem().close(SaveOptions.NO);
+        FAIL_LOG.open('a');
+        FAIL_LOG.writeln('"' + decodeURI(fileObject) + '" failed inside of ' + FUNC_NAME + ' on line #' + e.line);
+        FAIL_LOG.close();
     }
 }
 
@@ -126,7 +133,6 @@ function refactorLink (link) {
     // invalidChars & leading/trailing spaces = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', 'NUL', 'TAB', 'CR', 'LF'];
     // first, replace all unicode dots, and then process the chars
     // /, :, ", * are all dots
-    // 
     var name = link.name,
         path = link.filePath,
         sep = path[path.length - name.length - 1],
@@ -134,94 +140,77 @@ function refactorLink (link) {
     
 }
 
+function addBookmark () {
+    var title = grep({ruleBelow: false})[0].contents;
+    title = DATA.title = title.replace(/\s+/g, ' ').trim().toUpperCase();
+    doc.bookmarks.everyItem().remove();
+    app.panels.item('Bookmarks').visible = false;
+    doc.bookmarks.add(doc.pages[0], {name: title});
+}
+
 function getData () {
-    // at this point, DATA has id, revision, & links
-    // need title, desig, sys, mod & writers
-    
+    var desig = grep({appliedParagraphStyle: 'PROCEDURE DESIGNATOR'}),
+        sys = grep({findWhat: '(?im)^.+system', pointSize: 6}, null, true),
+        footer = grep({findWhat: '(?<=\\r).*[-0-9/]{5,}.*', appliedParagraphStyle: 'footer'}, undefined, true);
+    DATA.desig = desig ? desig[0].contents.trim().toUpperCase() : null;
+    DATA.system = (sys.length ? sys[0].contents : SYSTEMS[prefix]).toUpperCase();
+    if (footer.length) {
+        // date format is: mmddyy, mmyydd, mddyy, myydd, mmdyy, or mmyyd; could compare with metadata
+        var match, re = /\b[A-Z]{2,3}\b/g;
+        footer = footer[0].contents.toUpperCase();
+        DATA.modified = footer.replace(/(\d\d)(?=\d\d$)/, '/$1/')
+                              .match(/[-0-9/]{5,}\d/)[0];
+        while (match = re.exec(footer)) {
+            if (match[0] !== 'ED' && !DATA.writers.contains(match[0]))
+                DATA.writers.push(match[0]);
+        }
+        DATA.writers = DATA.writers.sort();
+    } else
+        DATA.modified = DATA.writers = null;
 }
 
 function addXMP () {
-    var docPath = doc.fullName.fsName,
-        name = /^([^. ]+)(.R(\d+))?/.exec(doc.name.toUpperCase()),
-        title = grep({ruleBelow: false})[0].contents.trim().toUpperCase(),
-        desig = getDesignator(),
-        system = getSystem().trim().toUpperCase(),
-        foot = getFooter(),
-        links = getLinks(),
-        ns = 'http://dril-quip.com/rp/',
-        fxmp, xmp;
-    doc.close(SaveOptions.YES);
+    var fxmp, xmp, ns = 'http://dril-quip.com/rp/';
     fxmp = new XMPFile(doc.fullName.fsName, XMPConst.FILE_INDESIGN, XMPConst.OPEN_FOR_UPDATE);
     xmp = fxmp.getXMP();
     XMPMeta.registerNamespace(ns, 'rp');
+    // USE DATA OBJECT FOR PROPERTY ASSIGNMENT
     xmp.setProperty(ns, 'id', name[1]);
     xmp.setProperty(ns, 'revision', name[3] || 0);
     xmp.setProperty(ns, 'title', title);
     xmp.setProperty(ns, 'system', system);
-    if (foot.mod)
-        xmp.setProperty(ns, 'modified', foot.mod);
-    if (foot.writers)
-        XMPUtils.separateArrayItems(xmp, ns, 'writers', XMPConst.SEPARATE_ALLOW_COMMAS, foot.writers.join('\t'));
-    if (links.length)
-        XMPUtils.separateArrayItems(xmp, ns, 'links', XMPConst.SEPARATE_ALLOW_COMMAS, links.join('\t'));
+    if (DATA.modified)
+        xmp.setProperty(ns, 'modified', DATA.modified);
+    if (DATA.writers)
+        XMPUtils.separateArrayItems(xmp, ns, 'writers', XMPConst.SEPARATE_ALLOW_COMMAS, DATA.writers.join('\t'));
+    XMPUtils.separateArrayItems(xmp, ns, 'links', XMPConst.SEPARATE_ALLOW_COMMAS, DATA.links.join('\t'));
     fxmp.putXMP(xmp);
     fxmp.closeFile(XMPConst.CLOSE_UPDATE_SAFELY);
 }
 
-function getDesignator () {
-    var items = doc.pages[0].allPageItems;
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        if (item instanceof TextFrame && /designator/i.test(item.parentStory.appliedParagraphStyle.name))
-            return item.contents.trim().toUpperCase();
-    }
-    return null;
-}
-
-function getSystem () {
-    sys = grep({findWhat: '(?im)^.+system', pointSize: '6pt'},
-               undefined,
-               {includeMasterPages: true});
-    return sys.length ? sys[0].contents : SYSTEMS[prefix];
-}
-
-function getFooter () {
-    var footers = doc.masterSpreads[0].pages[0].textFrames.everyItem().contents;
-    for (var f = 0; f < footers.length; f++) {
-        var text = footers[f].contents.trim().toUpperCase();
-        if (/PAGE/.test(text))
-            continue;
-        text = /^.*([-0-9/]{5,}).*/m.exec(text);
-        if (text) {
-            var mod = text[1].replace(/(\d\d)(?=\d\d$)/, '/$1/');
-            if (mod.substr(-1) == '/')
-                mod = mod.slice(0, -1);
-            text = text[0].replace(/\bed\b/g, '');
-            writers = text.match(/\b[A-Z]{2,3}\b/g).sort();
-        }
-    }
-    return {'mod': mod || null, 'writers': writers || null};
-}
-
-function grep (findPrefs, changePrefs, opts) {
+function grep (findPrefs, changePrefs, masters) {
     app.findChangeGrepOptions = app.findGrepPreferences = app.changeGrepPreferences = null;
-    app.findChangeGrepOptions.properties = opts ? opts : {};
+    app.findChangeGrepOptions.includeMasterPages = masters ? true : false;
     app.findGrepPreferences.properties = findPrefs;
     app.changeGrepPreferences.properties = changePrefs ? changePrefs : {};
     return changePrefs ? doc.changeGrep() : doc.findGrep();
 }
 
-function getName (name) {
-    return name.replace(/^([^. ]+).(R(\d+))?.*/, function (m, g1, g2, g3) {
+function getPath (file) {
+    var path = decodeURI(file.path) + '/',
+        name = decodeURI(file.name.toUpperCase());
+    path += name.replace(/^([^. ]+).(R(\d+))?.*/, function (m, g1, g2, g3) {
         var id = g1.replace(/[^A-Z0-9]+/g, '').replace(/(\d\d)/g, '-$1');
         id = id.replace(/([A-Z]+)-(\d\d)(-(\d\d))?/g, '$1$2$4');
         DATA.id = id;
         DATA.revision = g3 || 0;
-        return [id, g2 ? g2 : ''].join('.') + '.indd';
+        return [id, g2 ? g2 : ''].join('.');
     });
+    return path;
 }
 
 function initProcess () {
+    app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
     if (!STYLE_SHEET.exists || !FILE_LIST.exists)
         return false;
     if (!ExternalObject.AdobeXMPScript)
