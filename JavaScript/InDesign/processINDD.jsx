@@ -75,6 +75,8 @@ if (initProcess()) {
 	wrapFunctions(processes)
 	// 
 	// MAKE PROCEDURE CONSTRUCTOR FUNCTION
+	// null globals
+	// 
 	// 
     main();
 
@@ -92,6 +94,12 @@ function main () {
 function processINDD (fileObject) {
     try {
         updateStyles();
+            if (doc.paragraphStyles.item('TOC Level 1').isValid)
+                doc.paragraphStyles.item('TOC Level 1').remove();
+            doc.links.everyItem().getElements().forEach(function (link) {
+                link.update();
+                proc.processLink(link);
+        
         updateLinks();
         addBookmark();
         getData();
