@@ -8,18 +8,15 @@
  * ONLY FUNCTION OBJECTS HAVE A PROTOTYPE PROPERTY
  */
 
-function Procedure (file, constantVars) {
+function Procedure (file) {
     var name = decodeURI(file.name.toUpperCase()).match(/^(\S+?)[. ](R(\d+))?/),
         path = decodeURI(file.path) + '/' + name[0];
     this.file = file;
     this.id = name[1];
     this.rev = name[3] || 0;
     this.path = path.replace(/.(R\d+)?$/, '$1.indd');
-    this.constants = constantVars;
 };
-// ADDED CONSTANTS/CONSTANTVARS TO CONSTRUCTOR TO GUARANTEE THAT PROCEDURE.PROTOTYPE METHODS
-// HAVE ACCESS TO GLOBALS LIKE STYLE_SHEET/NETWORK_PREFIX
-// LEFT OFF IN UPDATESTYLES
+
 Procedure.prototype.extend({
     openDoc: function () {
         this.doc = app.open(this.file);
@@ -115,3 +112,64 @@ Procedure.prototype.extend({
         doc.close(SaveOptions.YES, File(this.path + '.indd'));
     }
 });
+
+networkPrefix: File.fs == 'Macintosh' ? '/Volumes/' : '/n/';
+systems: {
+    'CC': 'Casing Connector System',
+    'CFS': 'Casing Connector System',
+    'CR': 'Completion Riser System',
+    'CRC': 'Completion Riser System',
+    'CRJ': 'Completion Riser System',
+    'CRM': 'Completion Riser System',
+    'CWS': 'Conventional Wellhead System',
+    'DR': 'Drilling Riser System',
+    'DRC': 'Drilling Riser System',
+    'DRM': 'Drilling Riser System',
+    'DTAP': 'Dril-Thru System',
+    'DTCC': 'Dril-Thru Casing Connector System',
+    'DTDR': 'Dril-Thru Drilling Riser System',
+    'DTMC': 'Dril-Thru Mudline Completion System',
+    'DTSC': 'Dril-Thru Subsea Completion System',
+    'DTSS': 'Dril-Thru Subsea Wellhead System',
+    'DTUW': 'Dril-Thru Unitized Wellhead System',
+    'DV': 'Valve System',
+    'FD': 'Fixed Diverter System',
+    'FDC': 'Fixed Diverter System',
+    'FDM': 'Fixed Diverter System',
+    'GVS': 'Gate Valve System',
+    'HPU': 'Production Controls System',
+    'MC': 'Mudline Completion System',
+    'MS': 'MS-10/MS-15 Mudline Suspension System',
+    'SC': 'Subsea Completion System',
+    'SCC': 'Subsea Completion System',
+    'SCJ': 'Subsea Completion System',
+    'SS': 'Subsea Wellhead System',
+    'SSC': 'Subsea Controls System',
+    'SSH': 'SS-15 BigBore II-H System',
+    'SSJ': 'Subsea Wellhead System',
+    'UW': 'Unitized Wellhead System',
+    'UWHTS': 'Unitized Wellhead Horizontal Tree System',
+    'UWHTSM': 'Unitized Wellhead Horizontal Tree System',
+    'WOC': 'Workover Controls System'
+}
+
+function processINDD (fileObject) {
+    try {
+        updateStyles();
+            if (doc.paragraphStyles.item('TOC Level 1').isValid)
+                doc.paragraphStyles.item('TOC Level 1').remove();
+            doc.links.everyItem().getElements().forEach(function (link) {
+                link.update();
+                proc.processLink(link);
+        
+        updateLinks();
+        addBookmark();
+        getData();
+        addXMP(getPath(fileObject));
+    } catch (e) {
+        app.documents.everyItem().close(SaveOptions.NO);
+        FAIL_LOG.open('a');
+        FAIL_LOG.writeln('"' + decodeURI(fileObject) + '" failed inside of ' + FUNC_NAME + ' on line #' + e.line);
+        FAIL_LOG.close();
+    }
+}
