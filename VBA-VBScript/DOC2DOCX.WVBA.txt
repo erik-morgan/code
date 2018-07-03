@@ -1,0 +1,18 @@
+Sub DOC2DOCX()
+    Dim dirPath As String, doc As Document, newPath As String
+    dirPath = "/Users/HD6904/Erik/Procedure Status/outlines/docs/"
+    docFile = Dir(dirPath)
+    Do While docFile <> ""
+        On Error GoTo FailedToOpen
+        If Right(LCase(docFile), 3) = "doc" Then
+            Set doc = Documents.Open(FileName:=dirPath & docFile, AddToRecentFiles:=False, Visible:=False)
+            doc.SaveAs2 FileName:=dirPath & docFile & "x", FileFormat:=16
+            doc.Close SaveChanges:=wdDoNotSaveChanges
+        End If
+ToNextDir:
+        docFile = Dir
+    Loop
+FailedToOpen:
+        Debug.Print "FAILED: " & docFile
+        Resume ToNextDir
+End Sub
