@@ -1,4 +1,4 @@
-Object.prototype.extend = function(obj) {
+﻿Object.prototype.extend = function(obj) {
     var o = Object(obj);
     if (o !== obj)
         throw new TypeError('Object.extend can only be called on Objects.');
@@ -96,4 +96,10 @@ if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/ {2,}/g, ' ');
     };
+}
+
+if (!String.prototype.format) {
+    String.prototype.format = function () {
+        return localize(this, [].slice.call(arguments));
+    }
 }
