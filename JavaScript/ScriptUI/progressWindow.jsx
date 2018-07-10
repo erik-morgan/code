@@ -75,6 +75,17 @@ ProgressWindow.prototype.close = function () {
                        this.count, formatTime((new Date() - this.start) / 1000));
 };
 
+ProgressWindow.prototype.close = function () {
+	// test if scriptui-test returns to show if error is thrown
+	// test if calling close with a value does return it to show
+	// otherwise, try and use just this as close handler, but still throw error on abort
+    this.w.onClose = null;
+    this.w.close();
+    if (!this.total)
+        alert(localize('Operation complete!\nProcessed %1 INDD files in %2',
+                       this.count, formatTime((new Date() - this.start) / 1000));
+};
+
 function formatTime (time) {
     var u, t = [];
     if (u = Math.floor(time / 3600))

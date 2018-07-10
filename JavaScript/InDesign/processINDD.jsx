@@ -3,23 +3,17 @@
 #include "procedure.jsx";
 
 /*
- * THIS SCRIPT WILL PROCESS ALL INDD FILES & COULD THEORETICALLY BE USED WITH BATCH PROCESSING SCRIPT
- * 
  * STANDARDIZE STYLE SHEETS (INCLUDES CLEANING UP MANUALLY ENTERED NUMBERED LIST)
- * RELINK ARTWORK THAT WAS RENAMED
- * ADD DOCUMENT TITLE, AUTHOR, REVISION, SYSTEM, & MAYBE LINK NAMES AS METADATA
- * RE-EXPORT PDF
- * EXTRACT FOOTER INFO, TITLE, SYSTEM, LINK NAMES
- * 
  * USE METADATA INSTEAD OF LOGGING, THEN EXTRACT & USE METADATA IN SEPARATE SCRIPTS
  * ALSO WRITE A COMPANION METADATA SCRIPT THAT AUTOMATICALLY UPDATES XMP DATA ON SAVE
  * AND PLACE IT INTO STARTUP SCRIPTS
  * 
+ * MERGE WITH procedure.jsx
  */
 
-// i think i can just use the filename
-fileList = File('../file_paths.txt');
-failLog = File('../process_fail_log.txt');
+Folder.current = File($.fileName).parent;
+fileList = File('file_paths.txt');
+failLog = File('process_fail_log.txt');
 styleSheet = app.scriptPreferences.scriptsFolder.getFiles('TWD Stylesheet.indd')[0];
 
 try {

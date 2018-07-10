@@ -1,16 +1,4 @@
-﻿Object.prototype.extend = function(obj) {
-    var o = Object(obj);
-    if (o !== obj)
-        throw new TypeError('Object.extend can only be called on Objects.');
-    for (var attr in obj) {
-        if (obj.constructor === Array)
-            this[obj[attr]] = undefined;
-        else
-            this[attr] = obj[attr];
-    }
-};
-
-if (!Array.prototype.includes) {
+﻿if (!Array.prototype.includes) {
     Array.prototype.includes = function (searchItem, fromIndex) {
         if (this == null)
             throw new TypeError('this is null or not defined');
@@ -96,10 +84,4 @@ if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/ {2,}/g, ' ');
     };
-}
-
-if (!String.prototype.format) {
-    String.prototype.format = function () {
-        return localize(this, [].slice.call(arguments));
-    }
 }
