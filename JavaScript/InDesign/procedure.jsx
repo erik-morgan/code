@@ -1,6 +1,10 @@
 // getData is no good; implement a process function that takes a callback (for refresh)
-// this.processes = ['updateStyles', 'updateLinks', 'addBookmark', 'addMetadata', 'saveAndClose'];
-
+// use app.doscript to control undo behavior
+/*
+ * consider wrapping it all in one giant object
+ * this way, processes can just point to main obj methods
+ * this also allows keeping a persistent collection of links in a tree for when 40 procs use same link (eg shear pins)
+ */
 function Procedure (file) {
     var name = decodeURI(file.name.toUpperCase()).match(/^(\S+?)[. ](R(\d+))?/),
         path = decodeURI(file.path) + '/' + name[0];
@@ -28,42 +32,65 @@ function updateStyles (includeTableStyles) {
     if (includeTableStyles)
         this.doc.importStyles(ImportFormat.TABLE_AND_CELL_STYLES_FORMAT, STYLE_SHEET);
     grep({findWhat: '^\s*[~8a-z0-9]+\.?\s*'}, {changeTo: ''}, undefined);
-};
+}
+
+// function updateLinksNotes () {
+//     this.links = {};
+//     this.doc.links.everyItem().getElements().forEach(function (olink) {
+//         var lpath = olink.filePath;
+//         if (!lpath in this.links) {
+//             var key = lpath,
+//                 flink = File(lpath);
+//             if (!flink.exists) {
+//                 // process link path
+//                 // if modified path doesn't exist, try getFiles
+//                 // otherwise, set it to incorrect path (seeing as it's broken anyway)
+//                 // should probably just set it to incorrect path initially, and try getFiles
+//             }
+//             // add flink.absoluteURI to this.links
+//             // i guess it doesn't really matter if link is missing or not...
+//         }
+//         // relink using this.links[lpath]
+//     });
+// }
 
 function updateLinks () {
+    // add support for local paths (to non-network hd)
     this.links = {};
-    this.doc.links.everyItem().getElements().forEach(function (link) {
-        link.update();
-        var path = link.filePath;
-        if (path in this.links && this.links[path] !== path)
-            // not good
-            this.processLink(link)
-    }, this);
-};
-
-function processLink (link) {
-    // on mac, colons are really slashes, so on PC, links with slashes are U+F022
-    // all unicodes will be removed except colons to slashes
-    var path = link.filePath.replace(/^.*(?=share)/i, NETWORK_PREFIX),
-        sep = path[path.length - link.name.length - 1],
-        parts = path.split(sep);
-    parts = parts.map(function (part) {
-        if (/:|\uF022|\//.test(part))
-            part = this.deslash(part.replace(/ *[:\uF022/] */g, '/'));
-        part = part.replace(/[<>:"/\\|?*\u0000-\u001F\uE000?\uF8FF]/g, '');
-        return part.trim();
-    }, this);
-    path = parts.join('/');
-    if (link.status == LinkStatus.LINK_MISSING)
-        link.relink(File(path));
-};
+    this.doc.links.everyItem().getElements().forEach(function (olink) {
+        var lpath = olink.filePath;
+        if (!lpath in this.links) {
+            var flink = File(lpath);
+            if (!flink.exists) {
+                // test UW0180-08-06 paths in VM tomorrow
+                // try flink.absoluteURI
+                var path = lpath.replace(/^.*(?=share)/i, ''),
+                    sep = lpath[lpath.length - olink.name.length - 1];
+                flink = File(netPath + path.split(sep).map(function (seg) {
+                    return deslash(
+                        seg.replace(/ *[:\uF022/] */g, '/')
+                    ).replace(/[<>:"/|?*\u0000-\u001F\uE000-\uF8FF]/g, '').trim();
+                }).join('/'));
+                if (!flink.exists) {
+                    var options = flink.parent.getFiles(decodeURI(flink.name).replace(/(\.\w{2,4})?$/, '*'));
+                    // get correct option to make sure you don't pull a pdf or dxf? or force tidy artwork storage...
+                }
+            }
+            // or just decodeURI(flink) ?
+            this.links[lpath] = decodeURI(flink.absoluteURI);
+        }
+        olink.relink(this.links[lpath]);
+    });
+}
 
 function deslash (str) {
     // convert fractions to decimal
     // convert w/ to with, f/ to for, etc
     // convert remaining slashes to spaces or ampersands
+    if (str.indexOf('/') < 0)
+        return str
     return str;
-};
+}
 
 function addBookmark () {
     var title = grep({ruleBelow: false})[0].contents;
@@ -71,7 +98,7 @@ function addBookmark () {
     this.doc.bookmarks.everyItem().remove();
     app.panels.item('Bookmarks').visible = false;
     this.doc.bookmarks.add(this.doc.pages[0], {name: title});
-};
+}
 
 function getData () {
     // check for existence of schema first
@@ -93,17 +120,35 @@ function getData () {
         DATA.writers = DATA.writers.sort();
     } else
         DATA.modified = DATA.writers = null;
-};
+}
 
 function saveAndClose () {
     this.doc.exportFile(ExportFormat.PDF_TYPE, File(this.path + '.pdf'), false);
     this.doc.close(SaveOptions.YES, File(this.path + '.indd'));
     if (this.hasOwnProperty('onClose'))
         this.onClose();
-};
+}
+
+function fixPath (file) {
+    // on mac, colons are really slashes, so on PC, links with slashes are U+F022
+    // all unicodes will be removed except colons to slashes
+    var path = decodeURI(file).replace(/^.*(?=share)/i, NETWORK_PREFIX);
+    var sep = path[path.length - link.name.length - 1];
+        parts = path.split(sep);
+    parts = parts.map(function (part) {
+        if (/:|\uF022|\//.test(part))
+            part = this.deslash(part.replace(/ *[:\uF022/] */g, '/'));
+        part = part.replace(/[<>:"/\\|?*\u0000-\u001F\uE000?\uF8FF]/g, '');
+        return part.trim();
+    }, this);
+    path = parts.join('/');
+    if (link.status == LinkStatus.LINK_MISSING)
+        link.relink(File(path));
+    
+}
 
 // see fs check used in estk
-networkPrefix = File.fs.indexOf('Mac') > -1 ? '/Volumes/' : '/n/';
+netPath = (File.fs == 'Macintosh' ? '/Volumes' : '/n') + '/share/SERVICE/';
 systems: {
     'CC': 'Casing Connector System',
     'CFS': 'Casing Connector System',
