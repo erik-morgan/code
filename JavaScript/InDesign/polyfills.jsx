@@ -1,15 +1,15 @@
 ﻿if (!Array.prototype.includes) {
-    Array.prototype.includes = function (searchItem, fromIndex) {
-        if (this == null)
-            throw new TypeError('this is null or not defined');
-        if (!this.length)
-            return false;
+    Array.prototype.includes = function (member, fromIndex) {
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
         var o = Object(this),
             len = o.length,
-            i = fromIndex >= 0 ? fromIndex : len + fromIndex;
+            i = (fromIndex |= 0) >= 0 ? fromIndex : len + fromIndex,
+            val = Object.valueOf;
+        if (len === 0 || i >= len)
+            return false;
         for (i = i < 0 ? 0 : i; i < len; i++) {
-            if (o[i] === searchItem ||
-                Object.valueOf(o[i]) === Object.valueOf(searchItem))
+            if (i in o && (o[i] === member || val(o[i]) === val(member)))
                 return true;
         }
     };
@@ -18,8 +18,8 @@
 if (!Array.prototype.filter){
     Array.prototype.filter = function(callback) {
         'use strict';
-        if (this == null)
-            throw new TypeError('this is null or not defined');
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
         if (typeof callback !== 'function')
             throw new TypeError(callback.name + ' is not a function');
         var thisVal = arguments.length > 1 ? arguments[1] : undefined,
@@ -35,8 +35,8 @@ if (!Array.prototype.filter){
 
 if (!Array.prototype.forEach) {
     Array.prototype.forEach = function(callback) {
-        if (this == null)
-            throw new TypeError('this is null or not defined');
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
         if (typeof callback !== 'function')
             throw new TypeError(callback.name + ' is not a function');
         var thisVal = arguments.length > 1 ? arguments[1] : undefined;
@@ -46,10 +46,28 @@ if (!Array.prototype.forEach) {
     };
 }
 
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (member, fromIndex) {
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
+        var o = Object(this),
+            len = o.length,
+            i = (fromIndex |= 0) >= 0 ? fromIndex : len + fromIndex,
+            val = Object.valueOf;
+        if (len === 0 || i >= len)
+            return -1;
+        for (i = i < 0 ? 0 : i; i < len; i++) {
+            if (i in o && (o[i] === member || val(o[i]) === val(member)))
+                return i;
+        }
+        return -1;
+    };
+}
+
 if (!Array.prototype.map) {
     Array.prototype.map = function(callback) {
-        if (this == null)
-            throw new TypeError('this is null or not defined');
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
         if (typeof callback !== 'function')
             throw new TypeError(callback.name + ' is not a function');
         var thisVal = arguments.length > 1 ? arguments[1] : undefined,
@@ -63,8 +81,8 @@ if (!Array.prototype.map) {
 
 if (!Array.prototype.reduce) {
     Array.prototype.reduce = function (callback) {
-        if (this == null)
-            throw new TypeError('this is null or not defined');
+        if (this === null || this === undefined)
+            throw TypeError('this is null or undefined');
         if (typeof callback !== 'function')
             throw new TypeError(callback.name + ' is not a function');
         if (!this.length && arguments.length < 2)

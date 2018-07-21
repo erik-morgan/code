@@ -1,14 +1,17 @@
-// getData is no good; implement a process function that takes a callback (for refresh)
+﻿// getData is no good; implement a process function that takes a callback (for refresh)
 // use app.doscript to control undo behavior
 /*
  * consider wrapping it all in one giant object
  * this way, processes can just point to main obj methods
  * this also allows keeping a persistent collection of links in a tree for when 40 procs use same link (eg shear pins)
+ * remove func_name bs from logger
+ * go back over comments and implement their notes
  */
 function Procedure (file) {
     var name = decodeURI(file.name.toUpperCase()).match(/^(\S+?)[. ](R(\d+))?/),
         path = decodeURI(file.path) + '/' + name[0];
     this.file = file;
+    this.prefix = /[A-Z]+/.exec(name[1])[0];
     this.id = name[1];
     this.rev = name[3] || 0;
     this.path = path.replace(/.(R\d+)?$/, '$1.indd');
@@ -32,160 +35,156 @@ function updateStyles (includeTableStyles) {
     if (includeTableStyles)
         this.doc.importStyles(ImportFormat.TABLE_AND_CELL_STYLES_FORMAT, STYLE_SHEET);
     grep({findWhat: '^\s*[~8a-z0-9]+\.?\s*'}, {changeTo: ''}, undefined);
+    // include other find/replace greps to clean up style changes
 }
 
-// function updateLinksNotes () {
-//     this.links = {};
-//     this.doc.links.everyItem().getElements().forEach(function (olink) {
-//         var lpath = olink.filePath;
-//         if (!lpath in this.links) {
-//             var key = lpath,
-//                 flink = File(lpath);
-//             if (!flink.exists) {
-//                 // process link path
-//                 // if modified path doesn't exist, try getFiles
-//                 // otherwise, set it to incorrect path (seeing as it's broken anyway)
-//                 // should probably just set it to incorrect path initially, and try getFiles
-//             }
-//             // add flink.absoluteURI to this.links
-//             // i guess it doesn't really matter if link is missing or not...
-//         }
-//         // relink using this.links[lpath]
-//     });
-// }
-
 function updateLinks () {
-    // add support for local paths (to non-network hd)
+    // this makes the links loaded from text file option seem much better (more concise)
     this.links = {};
     this.doc.links.everyItem().getElements().forEach(function (olink) {
         var lpath = olink.filePath;
+        // continue if link is local (non-network hd)
+        if (!/share.service/i.test(lpath))
+            continue;
         if (!lpath in this.links) {
             var flink = File(lpath);
             if (!flink.exists) {
-                // test UW0180-08-06 paths in VM tomorrow
-                // try flink.absoluteURI
-                var path = lpath.replace(/^.*(?=share)/i, ''),
-                    sep = lpath[lpath.length - olink.name.length - 1];
-                flink = File(netPath + path.split(sep).map(function (seg) {
-                    return deslash(
-                        seg.replace(/ *[:\uF022/] */g, '/')
-                    ).replace(/[<>:"/|?*\u0000-\u001F\uE000-\uF8FF]/g, '').trim();
-                }).join('/'));
-                if (!flink.exists) {
-                    var options = flink.parent.getFiles(decodeURI(flink.name).replace(/(\.\w{2,4})?$/, '*'));
-                    // get correct option to make sure you don't pull a pdf or dxf? or force tidy artwork storage...
+                var path = lpath.replace(/.+?SERVICE/i, ''), name, files;
+                flink = File(netPath + 
+                    path.split(path[0]).map(function (seg) {
+                        seg = deslash(seg.replace(/[:\uF022]/g, '/'));
+                        seg = seg.replace(/[<>"/|?*\u0000-\u001F\uE000-\uF8FF]/g, '');
+                        return seg.trim();
+                    }).join('/')
+                );
+                name = flink.displayName.replace(/(\.\w{2,4})?$/, '*');
+                files = flink.parent.getFiles(namePattern);
+                for (var f = 0; !flink.exists && f < files.length; f++) {
+                    var fname = files[f].displayName;
+                    if (/(ai|eps)$/i.test(fname))
+                        flink = files[f];
                 }
             }
-            // or just decodeURI(flink) ?
-            this.links[lpath] = decodeURI(flink.absoluteURI);
+            this.links[lpath] = decodeURI(flink);
         }
         olink.relink(this.links[lpath]);
     });
 }
 
 function deslash (str) {
-    // convert fractions to decimal
-    // convert w/ to with, f/ to for, etc
-    // convert remaining slashes to spaces or ampersands
     if (str.indexOf('/') < 0)
         return str
-    return str;
+    str = str.replace(/\s*\/\s*/g, '/');
+    str = str.replace(/1\/(2|4)(?= slice)/gi, function (match, g1) {
+        return g1 < 3 ? 'Half' : 'Quarter';
+    });
+    str = str.replace(/[- ]*\b(\d\d?)/(\d\d?)/g, function(match, n1, n2){
+        if (n1 < n2 && n1 <= 16 && n2 <= 16 && n1 % 2)
+            return (n1/n2).toString().substr(1, 5);
+        return match;
+    });
+    str = str.replace(/\b([fw]\/o?) ?\b/gi, function (match, g1) {
+        if (g1.toLowerCase() == 'f/')
+            return 'for ';
+        return 'with' + (/o/i.test(g1) ? 'out ' : ' ');
+    });
+    str = str.replace(\b([A-Z])\/([A-Z])\b/gi, '$1$2');
+    return str.replace('/', '-');
 }
 
 function addBookmark () {
-    var title = grep({ruleBelow: false})[0].contents;
-    title = DATA.title = title.replace(/\s+/g, ' ').trim().toUpperCase();
+    this.title = grep({ruleBelow: false})[0].contents
+                 .replace(/\s+/g, ' ').trim().toUpperCase();
     this.doc.bookmarks.everyItem().remove();
     app.panels.item('Bookmarks').visible = false;
-    this.doc.bookmarks.add(this.doc.pages[0], {name: title});
+    this.doc.bookmarks.add(this.doc.pages[0], {name: this.title});
 }
 
 function getData () {
     // check for existence of schema first
-    var desig = grep({appliedParagraphStyle: 'PROCEDURE DESIGNATOR'}),
-        sys = grep({findWhat: '(?im)^.+system', pointSize: 6}, null, true),
-        footer = grep({findWhat: '(?<=\\r).*[-0-9/]{5,}.*', appliedParagraphStyle: 'footer'}, undefined, true);
-    DATA.desig = desig ? desig[0].contents.trim().toUpperCase() : null;
-    DATA.system = (sys.length ? sys[0].contents : SYSTEMS[prefix]).toUpperCase();
-    if (footer.length) {
-        // date format is: mmddyy, mmyydd, mddyy, myydd, mmdyy, or mmyyd; could compare with metadata
-        var match, re = /\b[A-Z]{2,3}\b/g;
-        footer = footer[0].contents.toUpperCase();
-        DATA.modified = footer.replace(/(\d\d)(?=\d\d$)/, '/$1/')
-                              .match(/[-0-9/]{5,}\d/)[0];
-        while (match = re.exec(footer)) {
-            if (match[0] !== 'ED' && !DATA.writers.contains(match[0]))
-                DATA.writers.push(match[0]);
-        }
-        DATA.writers = DATA.writers.sort();
+    // check if result of grep is undefined when nothing is found (empty array would eval true)
+    // 
+    // REFACTOR THIS FUNCTION
+    // 
+    var find, match, writers;
+    find = grep({appliedParagraphStyle: 'Procedure Designator'});
+    this.desig = find.length ? find[0].contents.trim().toUpperCase() : null;
+    
+    find = grep({findWhat: '(?im)^.+system', pointSize: 6}, null, true),
+    this.sys = find.length ? find[0].contents.toUpperCase() : SYSTEMS[this.prefix];
+    
+    find = grep({findWhat: '(?<=\\r).*[-0-9/]{5,}.*', appliedParagraphStyle: 'footer'}, null, true);
+    if (find.length) {
+        // date formats: mmddyy, mmyydd, mddyy, myydd, mmdyy, mmyyd; could compare with metadata
+        find = find[0].contents.toUpperCase();
+        // pull all dates from all indd procs to come up with a regexp; below fails if format is mmdyy
+        this.modified = find.replace(/(\d\d)(?=\d\d$)/, '/$1/')
+                            .match(/[-0-9/]{5,}\d/)[0];
+        // do ternary test for writers; fix regex bc ED may be up against date digits
+        this.writers = '';
+        this.writers = find.match(/(?!ED\b)[A-Z]{2,3}\b/g) || [];
+        .filter(function(item, index, self) {
+            return index == self.indexOf(item);
+        }).sort();
     } else
-        DATA.modified = DATA.writers = null;
+        this.modified = this.writers = null;
 }
 
 function saveAndClose () {
     this.doc.exportFile(ExportFormat.PDF_TYPE, File(this.path + '.pdf'), false);
     this.doc.close(SaveOptions.YES, File(this.path + '.indd'));
-    if (this.hasOwnProperty('onClose'))
-        this.onClose();
+    // write metadata to closed file
 }
 
-function fixPath (file) {
-    // on mac, colons are really slashes, so on PC, links with slashes are U+F022
-    // all unicodes will be removed except colons to slashes
-    var path = decodeURI(file).replace(/^.*(?=share)/i, NETWORK_PREFIX);
-    var sep = path[path.length - link.name.length - 1];
-        parts = path.split(sep);
-    parts = parts.map(function (part) {
-        if (/:|\uF022|\//.test(part))
-            part = this.deslash(part.replace(/ *[:\uF022/] */g, '/'));
-        part = part.replace(/[<>:"/\\|?*\u0000-\u001F\uE000?\uF8FF]/g, '');
-        return part.trim();
-    }, this);
-    path = parts.join('/');
-    if (link.status == LinkStatus.LINK_MISSING)
-        link.relink(File(path));
-    
-}
-
-// see fs check used in estk
 netPath = (File.fs == 'Macintosh' ? '/Volumes' : '/n') + '/share/SERVICE/';
 systems: {
-    'CC': 'Casing Connector System',
-    'CFS': 'Casing Connector System',
-    'CR': 'Completion Riser System',
-    'CRC': 'Completion Riser System',
-    'CRJ': 'Completion Riser System',
-    'CRM': 'Completion Riser System',
-    'CWS': 'Conventional Wellhead System',
-    'DR': 'Drilling Riser System',
-    'DRC': 'Drilling Riser System',
-    'DRM': 'Drilling Riser System',
-    'DTAP': 'Dril-Thru System',
-    'DTCC': 'Dril-Thru Casing Connector System',
-    'DTDR': 'Dril-Thru Drilling Riser System',
-    'DTMC': 'Dril-Thru Mudline Completion System',
-    'DTSC': 'Dril-Thru Subsea Completion System',
-    'DTSS': 'Dril-Thru Subsea Wellhead System',
-    'DTUW': 'Dril-Thru Unitized Wellhead System',
-    'DV': 'Valve System',
-    'FD': 'Fixed Diverter System',
-    'FDC': 'Fixed Diverter System',
-    'FDM': 'Fixed Diverter System',
-    'GVS': 'Gate Valve System',
-    'HPU': 'Production Controls System',
-    'MC': 'Mudline Completion System',
-    'MS': 'MS-10/MS-15 Mudline Suspension System',
-    'SC': 'Subsea Completion System',
-    'SCC': 'Subsea Completion System',
-    'SCJ': 'Subsea Completion System',
-    'SS': 'Subsea Wellhead System',
-    'SSC': 'Subsea Controls System',
-    'SSH': 'SS-15 BigBore II-H System',
-    'SSJ': 'Subsea Wellhead System',
-    'UW': 'Unitized Wellhead System',
-    'UWHTS': 'Unitized Wellhead Horizontal Tree System',
-    'UWHTSM': 'Unitized Wellhead Horizontal Tree System',
-    'WOC': 'Workover Controls System'
+    'CC': 'CASING CONNECTOR SYSTEM',
+    'CFS': 'CASING CONNECTOR SYSTEM',
+    'CR': 'COMPLETION RISER SYSTEM',
+    'CRC': 'COMPLETION RISER SYSTEM',
+    'CRJ': 'COMPLETION RISER SYSTEM',
+    'CRM': 'COMPLETION RISER SYSTEM',
+    'CSRP': 'CASING REPARATION SYSTEM',
+    'CWS': 'CONVENTIONAL WELLHEAD SYSTEM',
+    'DR': 'DRILLING RISER SYSTEM',
+    'DRC': 'DRILLING RISER SYSTEM',
+    'DRM': 'DRILLING RISER SYSTEM',
+    'DTAP': 'DRIL-THRU SYSTEM',
+    'DTCC': 'DRIL-THRU CASING CONNECTOR SYSTEM',
+    'DTDR': 'DRIL-THRU DRILLING RISER SYSTEM',
+    'DTMC': 'DRIL-THRU MUDLINE COMPLETION SYSTEM',
+    'DTMS': 'DRIL-THRU MUDLINE SUSPENSION SYSTEM',
+    'DTSC': 'DRIL-THRU SUBSEA COMPLETION SYSTEM',
+    'DTSS': 'DRIL-THRU SUBSEA WELLHEAD SYSTEM',
+    'DTUW': 'DRIL-THRU UNITIZED WELLHEAD SYSTEM',
+    'DV': 'VALVES',
+    'ER': 'EXPORT RISER',
+    'FD': 'FIXED DIVERTER',
+    'FDC': 'FIXED DIVERTER',
+    'FDM': 'FIXED DIVERTER',
+    'GVS': 'GATE VALVES',
+    'GPU': 'PRODUCTION CONTROLS',
+    'HPU': 'PRODUCTION CONTROLS',
+    'LS': 'LS-15 LINER HANGER',
+    'MC': 'MUDLINE COMPLETION',
+    'MDTCC': 'MUDLINE DRIL-THRU CASING CONNECTOR',
+    'MS': 'MS-10/MS-15 MUDLINE SUSPENSION',
+    'MSCM': 'MUDLINE SUBSEA CONTROLS MODULE',
+    'RT': 'RISER TENSIONER',
+    'SC': 'SUBSEA COMPLETION',
+    'SCC': 'SUBSEA COMPLETION',
+    'SCCM': 'SUBSEA COMPLETION CONTROLS MODULE',
+    'SCJ': 'SUBSEA COMPLETION',
+    'SCMS': 'SUBSEA COMPLETION MUDLINE',
+    'SS': 'SUBSEA WELLHEAD',
+    'SSC': 'SUBSEA CONTROLS',
+    'SSH': 'SS-15 BIGBORE II-H SUBSEA WELLHEAD',
+    'SSJ': 'SUBSEA WELLHEAD',
+    'SW': 'SURFACE WELLHEAD',
+    'UW': 'UNITIZED WELLHEAD',
+    'UWHTS': 'UNITIZED WELLHEAD HORIZONTAL TREE',
+    'UWHTSM': 'UNITIZED WELLHEAD HORIZONTAL TREE',
+    'WOC': 'WORKOVER CONTROLS'
 }
 
 function processINDD (fileObject) {
