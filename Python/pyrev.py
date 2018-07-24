@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # from multiprocessing.dummy import Pool as ThreadPool
-import os
+from os import walk, remove
+from os.path import dirname, join
 import re
 import logging
 import requests as req
-from lxml import html
+from lxml.html import fromstring as tohtml, get_element_by_id as get_id
 from io import BytesIO
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
@@ -14,14 +15,13 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
 # TODO: find out if possible to have rev NR in lib (and if 0 is before/after NR)
 
-root = os.path.dirname(__file__)
+root = dirname(__file__)
+log = logging.info
 REVS = {
     'NC': 0.5,
     '0': 0.25,
     'NR': 0
 }
-PN_URL = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={0}'
-DL_URL = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx?PartNumber={0}&checkInProcess=1'
 
 def get_creds():
     from tkinter import Tk, Label, Entry, Button
@@ -64,53 +64,60 @@ def get_creds():
     win.mainloop()
 
 def get_rev(part_num):
-    reply = req.get(PN_URL.format(part_num))
-    node = html.fromstring(reply.content).get_element_by_id('revisionNum')
+    url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
+    node = tohtml(req.get(url).content).get_id('revisionNum')
     return node.text_content() if node else ''
 
-def is_old(myrev, dqrev):
-    # use int(rev, 36)!
-    myrev = REVS[myrev] if myrev in REVS else int(myrev, 36)
-    dqrev = REVS[dqrev] if dqrev in REVS else int(dqrev, 36)
-    return dqrev > myrev
+def is_old(rev1, rev2):
+    rev1 = REVS[rev1] if rev1 in REVS else int(rev1, 36)
+    rev2 = REVS[rev2] if rev2 in REVS else int(rev2, 36)
+    return rev2 > rev1
 
 def rev_spec(part_num):
     # Cookie: DqUserInfo=PartDocumentReader=AMERICAS\MorganEL;if necessary, get from env
-    # PdfFileMerger.append just creates a PdfFileReader anyway, but reader has numPages
     # if stream fails & it just downloads it anyway, then remove this func
-    with req.get(DL_URL.format(part_num), stream=True) as response:
+    url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
+    params = {'PartNumber': part_num, 'checkInProcess': 1}
+    with req.get(url, params=params, stream=True) as response:
         pdf = PdfFileReader(BytesIO(response.raw.read()))
     return pdf
 
+def iter_revs():
+    partrx = r'([-\w]+)\.([-A-Z0]{1,2})\.([-A-Z0]{1,2})'
+    for path, dirs, files in walk(root):
+        for f in files:
+            match = re.match(partrx, f)
+            if match:
+                yield join(path, f), *match.groups()
+    
+
 def check_revs():
-    # keep dict of checked drawings to avoid duplicate scraping
     pull_list = []
     dwgs = {}
-    for path, dirs, files in os.walk(root):
-        for file in files:
-            match = re.match(r'(([-\w]+)-\w+)\.([-A-Z0]{1,2})\.([-A-Z0]{1,2})', file)
-            if not match:
-                continue
-            part, base, draw, spec = match.groups()
-            if spec != '-':
-                spec_rev = get_rev(part)
-                if is_old(spec_rev, spec):
-                    new_file = os.path.join(path, f'{part}.{draw}.{spec_rev}')
-                    new_spec = rev_spec(part)
-                    pdf = PdfFileMerger()
-                    if draw != '-':
-                        pdf.append(os.path.join(path, file),
-                                   pages = (0, len(new_pages)))
-                    # LEFT OFF HERE
-            if draw != '-':
-                # make sure that get_rev isn't run even when it is in drawings
-                # REFACTOR THIS
-                draw_num = part if '.-.' in file else base
-                draw_rev = dwgs[draw_num] if draw_num in dwgs else get_rev(draw_num)
-                if is_old(draw_rev, draw):
-                    pull_list.append(draw_num)
-                    
-    
+    for file, num, draw, spec in iter_revs():
+        if spec == '-':
+            dwg = num
+        else:
+            dwg = num.rsplit('-', 1)[0]
+            rev = get_rev(num)
+            if is_old(spec, rev):
+                spec = rev_spec(part)
+                pdf = PdfFileMerger()
+                if draw != '-':
+                    pdf.append(file, pages=(-1*spec.numPages, 0))
+                pdf.append(spec)
+                with open(join(dirname(file),
+                               f'{num}.{draw}.{rev}'), 'wb') as f:
+                    pdf.write(f)
+                pdf.close()
+                remove(file)
+        if draw != '-':
+            if not dwg in dwgs:
+                dwgs[dwg] = get_rev(dwg)
+            rev = dwgs[dwg]
+            if is_old(draw, rev):
+                pull_list.append(dwg)
+    return pull_list
 
 def main():
     log_file = os.path.join(root, 'pyrev.log')
@@ -122,4 +129,8 @@ def main():
         datefmt = '%Y-%m-%dT%H:%M:%S',
         level = logging.INFO
     )
-    check_revs():
+    pull_list = check_revs()
+    if pull_list:
+        with open(join(root, 'pyrev.pull'), 'w') as f:
+            f.write('\n'.join(pull_list))
+-

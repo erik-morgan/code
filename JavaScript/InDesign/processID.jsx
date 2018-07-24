@@ -1,11 +1,105 @@
-﻿// getData is no good; implement a process function that takes a callback (for refresh)
-// use app.doscript to control undo behavior
+#target indesign
+#include "polyfills.jsx";
+
 /*
- * consider wrapping it all in one giant object
- * this way, processes can just point to main obj methods
- * this also allows keeping a persistent collection of links in a tree for when 40 procs use same link (eg shear pins)
- * go back over comments and implement their notes
+ * TODO: implement a process function that takes a callback (for refresh)
+ * TODO: consider using app.doscript to control undo behavior
+ * TODO: finish wrapping everything in one giant object;
+ *       processes can just point to main obj methods
+ *       allows persistent collection of links for when 40 procs use same link
+ * TODO: 
  */
+
+Folder.current = File($.fileName).parent;
+app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT;
+
+function ProcessID () {
+    var f = File('indds.txt');
+    this.log = File('processID.log');
+    this.styleSheet = app.scriptPreferences.scriptsFolder.getFiles('TWD Stylesheet.indd')[0];
+    if (!ExternalObject.AdobeXMPScript)
+        ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+    if (!this.styleSheet.exists)
+        throw Error('styleSheet does not exist in InDesign\'s Scripts folder.');
+    if (!f.exists)
+        throw Error('A list of file paths in indds.txt is required in this folder.');
+    f.open() && this.files = f.read().split(/[\n\r]+/) && f.close() && f = null;
+    this.net = (File.fs == 'Macintosh' ? '' : '/n/') + 'share/SERVICE/';
+    // i COULD break this into a function like so:
+    //     if rx matches the collapsible ones, only use first two chars for lookup
+    //     eg if /CR|DR|FD/.test(prefix) return this.systems[prefix.slice(0, 2)]
+    //     if dt, only use last two chars for lookup
+    this.systems = {
+        'CC': 'CASING CONNECTOR',
+        'CFS': 'CASING CONNECTOR',
+        'CR': 'COMPLETION RISER',
+        'CRC': 'COMPLETION RISER',
+        'CRJ': 'COMPLETION RISER',
+        'CRM': 'COMPLETION RISER',
+        'CSRP': 'CASING REPARATION',
+        'CWS': 'CONVENTIONAL WELLHEAD',
+        'DR': 'DRILLING RISER',
+        'DRC': 'DRILLING RISER',
+        'DRM': 'DRILLING RISER',
+        'DTAP': 'DRIL-THRU',
+        'DTCC': 'DRIL-THRU CASING CONNECTOR',
+        'DTDR': 'DRIL-THRU DRILLING RISER',
+        'DTMC': 'DRIL-THRU MUDLINE COMPLETION',
+        'DTMS': 'DRIL-THRU MUDLINE SUSPENSION',
+        'DTSC': 'DRIL-THRU SUBSEA COMPLETION',
+        'DTSS': 'DRIL-THRU SUBSEA WELLHEAD',
+        'DTUW': 'DRIL-THRU UNITIZED WELLHEAD',
+        'DV': 'VALVES',
+        'ER': 'EXPORT RISER',
+        'FD': 'FIXED DIVERTER',
+        'FDC': 'FIXED DIVERTER',
+        'FDM': 'FIXED DIVERTER',
+        'GVS': 'GATE VALVES',
+        'GPU': 'PRODUCTION CONTROLS',
+        'HPU': 'PRODUCTION CONTROLS',
+        'LS': 'LS-15 LINER HANGER',
+        'MC': 'MUDLINE COMPLETION',
+        'MS': 'MS-10/MS-15 MUDLINE SUSPENSION',
+        'MSCM': 'MUDLINE SUBSEA CONTROLS MODULE',
+        'RT': 'RISER TENSIONER',
+        'SC': 'SUBSEA COMPLETION',
+        'SCC': 'SUBSEA COMPLETION',
+        'SCCM': 'SUBSEA COMPLETION CONTROLS MODULE',
+        'SCJ': 'SUBSEA COMPLETION',
+        'SCMS': 'SUBSEA COMPLETION MUDLINE',
+        'SS': 'SUBSEA WELLHEAD',
+        'SSC': 'SUBSEA CONTROLS',
+        'SSH': 'SS-15 BIGBORE II-H SUBSEA WELLHEAD',
+        'SSJ': 'SUBSEA WELLHEAD',
+        'SW': 'SURFACE WELLHEAD',
+        'UW': 'UNITIZED WELLHEAD',
+        'UWHTS': 'UNITIZED WELLHEAD HORIZONTAL TREE',
+        'UWHTSM': 'UNITIZED WELLHEAD HORIZONTAL TREE',
+        'WOC': 'WORKOVER CONTROLS'
+    }
+}
+
+try {
+    $.ProcessID = new ProcessID();
+} catch (e) {
+    ExternalObject.AdobeXMPScript.terminate();
+}
+
+function main () {
+    filePaths.forEach(function (path) {
+        if (!File(path).exists)
+            continue;
+        var proc = new Procedure(File(path));
+        try {
+            proc.process();
+        } catch (e) {
+            // should encapsulate each call in a try/catch &
+            // this catch should catch that error, close the doc, 
+            // destroy the instance, & log the problems
+        }
+    });
+}
+
 function Procedure (file) {
     var name = decodeURI(file.name.toUpperCase()).match(/^(\S+?)[. ](R(\d+))?/),
         path = decodeURI(file.path) + '/' + name[0];
@@ -100,11 +194,6 @@ function addBookmark () {
 }
 
 function getData () {
-    // check for existence of schema first
-    // check if result of grep is undefined when nothing is found (empty array would eval true)
-    // 
-    // REFACTOR THIS FUNCTION
-    // 
     var find, match, writers;
     find = grep({appliedParagraphStyle: 'Procedure Designator'});
     this.desig = find.length ? find[0].contents.trim().toUpperCase() : null;
@@ -128,61 +217,11 @@ function saveAndClose () {
     this.doc.exportFile(ExportFormat.PDF_TYPE, File(this.path + '.pdf'), false);
     this.doc.close(SaveOptions.YES, File(this.path + '.indd'));
     // write metadata to closed file
+    // check for existence of schema first
     // put this into metadata part where if (this.writers) {
         this.writers.filter(function(item, index, self) {
             return index == self.indexOf(item);
         }).sort();
-}
-
-netPath = (File.fs == 'Macintosh' ? '/Volumes' : '/n') + '/share/SERVICE/';
-systems: {
-    'CC': 'CASING CONNECTOR SYSTEM',
-    'CFS': 'CASING CONNECTOR SYSTEM',
-    'CR': 'COMPLETION RISER SYSTEM',
-    'CRC': 'COMPLETION RISER SYSTEM',
-    'CRJ': 'COMPLETION RISER SYSTEM',
-    'CRM': 'COMPLETION RISER SYSTEM',
-    'CSRP': 'CASING REPARATION SYSTEM',
-    'CWS': 'CONVENTIONAL WELLHEAD SYSTEM',
-    'DR': 'DRILLING RISER SYSTEM',
-    'DRC': 'DRILLING RISER SYSTEM',
-    'DRM': 'DRILLING RISER SYSTEM',
-    'DTAP': 'DRIL-THRU SYSTEM',
-    'DTCC': 'DRIL-THRU CASING CONNECTOR SYSTEM',
-    'DTDR': 'DRIL-THRU DRILLING RISER SYSTEM',
-    'DTMC': 'DRIL-THRU MUDLINE COMPLETION SYSTEM',
-    'DTMS': 'DRIL-THRU MUDLINE SUSPENSION SYSTEM',
-    'DTSC': 'DRIL-THRU SUBSEA COMPLETION SYSTEM',
-    'DTSS': 'DRIL-THRU SUBSEA WELLHEAD SYSTEM',
-    'DTUW': 'DRIL-THRU UNITIZED WELLHEAD SYSTEM',
-    'DV': 'VALVES',
-    'ER': 'EXPORT RISER',
-    'FD': 'FIXED DIVERTER',
-    'FDC': 'FIXED DIVERTER',
-    'FDM': 'FIXED DIVERTER',
-    'GVS': 'GATE VALVES',
-    'GPU': 'PRODUCTION CONTROLS',
-    'HPU': 'PRODUCTION CONTROLS',
-    'LS': 'LS-15 LINER HANGER',
-    'MC': 'MUDLINE COMPLETION',
-    'MDTCC': 'MUDLINE DRIL-THRU CASING CONNECTOR',
-    'MS': 'MS-10/MS-15 MUDLINE SUSPENSION',
-    'MSCM': 'MUDLINE SUBSEA CONTROLS MODULE',
-    'RT': 'RISER TENSIONER',
-    'SC': 'SUBSEA COMPLETION',
-    'SCC': 'SUBSEA COMPLETION',
-    'SCCM': 'SUBSEA COMPLETION CONTROLS MODULE',
-    'SCJ': 'SUBSEA COMPLETION',
-    'SCMS': 'SUBSEA COMPLETION MUDLINE',
-    'SS': 'SUBSEA WELLHEAD',
-    'SSC': 'SUBSEA CONTROLS',
-    'SSH': 'SS-15 BIGBORE II-H SUBSEA WELLHEAD',
-    'SSJ': 'SUBSEA WELLHEAD',
-    'SW': 'SURFACE WELLHEAD',
-    'UW': 'UNITIZED WELLHEAD',
-    'UWHTS': 'UNITIZED WELLHEAD HORIZONTAL TREE',
-    'UWHTSM': 'UNITIZED WELLHEAD HORIZONTAL TREE',
-    'WOC': 'WORKOVER CONTROLS'
 }
 
 function processINDD (fileObject) {
