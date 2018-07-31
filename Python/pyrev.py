@@ -14,6 +14,15 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 # TODO: check if login is needed on PC (requests-kerberos)
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
 # TODO: find out if possible to have rev NR in lib (and if 0 is before/after NR)
+# 
+# WORKS PERFECTLY:
+# url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
+# data = {'PartNumber': '420006-02', 'checkInProcess': 1}
+# heads = {'Cookie': 'DqUserInfo=PartDocumentReader=AMERICAS\MorganEL'}
+# r = req.get(url, params=data, headers=heads)
+# r.status_code (200)
+# with open('420006-02.TEST.pdf', 'wb') as f:
+#     f.write(r.content)
 
 root = dirname(__file__)
 log = logging.info
@@ -133,4 +142,6 @@ def main():
     if pull_list:
         with open(join(root, 'pyrev.pull'), 'w') as f:
             f.write('\n'.join(pull_list))
--
+
+if __name__ == '__main__':
+    main()
