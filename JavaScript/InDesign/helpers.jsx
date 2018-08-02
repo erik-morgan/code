@@ -1,6 +1,7 @@
-﻿var hasProp = function (obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop) &&
-           !obj[prop] instanceof Function;
+﻿var op = Object.prototype,
+    hasOwn = op.hasOwnProperty;
+var hasProp = function (obj, prop) {
+    return hasOwn.call(obj, prop) && !obj[prop] instanceof Function;
 };
 var keys = function (obj) {
     return items.call(obj, true);
@@ -12,10 +13,9 @@ var items = function (obj, k) {
     if (!obj || obj !== Object(obj)) {
         throw TypeError('Can not get keys of a non-object');
     }
-    var a = [],
-        isEnum = Object.prototype.propertyIsEnumerable;
+    var a = [];
     for (var p in obj) {
-        if (hasProp(obj, p) && isEnum.call(obj, p)) {
+        if (hasProp(obj, p)) {
             a.push(k ? p : k == undefined ? [p, obj[p]] : obj[p]);
         }
     }
@@ -60,67 +60,7 @@ var map = function (arr, callback) {
     }
     return a;
 };
-
-(function () {
-    // consider opening file here, and writing throughout?
-    var logger = {};
-    logger.levels = {NONE: 0, ERROR: 1, INFO: 2, DEBUG: 4};
-    logger.level = this.levels.NONE;
-    logger.file = Folder.current + '/batch.log';
-    logger.logs = [];
-    logger.log = function (level, data) {
-        this.logs.push(localize(' [%1-%2-%3T%4] | %5 | %6'));
-        // integrate timestamp here
-        msg = timestamp() + '  [' + level + ']  ' + toString(data);
-    };
-    logger.error = function (data) {
-        if ((this.level * 2 - 1) & this.levels.ERROR)
-            this.log('ERROR', data);
-    };
-    logger.info = function (data) {
-        if ((this.level * 2 - 1) & this.levels.INFO)
-            this.log('INFO ', data);
-    };
-    logger.debug = function (data) {
-        if ((this.level * 2 - 1) & this.levels.DEBUG)
-            this.log('DEBUG', data);
-    };
-    this.levels.ERROR | this.levels.INFO | this.levels.DEBUG
-    return logger;
-})();
-
-logger.log = function (level, data) {
-    var d = new Date();
-    this.logs.push(localize(' [%1-%2-%3T%4] | %5 | %6', 
-                            d.getFullYear(),
-                            ('0' + (++d.getMonth())).substr(-2),
-                            ('0' + d.getDate()).substr(-2),
-                            d.toTimeString().slice(0, 8),
-                            level, toString(data, pretty));
-    // toString options have to start with 31 spaces to match logs
-    // cap log width at 120
-    // just do json/toString for objects/arrays
-};
-
-logger.str = function (obj) {
-    if (obj === o) {
-        var o = Object(obj);
-        var elements = map(o.items(), function (element) {
-            if (obj instanceof Array) {
-                return logger.str(element[0]);
-            } else {
-                return element[0] + ': ' + logger.str(element[1]);
-            }
-        })
-        // figure out how to handle object vs array
-        // reference fast-json-stable-stringify on github
-        var brackets = o.toString() === '[object Array]' ? '[]' : '{}';
-    } else {
-        return String(obj);
-    }
-};
-
-function except (type, arg, func) {
+var except = function (type, arg, func) {
     var e = type instanceof Error ? type : 
             new Error(
                 type == 'process' ? 'No processes in Batch.processes' :
@@ -135,5 +75,4 @@ function except (type, arg, func) {
         Batch.log('err', e);
     }
     throw e;
-}
-
+};
