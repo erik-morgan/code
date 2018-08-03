@@ -1,76 +1,68 @@
-/*
- * got a working algorithm for compact, semi-pretty semi-JSON
- * stringify-like behavior for logging data
- * 
- * it would be cool if it handled obj braces better (eg if an array of objs,
- * then when one ends, and another begins, it'd be like "}, {")
- * 
- * Inspired by and used for guidance:
- * https://github.com/lydell/json-stringify-pretty-compact/blob/master/index.js
- * 
- * Fiddle containing algorithm:
- * https://jsfiddle.net/erikmorgan/t7yejk1o/45/
- */
-
-function logger () {
-    // consider opening file here, and writing throughout?
-    this.levels = {NONE: 0, ERROR: 1, INFO: 2, DEBUG: 4};
-    this.level = this.levels.NONE;
-    this.file = Folder.current + '/batch.log';
-    this.logs = [];
-}
-logger.prototype.error = function (data) {
-    if ((this.level * 2 - 1) & this.levels.ERROR)
-        this.log('ERROR', data);
-};
-logger.prototype.info = function (data) {
-    if ((this.level * 2 - 1) & this.levels.INFO)
-        this.log('INFO ', data);
-};
-logger.prototype.debug = function (data) {
-    if ((this.level * 2 - 1) & this.levels.DEBUG)
-        this.log('DEBUG', data);
-};
-logger.prototype.log = function (level, msg, data) {
-    var d = new Date();
-    this.logs.push(localize(
-        '[ %1-%2-%3 %4 ] [ %5 ] %6', 
-        d.getFullYear(),
-        ('0' + (++d.getMonth())).substr(-2),
-        ('0' + d.getDate()).substr(-2),
-        d.toTimeString().slice(0, 8),
-        level, localize(msg, strify(data)));
-};
-var quote = function (str) { return '\'' + str + '\''; },
-    pad = function (times, rept) {
-        rept = rept || ' ';
-        for (var n = 0, str = ''; n < times; n++, str += rept);
-        return str;
-};
-function strify (obj, indent, offset) {
-    // either need to add a constant for reserved space,
-    // or increment keylen; or i could start with a 32 char indent?
-    var o = Object(obj);
-    indent = indent || 0;
-    offset = offset || 0;
-    if (obj === o) {
-        var isArray = o instanceof Array,
-            ends = isArray ? '[]' : '{}',
-            members, len;
-        members = items(o).map(function (item, i, self) {
-            var key = isArray ? '' : quote(item[0]) + ': ',
-                keylen = i == self.length - 1 ? 0 : 2;
-            return key + strify(item[1], indent + 2, keylen);
-        });
-        len = members.join(', ').length + indent + offset + 2;
-        if (len <= 120) {
-            return ends[0] + members.join(', ') + ends[1];
+(function () {
+    // OTHER FORMATS I LIKE: [HH:MM:SS] [LVL], [HH:MM:SS LVL], [HH:MM:SS | LVL]
+    function log (level, msg, data, name) {
+        var stamp = [new Date().toTimeString().slice(0, 8), level].join(' | ');
+        if (data && data === Object(data)) {
+            name = name || data.constructor.name;
+            data = map(items(o), function (item) {
+                return name + '[' + item[0] + '] = ' + item[1];
+            }).join('\n');
         } else {
-            return ends[0] + '\n' + pad(indent + 2) + 
-                   members.join(',\n' + pad(indent + 2)) + 
-                   '\n' + pad(indent) + ends[1];
+            data = data ? (name || data.constructor.name) + ' = ' + data : '';
         }
-    } else {
-        return String(obj) === obj ? quote(String(obj)) : String(obj);
+        if (!this.opened) {
+            this.file.open('w');
+            this.opened = true;
+        }
+        this.file.writeln(trim(stamp + (msg || '') + '\n' + 
+            data).replace(/^ /gm, '                  '));
+    };
+
+    var esc = function (str) {
+        return str.replace(/[\r\n]+/g, '\\n').replace('\t', '\\t');
     }
-}
+    function log (level, data, name) {
+        // what if item[1] has newlines? there has to be a limit...
+        // 
+        // JUST MAKE IT INTENTIONAL!
+        // IF NAME IS SUPPLIED, TREAT AS LOGDATA, OTHERWISE AS MESSAGE
+        // 
+        if (Object(data) === data) {
+            name = name || data.constructor.name;
+            data = map(items(o), function (item) {
+                return name + '[' + item[0] + '] = ' + esc(item[1]);
+            }).join('\n                 ');
+        } else {
+            data = (name ? name + ' = ' : '') + esc(String(data));
+        }
+        if (!this.opened) {
+            this.file.open('w');
+            this.opened = true;
+        }
+        // could do a single replace at end?
+        this.file.writeln(new Date().toTimeString().slice(0, 8) + ' | ' + 
+                          level + ' | ' + data);
+    };
+    
+    return {
+        levels: {NONE: 0, ERROR: 1, INFO: 2, DEBUG: 4},
+        level: this.levels.NONE,
+        file: file || Folder.current + '/batch.log',
+        opened: false,
+        close: function () {
+            this.file.close();
+        },
+        error: function (err) {
+            if ((this.level * 2 - 1) & this.levels.ERROR)
+                log.call(this, 'ERR', undefined, err);
+        },
+        info: function (msg, data) {
+            if ((this.level * 2 - 1) & this.levels.INFO)
+                log.call(this, 'INF', msg, data);
+        },
+        debug: function (msg, data) {
+            if ((this.level * 2 - 1) & this.levels.DEBUG)
+                log.call(this, 'DBG', msg, data);
+        }
+    };
+})();

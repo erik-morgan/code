@@ -13,10 +13,10 @@ var items = function (obj, k) {
     if (!obj || obj !== Object(obj)) {
         throw TypeError('Can not get keys of a non-object');
     }
-    var a = [];
-    for (var p in obj) {
-        if (hasProp(obj, p)) {
-            a.push(k ? p : k == undefined ? [p, obj[p]] : obj[p]);
+    var o = Object(obj), a = [];
+    for (var p in o) {
+        if (hasProp(o, p)) {
+            a.push(k ? p : k == undefined ? [p, o[p]] : o[p]);
         }
     }
     return a;
