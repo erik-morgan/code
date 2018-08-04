@@ -1,25 +1,20 @@
-﻿var op = Object.prototype,
-    hasOwn = op.hasOwnProperty;
-var hasProp = function (obj, prop) {
-    return hasOwn.call(obj, prop) && !obj[prop] instanceof Function;
-};
-var keys = function (obj) {
-    return items.call(obj, true);
-};
-var values = function (obj) {
-    return items.call(obj, false);
-};
-var items = function (obj, k) {
-    if (!obj || obj !== Object(obj)) {
-        throw TypeError('Can not get keys of a non-object');
+﻿// 2018-08-03 21:42:03 //
+var items = function (o, funcs) {
+    if (! o || o !== Object(o)) {
+        throw TypeError('Can not get members of a non-object');
     }
-    var o = Object(obj), a = [];
-    for (var p in o) {
-        if (hasProp(o, p)) {
-            a.push(k ? p : k == undefined ? [p, o[p]] : o[p]);
+    var obj = Object(o),
+        has = obj.propertyIsEnumerable,
+        entries = [];
+    for (var key in obj) {
+        if (has(key) && (! obj[key] instanceof Function || funcs)) {
+            entries.push([key, obj[key]]);
         }
     }
-    return a;
+    entries.sort(function (a, b) {
+        a[0].localeCompare(b[0], 'en-u-kn-true');
+    })
+    return entries;
 };
 var trim = function (str) {
     return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/ {2,}/g, ' ');
@@ -60,19 +55,40 @@ var map = function (arr, callback) {
     }
     return a;
 };
-var except = function (type, arg, func) {
-    var e = type instanceof Error ? type : 
-            new Error(
-                type == 'process' ? 'No processes in Batch.processes' :
-                type == 'queue' ? 'No documents in Batch.queue' : arg
-            );
-    if (func) {
-        e.from = func instanceof Function ? func.name : func;
-    } else if (type == 'process' || type == 'queue') {
-        e.from = 'Batch.process';
-    }
-    if (Batch && Batch.logging) {
-        Batch.log('err', e);
-    }
-    throw e;
-};
+var logger = (function () {
+    var log = function (level, data, name) {
+        if (name && Object(data) === data) {
+            data = map(items(data), function (item) {
+                return name + '[' + item[0] + '] = ' + String(item[1]);
+            }).join('\n');
+        } else {
+            data = (name ? name + ' = ' : '') + String(data);
+        }
+        this.file.writeln(
+            new Date().toTimeString().slice(0, 8) + ' | ' + level + ' | ' +
+            data.replace(/[\r\n]+/g, '\n                 '));
+    };
+    return {
+        levels: {NONE: 0, ERROR: 1, INFO: 2, DEBUG: 4},
+        level: 0,
+        file: 'batch.log',
+        close: function () {
+            this.file.close();
+        },
+        error: function (err) {
+            if ((this.level * 2 - 1) & this.levels.ERROR) {
+                log.call(this, 'ERR', err, 'Error');
+            }
+        },
+        info: function (data, name) {
+            if ((this.level * 2 - 1) & this.levels.INFO) {
+                log.call(this, 'INF', data, name);
+            }
+        },
+        debug: function (data, name) {
+            if ((this.level * 2 - 1) & this.levels.DEBUG) {
+                log.call(this, 'DBG', data, name);
+            }
+        }
+    };
+})();

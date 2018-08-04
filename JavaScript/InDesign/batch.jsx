@@ -1,11 +1,11 @@
+// 2018-08-03 21:42:28 //
 #target indesign
-// #targetengine "session"
 
 (function (global) {
     Folder.current = File($.fileName).parent;
     
     var decode = global.decodeURI;
-
+    
     #include 'helpers.jsx';
     
     function newDoc (file) {
@@ -28,14 +28,19 @@
         }
         this.processes = [];
         this.queue = [];
+        this.logger = logger;
     }
     
-    Batch.prototype.process = function (doc) {
+    Batch.prototype.process = function () {
         // still have to add ui & indesign events
+        // use try...catch...finally to ensure logger clean-up
         if (this.queue.length == 0) {
             except('queue');
         } else if (this.processes.length == 0) {
             except('process');
+        }
+        if (this.logger.level) {
+            this.logger.file.open('w');
         }
     };
     
