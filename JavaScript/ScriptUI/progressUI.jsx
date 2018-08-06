@@ -1,56 +1,64 @@
-// 2018-08-05 01:25:33 //
-// don't forget to increment this in batch.jsx, even when a file is skipped;
-// otherwise, it will throw off the progress
+// 2018-08-06 00:02:32 //
+/**
+ * TODO: increment this in batch, even when file is skipped (to maintain count)
+ */
 (function () {
-    var w = new Window('palette', '    Batch Progress');
+    // actually, switch to the prototype method, this is too sloppy
+    
+    var w = new Window('palette', 'Batch Progress');
     w.alignChildren = 'fill';
-    w.add('statictext').update = function (self) {
-        this.text = localize('Processing File %1/%2',
-                             self.bar.value, self.bar.maxvalue);
-    };
-    // add update function to bar
-    bar = buildBar(w);
-    w.add('statictext').update = function (self) {
-        this.text = localize('Filename: %1', self.file);
-    };
-    w.add('statictext').update = function (self) {
-        this.text = localize('Time Elapsed: %1', self.timer.elapsed);
-    };
-    w.add('statictext').update = function (self) {
-        this.text = localize('Time Remaining: About %1', self.timer.remaining);
-    };
+    
+    w.count = w.add('statictext');
+    buildBar(w);
+    w.filename = w.add('statictext');
+    w.elapsed = w.add('statictext');
+    w.remaining = w.add('statictext');
+    
     w.cancel = w.add('button', undefined, 'Abort', {name: 'cancel'});
     w.cancel.onClick = w.close;
+    
     w.onClose = function () {
         w.aborted = Window.alert('Abort the operation?', true);
     };
+    
     return {
-        w: w,
-        bar: bar,
-        init: function (max) {
-            this.bar.maxvalue = max;
-            this.start = new Date();
-            this.w.show();
+        win: w,
+        create: function (max, firstName) {
+            this.value = 0;
+            this.max = max;
+            this.name = firstName;
         },
         update: function (name) {
-            each(this.w.children, function (child) {
-                if (child.hasOwnProperty('update')) {
-                    child.update(this);
+            if (name) {
+                this.win.count.text = localize('Processing File %1/%2',
+                                               ++this.bar.value, this.bar.max);
+                this.win.filename.text = 'Filename: %1' + name;
+            }
+            this.timer.update(this.bar.value, this.bar.maxvalue);
+        },
+        timer: {
+            elapsed: w.children[3],
+            remaining: w.children[4],
+            update: function (val, max) {
+                var time = (new Date() - this.start) / 1000;
+                this.elapsed.text = 'Time Elapsed: ' + this.format(time);
+                this.remaining.text = 'Time Remaining: About %1' + 
+                                      this.format((max - val) * (time / val));
+            },
+            format: function (t) {
+                var floor = Math.floor;
+                if (t > 3600) {
+                    t = floor(t / 3600) + ' hours, ' +
+                        floor(t % 3600 / 60) + ' minutes';
+                } else {
+                    t = floor(t % 3600 / 60) + ' minutes, ' +
+                        floor(t % 60) + ' seconds';
                 }
-            }, this);
+                return t.replace(/(\b1 \w+)s|(, )?\b0 \w+(, )?/g, '$1');
+            }
         }
-    }
+    };
 })();
-
-ProgressWindow.prototype.update = function (name) {
-    if (name) {
-        this.file = name;
-        this.bar.value = ++this.count;
-    }
-    this.timer = (new Date() - this.start) / 1000;
-    this.tpass = formatTime(this.timer);
-    this.tleft = formatTime((--this.total) * (this.timer / this.count));
-};
 
 ProgressWindow.prototype.close = function () {
     // try and use just this as close handler, but still throw error on abort
@@ -61,19 +69,8 @@ ProgressWindow.prototype.close = function () {
                        this.count, formatTime((new Date() - this.start) / 1000));
 };
 
-function formatTime (time) {
-    var u, t = [];
-    if (u = Math.floor(time / 3600))
-        t.push(u + (u > 1 ? ' hours' : ' hour'));
-    if (u = Math.floor(time % 3600 / 60))
-        t.push(u + (u > 1 ? ' minutes' : ' minute'));
-    if (time < 3600 && (u = Math.floor(time % 60)))
-        t.push(u + (u > 1 ? ' seconds' : ' second'));
-    return t.join(', ');
-}
-
 function buildBar (parent) {
-    var bar = parent.add('customBoundedValue {text: "0%", factor: 0}');
+    parent.bar = parent.add('customBoundedValue {text: "0%", factor: 0}');
     bar.w = bar.graphics.measureString('X')[0] * 60;
     bar.h = bar.graphics.measureString('X')[1] * 2;
     bar.back: bar.graphics.newBrush(+null, [0.4, 0.4, 0.4]),
