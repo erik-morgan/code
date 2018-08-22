@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # from multiprocessing.dummy import Pool as ThreadPool
-from os import walk, remove
-from os.path import dirname, join
-import re
+from pathlib import Path
+from fnmatch import fnmatch, filter as fnfilter
 import logging
 import requests as req
 from lxml.html import fromstring as tohtml, get_element_by_id as get_id
 from io import BytesIO
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfFileReader as Reader, PdfFileWriter as Writer, PdfFileMerger as Merger
 
 # TODO: add multiprocessing support via ThreadPool
 # TODO: add info logging statements like rev_check.sh
@@ -15,16 +14,12 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
 # TODO: find out if possible to have rev NR in lib (and if 0 is before/after NR)
 # 
-# WORKS PERFECTLY:
-# url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
-# data = {'PartNumber': '420006-02', 'checkInProcess': 1}
-# heads = {'Cookie': 'DqUserInfo=PartDocumentReader=AMERICAS\MorganEL'}
-# r = req.get(url, params=data, headers=heads)
-# r.status_code (200)
-# with open('420006-02.TEST.pdf', 'wb') as f:
-#     f.write(r.content)
+# SPLIT PDF LIB BACK INTO INDIVIDUAL DRAWINGS & SPEC SHEETS
+# CHECK IF THERE IS AN INDICATOR ON DIR RVW PAGE THAT SAYS IF ITS A DWG OR NOT
+# PROCEED AS IF THERE IS AN INDICATOR (EG NO SEPARATE DIRS FOR DRAWS & PLS
 
-root = dirname(__file__)
+DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
+root = Path(DRAW_PATH)
 log = logging.info
 REVS = {
     'NC': 0.5,
@@ -32,45 +27,81 @@ REVS = {
     'NR': 0
 }
 
-def get_creds():
-    from tkinter import Tk, Label, Entry, Button
-    win = Tk()
-    win.resizable(width=False, height=False)
-    win.title('DQ Login Credentials')
-    
-    user_label = Label(win, text='Username: ')
-    user_label.grid(column=0, row=0, padx=15, pady=15, sticky='NESW')
-    user = Entry(win, width=30, validate='key', highlightthickness=1)
-    user.grid(column=1, row=0, padx=15, pady=15, sticky='NESW')
-    
-    pswd_label = Label(win, text='Password: ')
-    pswd_label.grid(column=0, row=1, padx=15, sticky='NESW')
-    pswd = Entry(win, width=30, show='*', validate='key')
-    pswd.grid(column=1, row=1, padx=15, sticky='NESW')
-    
-    ok = Button(win, text='Ok', state='disabled')
-    ok.grid(column=1, row=2, padx=15, pady=15, sticky='E')
+def main():
+    log_file = root / 'pyrev.log'
+    log_file.write_text()
+    logging.basicConfig(
+        filename = log_file,
+        format = '[%(asctime)s] %(levelname)s:%(message)s',
+        datefmt = '%Y-%m-%dT%H:%M:%S',
+        level = logging.INFO
+    )
+    pull_list = check_revs()
+    if pull_list:
+        with open(join(root, 'pyrev.pull'), 'w') as f:
+            f.write('\n'.join(pull_list))
 
-    def validate(text, name):
-        if name == str(user):
-            user_flag = text.isalpha()
-            col = 'black' if user_flag else 'red'
-            user['highlightcolor'] = user['highlightbackground'] = col
-        else:
-            user_flag = user.get().isalpha()
-        ok['state'] = 'normal' if user_flag and len(pswd.get()) > 0 else 'disabled'
-        return True
-    
-    def submit():
-        creds = (user.get(), pswd.get())
-        win.destroy()
-        return creds
-    
-    vcmd = (win.register(validate), '%P', '%W')
-    user['validatecommand'] = pswd['validatecommand'] = vcmd
-    user.focus_set()
-    ok['command'] = submit
-    win.mainloop()
+def check_revs():
+    # if either rev is - then whether dwg/pl doesnt matter til dl/append time
+    pull_list = []
+    draw_revs = {}
+    for file in root.glob('[0-9X]-/*[Pp][Dd][Ff]'):
+        name = file.name
+        part, draw_rev, spec_rev = name[:-4].split('.')
+        draw = part if '.-.' in name else part.rsplit('-', 1)[0]
+        spec = part
+        if draw_rev != '-':
+            draw = part if '.-.' in name else part.rsplit('-', 1)[0]
+            if draw not in draw_revs:
+                draw_revs[draw] = get_rev(draw)
+            draw_rev_new = draw_revs[draw]
+            if is_old(draw_rev, draw_rev_new):
+                pull_list.append(draw)
+        if spec_rev != '-':
+            spec_rev_new = get_rev(spec)
+            if is_old(spec_rev, spec_rev_new):
+                spec_new = Writer()
+                old_pgs = Reader(file.read_bytes()).pages
+                new_pgs = rev_spec(spec)
+                pg_diff = len(new_pgs) - len(old_pgs)
+                spec_new
+                for p, pg in enumerate(old_pgs):
+                    if pg.mediaBox[3] > 800 or p < pg_diff:
+                        spec_new.addPage(pg)
+                    
+                    
+                spec_new.append(file, pages=(-1*spec.numPages, 0))
+                pages = old_pgs[0:] + new_pgs
+                for p, pg in enumerate(old_pgs):
+                    if p 
+                if len(old_pgs) > len(new_pgs):
+                    for p in range(len(old_pgs)):
+                        if p < 
+                    for pg in old_pages[:spec_new.getNumPages() * -1]:
+                        
+                spec_new.
+                if draw_rev != '-':
+                    pdf.append(file, pages=(-1*spec.numPages, 0))
+                pdf.append(spec_new)
+                
+            if is_old(spec, rev):
+                spec = rev_spec(part)
+                pdf = PdfFileMerger()
+                if draw != '-':
+                    pdf.append(file, pages=(-1*spec.numPages, 0))
+                pdf.append(spec)
+                with open(join(dirname(file),
+                               f'{num}.{draw}.{rev}'), 'wb') as f:
+                    pdf.write(f)
+                pdf.close()
+                remove(file)
+    # WORKING HERE
+    # 
+    # if draw rev is - then pn is spec
+    # if spec rev is - then pn is draw
+    # if neither is - then draw is base
+    # 
+    # 
 
 def get_rev(part_num):
     url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
@@ -88,17 +119,8 @@ def rev_spec(part_num):
     url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
     params = {'PartNumber': part_num, 'checkInProcess': 1}
     with req.get(url, params=params, stream=True) as response:
-        pdf = PdfFileReader(BytesIO(response.raw.read()))
-    return pdf
-
-def iter_revs():
-    partrx = r'([-\w]+)\.([-A-Z0]{1,2})\.([-A-Z0]{1,2})'
-    for path, dirs, files in walk(root):
-        for f in files:
-            match = re.match(partrx, f)
-            if match:
-                yield join(path, f), *match.groups()
-    
+        pdf = Reader(BytesIO(response.raw.read()))
+    return pdf.pages
 
 def check_revs():
     pull_list = []
@@ -127,21 +149,6 @@ def check_revs():
             if is_old(draw, rev):
                 pull_list.append(dwg)
     return pull_list
-
-def main():
-    log_file = os.path.join(root, 'pyrev.log')
-    with open(log_file, 'w') as f:
-        pass
-    logging.basicConfig(
-        filename = log_file,
-        format = '[%(asctime)s] %(levelname)s:%(message)s',
-        datefmt = '%Y-%m-%dT%H:%M:%S',
-        level = logging.INFO
-    )
-    pull_list = check_revs()
-    if pull_list:
-        with open(join(root, 'pyrev.pull'), 'w') as f:
-            f.write('\n'.join(pull_list))
 
 if __name__ == '__main__':
     main()

@@ -16,7 +16,7 @@ import re
 
 PDFS_PATH = '/Users/HD6904/Desktop/PDFs'
 DRAWS_PATH = '/Users/HD6904/Desktop/Drawings'
-drawre = re.compile(r'^ *[-0-9A-Z]+ ?\d{5}\S*', re.I|re.M)
+drawre = re.compile(r'(?:[-0-9]{8,}|(?:\d-)?(?:[A-Z]{2}[- ]?)\d{5})\S*', re.I)
 
 def main(proj):
     proj_tocs = proj + '/TOCs/'
@@ -26,7 +26,9 @@ def main(proj):
             name, proc = re.search(r'.+/(([^. ]+).+)', toc_path).groups()
             merge_list = [toc_path, get_path(proc)]
             for draw in scrape_toc(toc_path):
-                merge_list.append(get_path(draw))
+                draw = get_path(draw)
+                if draw not in merge_list:
+                    merge_list.append(draw)
             if all([exists(f) for f in merge_list]):
                 build_module(merge_list, proj_pdfs + proc + '.pdf')
             else:
@@ -39,8 +41,9 @@ def main(proj):
 def scrape_toc(toc):
     with open(toc, 'rb') as f:
         txt = '\n'.join(pg.extractText() for pg in Reader(f).pages)
+    txt = re.search(r'Assembly Drawing[\S\s]+', txt)[0]
     for draw in drawre.finditer(txt):
-        yield draw
+        yield draw[0]
 
 def build_module(path_list, out_path):
     if exists(out_path):
@@ -66,7 +69,7 @@ def get_path(idnum):
         if not paths:
             paths = fnfilter(draws, pattern(idnum.rsplit('-', 1)[0] + '.'))
     else:
-        paths = fnfilter(pdfs, pattern.format(idnum))
+        paths = fnfilter(pdfs, pattern(idnum))
     return paths[0] if paths else idnum
 
 def test_dir(path):
