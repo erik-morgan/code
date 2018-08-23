@@ -1,8 +1,9 @@
+# 2018-08-22 23:30:07 #
 #!/usr/bin/python
 # from multiprocessing.dummy import Pool as ThreadPool
 from pathlib import Path
-from fnmatch import fnmatch, filter as fnfilter
 import logging
+import re
 import requests as req
 from lxml.html import fromstring as tohtml, get_element_by_id as get_id
 from io import BytesIO
@@ -14,18 +15,13 @@ from PyPDF2 import PdfFileReader as Reader, PdfFileWriter as Writer, PdfFileMerg
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
 # TODO: find out if possible to have rev NR in lib (and if 0 is before/after NR)
 # 
-# SPLIT PDF LIB BACK INTO INDIVIDUAL DRAWINGS & SPEC SHEETS
-# CHECK IF THERE IS AN INDICATOR ON DIR RVW PAGE THAT SAYS IF ITS A DWG OR NOT
-# PROCEED AS IF THERE IS AN INDICATOR (EG NO SEPARATE DIRS FOR DRAWS & PLS
 
 DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 root = Path(DRAW_PATH)
 log = logging.info
-REVS = {
-    'NC': 0.5,
-    '0': 0.25,
-    'NR': 0
-}
+partre = re.compile(r'(([-0-9]+)(?:(?=.+\.-)\b|-\d+))'
+                    r'\.([^.]+)\.([^.]+)', re.I)
+revint = lambda s: sum((ord(c) - 64) * 26**n for n, c in enumerate(s[::-1]))
 
 def main():
     log_file = root / 'pyrev.log'
@@ -42,21 +38,24 @@ def main():
             f.write('\n'.join(pull_list))
 
 def check_revs():
-    # if either rev is - then whether dwg/pl doesnt matter til dl/append time
     pull_list = []
     draw_revs = {}
-    for file in root.glob('[0-9X]-/*[Pp][Dd][Ff]'):
+    for file in root.glob('[0-9X]-/*.*.*.???'):
+        # num pages in raw text like:
+        # /Type/Pages
+        # /Kids.+
+        # /Count #
         name = file.name
-        part, draw_rev, spec_rev = name[:-4].split('.')
-        draw = part if '.-.' in name else part.rsplit('-', 1)[0]
-        spec = part
-        if draw_rev != '-':
-            draw = part if '.-.' in name else part.rsplit('-', 1)[0]
+        spec, draw, drev, srev = partre.match(name).groups()
+        if drev != '-':
             if draw not in draw_revs:
                 draw_revs[draw] = get_rev(draw)
-            draw_rev_new = draw_revs[draw]
-            if is_old(draw_rev, draw_rev_new):
+            new_rev = draw_revs[draw]
+            if is_old(drev, new_rev):
                 pull_list.append(draw)
+################################################################################
+# LEFT OFF HERE AFTER REFACTORING IS_OLD
+################################################################################
         if spec_rev != '-':
             spec_rev_new = get_rev(spec)
             if is_old(spec_rev, spec_rev_new):
@@ -95,23 +94,18 @@ def check_revs():
                     pdf.write(f)
                 pdf.close()
                 remove(file)
-    # WORKING HERE
-    # 
-    # if draw rev is - then pn is spec
-    # if spec rev is - then pn is draw
-    # if neither is - then draw is base
-    # 
-    # 
 
 def get_rev(part_num):
     url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
-    node = tohtml(req.get(url).content).get_id('revisionNum')
+    doc = tohtml(req.get(url).content)
+    doc.get_id('revisionNum')
+    
     return node.text_content() if node else ''
 
 def is_old(rev1, rev2):
-    rev1 = REVS[rev1] if rev1 in REVS else int(rev1, 36)
-    rev2 = REVS[rev2] if rev2 in REVS else int(rev2, 36)
-    return rev2 > rev1
+    r1 = revint(rev1) if rev1 != 'NC' else 0
+    r2 = revint(rev2) if rev2 != 'NC' else 0
+    return revint(r2) if r2 != 'NC' else 0 > revint(r1) if r1 != 'NC' else 0
 
 def rev_spec(part_num):
     # Cookie: DqUserInfo=PartDocumentReader=AMERICAS\MorganEL;if necessary, get from env

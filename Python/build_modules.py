@@ -16,7 +16,13 @@ import re
 
 PDFS_PATH = '/Users/HD6904/Desktop/PDFs'
 DRAWS_PATH = '/Users/HD6904/Desktop/Drawings'
-drawre = re.compile(r'(?:[-0-9]{8,}|(?:\d-)?(?:[A-Z]{2}[- ]?)\d{5})\S*', re.I)
+drawre = re.compile(r'(?:\d-)?(?:[A-Z]{2}-?\d{5}|\d{6})(?=\D)\S*', re.I)
+# PROBLEM IS THAT IF IT IS A-Z it can only match 5 digits
+# Possible Starting Strings: 2-\d{6} | 2-PD-\d{5} | TP\d{5} | \d{6}
+# 
+# STILL WON'T PROPERLY HANDLE LIT WHERE DWG IS REPEATED IN DESCRIPTION
+# 
+# drawre = re.compile(r'(?:[-0-9]{8,}|(?:\d-)?(?:[A-Z]{2}[- ]?)\d{5})\S*', re.I)
 
 def main(proj):
     proj_tocs = proj + '/TOCs/'
@@ -41,7 +47,7 @@ def main(proj):
 def scrape_toc(toc):
     with open(toc, 'rb') as f:
         txt = '\n'.join(pg.extractText() for pg in Reader(f).pages)
-    txt = re.search(r'Assembly Drawing[\S\s]+', txt)[0]
+    txt = re.sub(r' (?=\d{5})', '', txt.split('Assembly Drawing')[1])
     for draw in drawre.finditer(txt):
         yield draw[0]
 
