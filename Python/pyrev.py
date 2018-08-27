@@ -1,106 +1,73 @@
-# 2018-08-22 23:30:07 #
-#!/usr/bin/python
-# from multiprocessing.dummy import Pool as ThreadPool
+# 2018-08-26 23:04:06 #
 from pathlib import Path
-import logging
-import re
+from os import listdir
+from logging import basicConfig, info, error
 import requests as req
 from lxml.html import fromstring as tohtml, get_element_by_id as get_id
 from io import BytesIO
 from PyPDF2 import PdfFileReader as Reader, PdfFileWriter as Writer, PdfFileMerger as Merger
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# TODO: add multiprocessing support via ThreadPool
 # TODO: add info logging statements like rev_check.sh
-# TODO: check if login is needed on PC (requests-kerberos)
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
-# TODO: find out if possible to have rev NR in lib (and if 0 is before/after NR)
-# 
+# TODO: merge 2-, 4-, 6-, 7-, and X- into single folder called Units or Assembly Drawings or Library
+# TODO: idk how necessary pathlib module is; after implementing rev_draws & pdf portion of check_revs, reevaluate
+# NOTE: can't just keep diff revs and use that, bc it's possible that two files have diff revs of same dwg
 
 DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 root = Path(DRAW_PATH)
-log = logging.info
-partre = re.compile(r'(([-0-9]+)(?:(?=.+\.-)\b|-\d+))'
-                    r'\.([^.]+)\.([^.]+)', re.I)
+pyrev = root / '.pyrev'
 revint = lambda s: sum((ord(c) - 64) * 26**n for n, c in enumerate(s[::-1]))
+get_name = '{0}.{1}.{2}.pdf'.format
 
 def main():
-    log_file = root / 'pyrev.log'
-    log_file.write_text()
-    logging.basicConfig(
-        filename = log_file,
-        format = '[%(asctime)s] %(levelname)s:%(message)s',
-        datefmt = '%Y-%m-%dT%H:%M:%S',
-        level = logging.INFO
-    )
-    pull_list = check_revs()
-    if pull_list:
-        with open(join(root, 'pyrev.pull'), 'w') as f:
-            f.write('\n'.join(pull_list))
+    pyrev.mkdir(parents=True, exist_ok=True)
+    basicConfig(filename = pyrev / 'log.txt',
+                format = '[%(asctime)s] %(levelname)s:%(message)s',
+                datefmt = '%Y-%m-%dT%H:%M:%S',
+                level = logging.INFO)
+    pull = pyrev / 'pull.txt'
+    files = get_files(root / 'Library')
+    if pull.exists:
+        rev_draws(pull)
+        # only delete pull when all dwgs are replaced, but update it each time
+    else:
+        # clear log_file
+        pull_list = check_revs(files)
+        if pull_list:
+            pull.write_text('\n'.join(pull_list))
 
-def check_revs():
+def get_files(lib_dir):
+    files = {}
+    for f in lib_dir.glob('*.*.*.???'):
+        part, draw_rev, spec_rev = f.name.split('.')[0:-1]
+        draw = part if '.-.' in f.name else part.rsplit('-', 1)[0]
+        files[f] = ((None if draw_rev == '-' else draw, draw_rev),
+                   (None if spec_rev == '-' else part, spec_rev))
+    return files
+
+def check_revs(file_list):
+    ############################################################################
+    # lib.glob('*.*.*.???')
+    # use partre?
+    # num pages in raw text like: /Type/Pages ... \n/Kids.+ ... \n/Count #
+    revs = get_revs(file_list)
     pull_list = []
-    draw_revs = {}
-    for file in root.glob('[0-9X]-/*.*.*.???'):
-        # num pages in raw text like:
-        # /Type/Pages
-        # /Kids.+
-        # /Count #
-        name = file.name
-        spec, draw, drev, srev = partre.match(name).groups()
-        if drev != '-':
-            if draw not in draw_revs:
-                draw_revs[draw] = get_rev(draw)
-            new_rev = draw_revs[draw]
-            if is_old(drev, new_rev):
-                pull_list.append(draw)
-################################################################################
-# LEFT OFF HERE AFTER REFACTORING IS_OLD
-################################################################################
-        if spec_rev != '-':
-            spec_rev_new = get_rev(spec)
-            if is_old(spec_rev, spec_rev_new):
-                spec_new = Writer()
-                old_pgs = Reader(file.read_bytes()).pages
-                new_pgs = rev_spec(spec)
-                pg_diff = len(new_pgs) - len(old_pgs)
-                spec_new
-                for p, pg in enumerate(old_pgs):
-                    if pg.mediaBox[3] > 800 or p < pg_diff:
-                        spec_new.addPage(pg)
-                    
-                    
-                spec_new.append(file, pages=(-1*spec.numPages, 0))
-                pages = old_pgs[0:] + new_pgs
-                for p, pg in enumerate(old_pgs):
-                    if p 
-                if len(old_pgs) > len(new_pgs):
-                    for p in range(len(old_pgs)):
-                        if p < 
-                    for pg in old_pages[:spec_new.getNumPages() * -1]:
-                        
-                spec_new.
-                if draw_rev != '-':
-                    pdf.append(file, pages=(-1*spec.numPages, 0))
-                pdf.append(spec_new)
-                
-            if is_old(spec, rev):
-                spec = rev_spec(part)
-                pdf = PdfFileMerger()
-                if draw != '-':
-                    pdf.append(file, pages=(-1*spec.numPages, 0))
-                pdf.append(spec)
-                with open(join(dirname(file),
-                               f'{num}.{draw}.{rev}'), 'wb') as f:
-                    pdf.write(f)
-                pdf.close()
-                remove(file)
+    for file, parts in file_list.items():
+        (draw, draw_rev), (spec, spec_rev) = parts
+    return pull_list
 
-def get_rev(part_num):
+def get_revs(files):
+    # test difference between executor.map and executor.submit and zip(list, executor.map)
+    parts = {pn for parts in files.values() for pn, rev in parts if pn}
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(fetch_rev, part) for part in parts]
+        return dict([future.result() for future in as_completed(futures)])
+
+def fetch_rev(part_num):
     url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
-    doc = tohtml(req.get(url).content)
-    doc.get_id('revisionNum')
-    
-    return node.text_content() if node else ''
+    node = tohtml(req.get(url).content).get_id('revisionNum')
+    return part_num, node.text_content() if node else ''
 
 def is_old(rev1, rev2):
     r1 = revint(rev1) if rev1 != 'NC' else 0
@@ -108,41 +75,12 @@ def is_old(rev1, rev2):
     return revint(r2) if r2 != 'NC' else 0 > revint(r1) if r1 != 'NC' else 0
 
 def rev_spec(part_num):
-    # Cookie: DqUserInfo=PartDocumentReader=AMERICAS\MorganEL;if necessary, get from env
-    # if stream fails & it just downloads it anyway, then remove this func
     url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
     params = {'PartNumber': part_num, 'checkInProcess': 1}
-    with req.get(url, params=params, stream=True) as response:
-        pdf = Reader(BytesIO(response.raw.read()))
-    return pdf.pages
-
-def check_revs():
-    pull_list = []
-    dwgs = {}
-    for file, num, draw, spec in iter_revs():
-        if spec == '-':
-            dwg = num
-        else:
-            dwg = num.rsplit('-', 1)[0]
-            rev = get_rev(num)
-            if is_old(spec, rev):
-                spec = rev_spec(part)
-                pdf = PdfFileMerger()
-                if draw != '-':
-                    pdf.append(file, pages=(-1*spec.numPages, 0))
-                pdf.append(spec)
-                with open(join(dirname(file),
-                               f'{num}.{draw}.{rev}'), 'wb') as f:
-                    pdf.write(f)
-                pdf.close()
-                remove(file)
-        if draw != '-':
-            if not dwg in dwgs:
-                dwgs[dwg] = get_rev(dwg)
-            rev = dwgs[dwg]
-            if is_old(draw, rev):
-                pull_list.append(dwg)
-    return pull_list
+    head = {'Cookie': 'DqUserInfo=PartDocumentReader=AMERICAS\\MorganEL'}
+    with req.get(url, params=params, headers=head, stream=True) as reply:
+        pgs = re.search(r'Type Pages.+?Count (\d+)', str(reply.content))[1]
+        return pgs, BytesIO(reply.raw.read())
 
 if __name__ == '__main__':
     main()
