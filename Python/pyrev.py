@@ -1,9 +1,9 @@
-# 2018-08-26 23:04:06 #
+# 2018-08-28 00:07:18 #
 from pathlib import Path
-from os import listdir
 from logging import basicConfig, info, error
+from string import ascii_uppercase as letters
 import requests as req
-from lxml.html import fromstring as tohtml, get_element_by_id as get_id
+from lxml.html import fromstring as tohtml, get_element_by_id as by_id
 from io import BytesIO
 from PyPDF2 import PdfFileReader as Reader, PdfFileWriter as Writer, PdfFileMerger as Merger
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 root = Path(DRAW_PATH)
 pyrev = root / '.pyrev'
-revint = lambda s: sum((ord(c) - 64) * 26**n for n, c in enumerate(s[::-1]))
+revals = dict(rev_map())
 get_name = '{0}.{1}.{2}.pdf'.format
 
 def main():
@@ -28,51 +28,61 @@ def main():
                 level = logging.INFO)
     pull = pyrev / 'pull.txt'
     files = get_files(root / 'Library')
-    if pull.exists:
-        rev_draws(pull)
-        # only delete pull when all dwgs are replaced, but update it each time
-    else:
-        # clear log_file
-        pull_list = check_revs(files)
-        if pull_list:
-            pull.write_text('\n'.join(pull_list))
+    pull_list = check_revs(files)
+    if pull_list:
+        rev_pulls(pull_list)
+        pull.write_text('\n'.join(pull_list))
 
 def get_files(lib_dir):
     files = {}
     for f in lib_dir.glob('*.*.*.???'):
         part, draw_rev, spec_rev = f.name.split('.')[0:-1]
-        draw = part if '.-.' in f.name else part.rsplit('-', 1)[0]
-        files[f] = ((None if draw_rev == '-' else draw, draw_rev),
-                   (None if spec_rev == '-' else part, spec_rev))
+        if draw_rev == '-':
+            files[f] = (None, (part, revals[spec_rev]))
+        elif spec_rev == '-':
+            files[f] = ((part, revals[draw_rev]), None)
+        else:
+            files[f] = ((part.rsplit('-', 1)[0], revals[draw_rev]),
+                        (part, revals[spec_rev]))
     return files
 
 def check_revs(file_list):
     ############################################################################
-    # lib.glob('*.*.*.???')
-    # use partre?
     # num pages in raw text like: /Type/Pages ... \n/Kids.+ ... \n/Count #
+    # due to revals, now both sets of data hold ints instead of revs
+    # trying to figure out how to forego putting None into part tuples...make alternate file for that
+    #     will probably involve slicing the revs out in that check_revs (eg file.name.split('.')[1:2])
     revs = get_revs(file_list)
-    pull_list = []
-    for file, parts in file_list.items():
-        (draw, draw_rev), (spec, spec_rev) = parts
+    pull_list = {}
+    for file, (draw, spec) in file_list.items():
+        parts = (draw[0] if draw and draw[1] < revs[draw[1]] else None,
+                 spec[0] if spec and spec[1] < revs[spec[1]] else None)
+        if any(parts):
+            pull_list[file] = parts
     return pull_list
 
 def get_revs(files):
     # test difference between executor.map and executor.submit and zip(list, executor.map)
-    parts = {pn for parts in files.values() for pn, rev in parts if pn}
+    parts = {part for parts in files.values() for part in parts if part}
     with ThreadPoolExecutor() as executor:
         futures = [executor.submit(fetch_rev, part) for part in parts]
         return dict([future.result() for future in as_completed(futures)])
 
 def fetch_rev(part_num):
     url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
-    node = tohtml(req.get(url).content).get_id('revisionNum')
-    return part_num, node.text_content() if node else ''
+    node = tohtml(req.get(url).content).by_id('revisionNum')
+    if node:
+        return part_num, revals[node.text_content()]
 
-def is_old(rev1, rev2):
-    r1 = revint(rev1) if rev1 != 'NC' else 0
-    r2 = revint(rev2) if rev2 != 'NC' else 0
-    return revint(r2) if r2 != 'NC' else 0 > revint(r1) if r1 != 'NC' else 0
+def rev_pulls(pulls):
+    # left off here; problem is now determining best way to pass data to rev_pulls in
+    # order to correctly handle which part of a drawing file to replace, whether it is draw/spec,
+    # and what is needed for making swap;
+    # 
+    # TODO: tomorrow, write out the rev_pulls function first to determine
+    #       which args it should expect, and how it handles single-file drawings
+    # 
+    pass
 
 def rev_spec(part_num):
     url = 'http://houston/ErpWeb/Part/PartDocumentReader.aspx'
@@ -81,6 +91,13 @@ def rev_spec(part_num):
     with req.get(url, params=params, headers=head, stream=True) as reply:
         pgs = re.search(r'Type Pages.+?Count (\d+)', str(reply.content))[1]
         return pgs, BytesIO(reply.raw.read())
+
+def rev_map():
+    yield 'NC', 0
+    for c, n in zip(letters, range(1, 27)):
+        yield c, n
+        for prec, pren in zip('ABC', range(1, 4)):
+            yield prec + c, 26 * pren + n
 
 if __name__ == '__main__':
     main()
