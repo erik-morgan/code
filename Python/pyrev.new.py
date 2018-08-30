@@ -1,15 +1,24 @@
-# 2018-08-29 22:39:58 #
+# 2018-08-29 22:45:21 #
 from pathlib import Path
 import requests as req
 from lxml.html import fromstring as tohtml, get_element_by_id as by_id
 from io import BytesIO
-from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
+from PyPDF2 import PdfFileReader as Reader, PdfFileWriter as Writer, PdfFileMerger as Merger
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
 # TODO: merge 2-, 4-, 6-, 7-, and X- into single folder called Units or Assembly Drawings or Library
 # TODO: idk how necessary pathlib is (wrt os/os.path)
 # NOTE: num pages in raw text like: /Type/Pages ... \n/Kids.+ ... \n/Count #
+################################################################################
+# 
+# pyrev.new is for an alternate way of processing drawing files:
+# In this version, I'll use multithreading once, at a high level, to fully process each file.
+# There will be 1 main function (as entry point) to handle processing. 
+# While it may be inefficient to repeat requests for dwg revs, (I can partially mitigate that 
+#   using a dict of processed dwg revs) the logic will be far simpler, and with less overhead.
+# 
+################################################################################
 
 DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 USER = 'MorganEL'
