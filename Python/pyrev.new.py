@@ -1,5 +1,8 @@
-# 2018-08-29 22:45:21 #
+# 2018-08-30 23:53:26 #
 from pathlib import Path
+from os import walk, remove
+from os.path import join, basename
+import re
 import requests as req
 from lxml.html import fromstring as tohtml, get_element_by_id as by_id
 from io import BytesIO
@@ -24,52 +27,48 @@ DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 USER = 'MorganEL'
 
 def main():
-    root = Path(DRAW_PATH)
-    pyrev = root / '.pyrev'
-    pyrev.mkdir(parents=True, exist_ok=True)
-    pull_file = pyrev / 'pull.txt'
-    files = dict(get_files(root / 'Library'))
-    pull_list = check_revs(files)
-    if pull_list:
-        pull_list = rev_pulls(pull_list)
-        pull_file.write_text('\n'.join(pull_list))
+    files = [f for flist in get_files() for f in flist]
+    # option 1) global var for dict of draw revs
+    # option 2) nested function closure
+    # option 3) get draw revs beforehand
+    # option 4) send dict as argument to check_rev (test if i have to return rev, or if it can be mutated in-func)
+    # option 5) don't use a draws dict at all, just repeat func calls
+    # option 6) return revs, add to dict, & if key is in dict, send it to func? probably won't work bc all futures made at once
+    # i think that just passing it w/o returning will work...
+    revs = {}
+    pulls = []
+    with ThreadPoolExecutor() as pool:
+        jobs = [pool.submit(check_revs, f, revs) for f in files]
+        pulls = {job.result() for job in as_completed(jobs)}
+        pulls.remove(None)
+    if pulls:
+        pull.write_text('\n'.join(pulls))
 
-def get_files(lib_dir):
-    for f in lib_dir.glob('*.*.*.???'):
-        part, draw_rev, spec_rev = f.name.split('.')[0:-1]
-        if '.-.' in f.name:
-            yield f, (None, part)[::1 if drev == '-' else -1]
-        else:
-            yield f, (part.rsplit('-', 1)[0], part)
+def get_files():
+    namerx = re.compile(r'[-0-9]+(\.[-A-Z0]{1,2}){2}\.pdf$', re.I)
+    for path, dirs, files in walk(root):
+        yield [join(path, f) for f in files if namerx.match(f)]
 
-def check_revs(files):
-    revs = get_revs(files)
-    pull_list = {}
-    for file, (draw, spec) in files.items():
-        drev, srev = file.name.split('.')[1:2]
-        revsd, revss = revs.get(draw, '-'), revs.get(spec, '-')
-        if (drev, srev) != (revsd, revss):
-            pull_list[file] = (f'{draw}.{revsd}' if draw else None,
-                               f'{spec}.{revss}' if spec else None)
-    return pull_list
+def check_revs(file, draw_revs):
+    name = basename(file)
+    (draw, )
+    
 
-def get_revs(files):
-    # test difference between executor.map and executor.submit and zip(list, executor.map)
-    parts = {part for parts in files.values() for part in parts if part}
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(fetch_rev, part) for part in parts]
-        return dict([future.result() for future in as_completed(futures)])
+def get_parts(name):
+    part, draw_rev, spec_rev = name.split('.')[0:-1]
+    if '.-.' not in name:
+        return (part.rsplit('.', 1)[0], draw_rev), (part, spec_rev)
+    elif draw_rev == '-':
+        return (None, '-'), (part, spec_rev)
+    else:
+        return (part, draw_rev), (None, '-')
 
 def fetch_rev(part_num):
     url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
     node = tohtml(req.get(url).content).by_id('revisionNum')
-    if node:
-        return part_num, node.text_content()
+    return node.text_content() if node else '-'
 
 def rev_pulls(pulls):
-    # destroy pulls as i go with pop, so ill have new pull list when done
-    draws = {f.name.rsplit('.', 1)[0]:f for f in pyrev.rglob('*.*.pdf')}
-    
     def dorev(file, (draw, spec)):
         if not draw:
             file_new = file.with_name(spec.replace('.', '.-.') + '.pdf')
@@ -79,15 +78,6 @@ def rev_pulls(pulls):
                 return draw
             file_new = file.with_name(draw + '.-.pdf')
             draws.pop(draw).replace(file_new)
-        else:
-            # file is out of rev by virtue of being in this list
-            # if draw in file.name, then 
-            #       use pages from file bc draw is at correct rev, so spec must be out of rev
-            # elif draw in draws, then use its pages, bc draw is out of rev
-            # else draw is NOT at correct rev, but it isn't in draws, so return draw for pull list
-            # if file.name.endswith(spec.split('.')[1] + '.pdf'), then take spec pages from file
-            # else get pages from get_spec
-        file.unlink()
     
     with ThreadPoolExecutor() as executor:
         futures = [executor.submit(f, pulls[f]) for f in pulls]
@@ -103,4 +93,8 @@ def get_spec(part_num):
         return reply.content
 
 if __name__ == '__main__':
+    root = Path(DRAW_PATH)
+    pyrev = root / '.pyrev'
+    pyrev.mkdir(parents=True, exist_ok=True)
+    pull = pyrev / 'pull.txt'
     main()
