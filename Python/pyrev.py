@@ -1,97 +1,100 @@
-# 2018-08-29 22:39:58 #
-from pathlib import Path
+# 2018-09-02 23:09:15 #
+from os import walk, remove, mkdir
+from os.path import exists, join, split
+from fnmatch import filter as fnfilter
+import re
 import requests as req
-from lxml.html import fromstring as tohtml, get_element_by_id as by_id
+from lxml.html import fromstring, get_element_by_id
 from io import BytesIO
-from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
+from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger, PageRange
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+################################################################################
 # TODO: add support for SUD/Gauging revs (by refactoring Drawings folder organization)
-# TODO: merge 2-, 4-, 6-, 7-, and X- into single folder called Units or Assembly Drawings or Library
-# TODO: idk how necessary pathlib is (wrt os/os.path)
-# NOTE: num pages in raw text like: /Type/Pages ... \n/Kids.+ ... \n/Count #
+################################################################################
 
 DRAW_PATH = '/Users/HD6904/Desktop/Drawings'
 USER = 'MorganEL'
 
 def main():
-    root = Path(DRAW_PATH)
-    pyrev = root / '.pyrev'
-    pyrev.mkdir(parents=True, exist_ok=True)
-    pull_file = pyrev / 'pull.txt'
-    files = dict(get_files(root / 'Library'))
-    pull_list = check_revs(files)
-    if pull_list:
-        pull_list = rev_pulls(pull_list)
-        pull_file.write_text('\n'.join(pull_list))
+    namerx = re.compile(r'[-0-9]+(\.[-A-Z0]{1,2}){2}\.pdf$', re.I)
+    files = []
+    for path, dirs, files in walk(root):
+        files.extend(join(path, f) for f in files if namerx.match(f))
+    with ThreadPoolExecutor() as pool:
+        jobs = [pool.submit(check_revs, f) for f in files]
+        pulls = {job.result() for job in as_completed(jobs)}
+        pulls.remove(None)
+    if pulls:
+        pull.write_text('\n'.join(pulls))
 
-def get_files(lib_dir):
-    for f in lib_dir.glob('*.*.*.???'):
-        part, draw_rev, spec_rev = f.name.split('.')[0:-1]
-        if '.-.' in f.name:
-            yield f, (None, part)[::1 if drev == '-' else -1]
-        else:
-            yield f, (part.rsplit('-', 1)[0], part)
+def check_revs(file):
+    path, name = split(file)
+    draw, spec = get_parts(name)
+    draw_new, spec_new = fetch_rev(draw), fetch_rev(spec)
+    if draw != draw_new and draw_new not in draws:
+        retdraw = draw_new
+        draw_new = draw
+    if (draw, spec) != (draw_new, spec_new):
+        name_new = '{0}.{1}.{2}.pdf'.format(name.split('.')[0],
+                                            draw_new.split('.')[1],
+                                            spec_new.split('.')[1])
+        rev_file(join(path, name_new),
+                 file if draw and draw == draw_new else draw_new,
+                 file if spec and spec == spec_new else spec_new)
+        remove(file)
+    return retdraw if retdraw else None
 
-def check_revs(files):
-    revs = get_revs(files)
-    pull_list = {}
-    for file, (draw, spec) in files.items():
-        drev, srev = file.name.split('.')[1:2]
-        revsd, revss = revs.get(draw, '-'), revs.get(spec, '-')
-        if (drev, srev) != (revsd, revss):
-            pull_list[file] = (f'{draw}.{revsd}' if draw else None,
-                               f'{spec}.{revss}' if spec else None)
-    return pull_list
+def get_parts(name):
+    part, draw_rev, spec_rev = name.split('.')[0:-1]
+    if '.-.' not in name:
+        return f'{part.rsplit('-', 1)[0]}.{draw_rev}', f'{part}.{spec_rev}'
+    elif draw_rev == '-':
+        return None, f'{part}.{spec_rev}'
+    else:
+        return f'{part}.{draw_rev}', None
 
-def get_revs(files):
-    # test difference between executor.map and executor.submit and zip(list, executor.map)
-    parts = {part for parts in files.values() for part in parts if part}
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(fetch_rev, part) for part in parts]
-        return dict([future.result() for future in as_completed(futures)])
+def fetch_rev(part):
+    if part:
+        part_num = part.split('.')[0]
+        with req.get('http://houston/ErpWeb/PartDetails.aspx',
+                     params={'PartNumber': part_num}) as reply:
+            node = fromstring(reply.content).get_element_by_id('revisionNum')
+    return f'{part}.{node.text_content()}' if part else None
 
-def fetch_rev(part_num):
-    url = 'http://houston/ErpWeb/PartDetails.aspx?PartNumber={part_num}'
-    node = tohtml(req.get(url).content).by_id('revisionNum')
-    if node:
-        return part_num, node.text_content()
-
-def rev_pulls(pulls):
-    # destroy pulls as i go with pop, so ill have new pull list when done
-    draws = {f.name.rsplit('.', 1)[0]:f for f in pyrev.rglob('*.*.pdf')}
-    
-    def dorev(file, (draw, spec)):
-        if not draw:
-            file_new = file.with_name(spec.replace('.', '.-.') + '.pdf')
-            file_new.write_bytes(get_spec(spec))
-        elif not spec:
-            if draw not in draws:
-                return draw
-            file_new = file.with_name(draw + '.-.pdf')
-            draws.pop(draw).replace(file_new)
-        else:
-            # file is out of rev by virtue of being in this list
-            # if draw in file.name, then 
-            #       use pages from file bc draw is at correct rev, so spec must be out of rev
-            # elif draw in draws, then use its pages, bc draw is out of rev
-            # else draw is NOT at correct rev, but it isn't in draws, so return draw for pull list
-            # if file.name.endswith(spec.split('.')[1] + '.pdf'), then take spec pages from file
-            # else get pages from get_spec
-        file.unlink()
-    
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(f, pulls[f]) for f in pulls]
-        retcodes = {future.result() for future in as_completed(futures)}
-        return [rc for rc in retcodes if rc]
-    # remove draws when done
+def rev_file(file_path, draw, spec):
+    pdf = Merger()
+    if draw in draws:
+        draw_pdf = Reader(draws.get(draw, draw))
+    if spec:
+        spec_pdf = Reader(spec if '.' in spec[-3:] else get_spec(spec))
+    if draw and spec:
+        pdf.append(draw_pdf, pages=PageRange(':' if draw in draws else
+                                             ':-' + spec_pdf.numPages))
+        pdf.append(spec_pdf, pages=PageRange(':' if spec.count('.') == 1 else
+                                             draw_pdf.numPages + ':'))
+    else:
+        pdf.append(spec_pdf if spec else draw_pdf)
+    with open(file_path, 'wb') as f:
+        pdf.write(f)
 
 def get_spec(part_num):
+    part_num = part_num.split('.')[0]
     head = {'Cookie': f'DqUserInfo=PartDocumentReader=AMERICAS\\{USER}'}
     with req.get('http://houston/ErpWeb/Part/PartDocumentReader.aspx',
                  params={'PartNumber': part_num, 'checkInProcess': 0},
-                 headers=head) as reply:
-        return reply.content
+                 headers=head, stream=True) as reply:
+        return BytesIO(reply.raw.read())
 
 if __name__ == '__main__':
+    pyrev = join(DRAW_PATH, 'pyrev')
+    if not exists(pyrev):
+        mkdir(pyrev)
+    pull = join(pyrev, 'pull.txt')
+    draws = {}
+    for path, dirs, files in walk(pyrev):
+        for f in fnfilter(files, '*.*.pdf'):
+            draws[f[:-4]] = join(path, f)
     main()
+    for f in draws.values():
+        remove(f)
