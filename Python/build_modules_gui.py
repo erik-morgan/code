@@ -1,74 +1,74 @@
-# 2018-09-19 23:57:16 #
+# 2018-09-20 23:28:31 #
 from tkinter import BooleanVar, filedialog, StringVar, Tk
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Style, Treeview
-from tkinter.font import nametofont
 from os import walk, remove
 from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
 import re
-
-# determine if there is any utility in making build_modules logic into a class!
-# otherwise, just make it simple and working using top level functions
 
 class BuildModulesApp(Tk):
     def __init__(self):
         super().__init__()
         self.resizable(width=True, height=False)
         self.title('Build Modules (by Erik Morgan)')
-        self.bind('<Escape>', self.quit)
-        self.form = FormFrame(self, self.build_libs)
-        self.form.build_form()
-        self.form.pack(expand=True, fill='BOTH')
+    
+    def launch_form(self):
         s = Style()
         s.theme_use('aqua' if 'aqua' in s.theme_names() else 'clam')
+        self.form = FormFrame(self, self.build_modules)
+        self.form.build_form()
+        self.form.pack(expand=True, fill='BOTH')
     
     def build_modules(self):
         self.dirs = self.form.dirs
         self.rmtocs = self.form.rmtocs.get()
+        self.dims = (self.winfo_reqwidth(), self.winfo_reqheight())
         self.form.destroy()
+        self.doclib = self.build_lib()
         self.pb = ProgressFrame(self, self.tocs)
         self.pb.pack(expand=True, fill='BOTH')
     
-    def build_libs(self):
-        # do for self.dirs[pdfs & dwgs & tocs]
-        # changed onrun callback to build_libs since this
-        # is only place I'll need paths from self.dirs
-        Module.pdflib = pdfs
-        Module.dwglib = dwgs
-        self.tocs = tocs
-        self.build_modules()
+    def build_lib(self):
+        # resume here
+        rxlib = re.compile(r'dwg pattern|rp pattern', flags=re.I)
+        rxtoc = re.compile(r'toc pattern', flags=re.I)
+        self.sep = '\\' if '\\' in self.dirs['dest'] else '/'
+        self.tocs = self.iter_dir(['tocs'], rxtoc.search)
+        # this is just a list of paths. convert it to dict
+        # also, keep in mind that iter_dir will only be used
+        # twice: for tocs & doclib
+        paths = list(self.iter_dir(['pdfs', 'dwgs'], rxlib.match))
     
-    def iter_dir(dir_path, cond='*'):
-        for path, dirs, files in walk(dir_path):
-            path += '/'
-            files = [path + f for f in fnfilter(files, '*.[Pp][Dd][Ff]')]
-            for f in fnfilter(files, cond):
-                yield f
+    def iter_dirs(dir_keys, rxfn):
+        for d in dir_keys:
+            for path, dirs, files in walk(self.dirs[d]):
+                path += self.sep
+                for f in filter(rxfn, files):
+                    yield path + f
     
 
 class FormFrame(Frame):
     def __init__(self, master, onrun):
-        super().__init__(master)
+        super().__init__(master, padding=16)
         self.master = master
+        self.bind('<Escape>', self.master.quit)
         self.onrun = onrun
         self.rmtocs = BooleanVar()
         self.fields = {
-            'pdfs': 'PDFs:',
-            'dwgs': 'Drawings:',
-            'tocs': 'TOCs:',
+            'pdfs': 'PDFs Location:',
+            'dwgs': 'Drawings Location:',
+            'tocs': 'Project TOCs:',
             'dest': 'Destination:'
         }
     
     def build_form(self):
         for r, name in enumerate(self.fields):
             self.add_field(r, name)
-        check = Checkbutton(self, variable=self.rmtocs,
-                            text='Delete TOC after successful build')
-        check.grid(column=0, row=4, columnspan=3, sticky='W', padx=16, pady=16)
-        self.cancel = Button(self, text='Cancel', command=self.quit)
-        self.cancel.grid(column=0, row=4, columnspan=2, sticky='NES', pady=16)
-        self.run = Button(self, text='Run', state='disabled',
-                          command=self.onrun)
-        self.run.grid(column=2, row=4, sticky='NESW', padx=(8, 16), pady=16)
+        check = Checkbutton(self, variable=self.rmtocs, text='Delete used TOCs')
+        check.grid(column=0, row=4, columnspan=3, sticky='w', pady=(0, 16))
+        cancel = Button(self, text='Cancel', command=self.master.quit)
+        cancel.grid(column=1, row=4, columnspan=2, sticky='nes')
+        self.run = Button(self, text='Run', state='disabled', command=self.onrun)
+        self.run.grid(column=2, row=4, sticky='nesw', padx=(8, 0))
         self.columnconfigure(1, weight=1)
         self.center()
     
@@ -81,12 +81,12 @@ class FormFrame(Frame):
             if all(self.fields.values()):
                 self.run.configure(state='normal')
         svar = StringVar()
-        lbl = Label(self, text=label)
+        lbl = Label(self, text=self.fields[name])
         fld = Entry(self, width=60, state='readonly', textvariable=svar)
         btn = Button(self, text='Browse', command=browse)
-        lbl.grid(column=0, row=r, sticky='W', padx=(16, 8), pady=(16, 0))
-        field.grid(column=1, row=r, sticky='NESW', pady=(16, 0))
-        browse.grid(column=2, row=r, sticky='NESW', padx=(8, 16), pady=(16, 0))
+        lbl.grid(column=0, row=r, sticky='w', pady=(0, 16))
+        fld.grid(column=1, row=r, sticky='nesw', padx=8, pady=(0, 16))
+        btn.grid(column=2, row=r, sticky='nesw', pady=(0, 16))
     
     def center(self):
         self.update_idletasks()
@@ -98,12 +98,11 @@ class FormFrame(Frame):
 
 class ProgressFrame(Frame):
     def __init__(self, master, tocs):
-        super().__init__(master)
+        super().__init__(master, padding=16)
         self.master = master
         self.tocs = tocs
-        self.charw = nametofont('TkDefaultFont').measure('0')
         self.pb = Progressbar(self, maximum=len(tocs))
-        self.pb.grid(column=0, row=0, sticky='NESW', padx=16, pady=16)
+        self.pb.grid(column=0, row=0, sticky='nesw', padx=16, pady=16)
         self.build_table()
         self.pb.step()
         self.close = Button(self, text='Close', command=self.quit)
@@ -118,7 +117,7 @@ class ProgressFrame(Frame):
         self.table = Treeview(self, columns=('tocs', 'status'))
         self.table.heading('tocs', text='TOCs')
         self.table.heading('status', text='Status')
-        self.table.grid(column=0, row=1, sticky='NESW', padx=16)
+        self.table.grid(column=0, row=1, sticky='nesw', padx=16)
         self.row_ids = []
         for toc in self.tocs:
             self.row_ids.append(self.table.insert('', 'end', values=(toc, '')))
@@ -157,8 +156,10 @@ class Module:
     
     def get_path(idnum):
         # check if idnum is in any of the libraries, and returns it if found
+        pass
     
 
 if __name__ == '__main__':
     app = BuildModulesApp()
+    app.launch_form()
     app.mainloop()
