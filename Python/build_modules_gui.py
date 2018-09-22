@@ -1,7 +1,8 @@
-# 2018-09-20 23:28:31 #
+# 2018-09-21 16:42:34 #
 from tkinter import BooleanVar, filedialog, StringVar, Tk
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Style, Treeview
 from os import walk, remove
+from os.path import join as join_path
 from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
 import re
 
@@ -28,22 +29,26 @@ class BuildModulesApp(Tk):
         self.pb.pack(expand=True, fill='BOTH')
     
     def build_lib(self):
-        # resume here
-        rxlib = re.compile(r'dwg pattern|rp pattern', flags=re.I)
-        rxtoc = re.compile(r'toc pattern', flags=re.I)
-        self.sep = '\\' if '\\' in self.dirs['dest'] else '/'
+        # #-####
+        # ######
+        # XX####
+        rxlib = re.compile(r'(?:\d-|[a-z]{2,6})?\d{4,6}\b.+pdf', flags=re.I)
+        rxtoc = re.compile(r'\bTOC.indd$', flags=re.I)
         self.tocs = self.iter_dir(['tocs'], rxtoc.search)
         # this is just a list of paths. convert it to dict
         # also, keep in mind that iter_dir will only be used
         # twice: for tocs & doclib
         paths = list(self.iter_dir(['pdfs', 'dwgs'], rxlib.match))
     
-    def iter_dirs(dir_keys, rxfn):
-        for d in dir_keys:
-            for path, dirs, files in walk(self.dirs[d]):
-                path += self.sep
-                for f in filter(rxfn, files):
-                    yield path + f
+    def iter_dir(dir_paths, pattern=r'.+'):
+        # most efficient to use fnfilter with an ext only pattern
+        rx = re.compile(pattern, re.I)
+        for dir_path in dir_paths:
+            for path, dirs, files in walk(dir_path):
+                yield from filter(rx.search, map(join_path))
+                yield from (f for f in map(join_path))
+                join_path
+                yield from (path + f for f in files if f.endswith(ext))
     
 
 class FormFrame(Frame):
