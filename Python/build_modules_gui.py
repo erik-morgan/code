@@ -1,4 +1,4 @@
-# 2018-09-23 00:36:11 #
+# 2018-09-23 22:41:32 #
 from tkinter import BooleanVar, filedialog, StringVar, Tk
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Style, Treeview
 from os import walk, remove, sep
@@ -17,6 +17,7 @@ class BuildModulesApp(Tk):
         s.theme_use('aqua' if 'aqua' in s.theme_names() else 'clam')
         self.form = FormFrame(self, self.build_modules)
         self.form.build_form()
+        # RESUME HERE
         self.form.pack(expand=True, fill='BOTH')
     
     def build_modules(self):
@@ -24,23 +25,28 @@ class BuildModulesApp(Tk):
         self.rmtocs = self.form.rmtocs.get()
         self.dims = (self.winfo_reqwidth(), self.winfo_reqheight())
         self.form.destroy()
-        self.doclib = self.build_lib()
+        self.build_lib()
         self.pb = ProgressFrame(self, self.tocs)
         self.pb.pack(expand=True, fill='BOTH')
     
     def build_lib(self):
-        rxlib = re.compile(r'(?:\d-|[a-z]{2,6})?\d{4,6}\b.+pdf', flags=re.I)
-        rxtoc = re.compile(r'\bTOC.indd$', flags=re.I)
-        self.tocs = self.iter_dir(['tocs'], rxtoc.search)
-        # this is just a list of paths. convert it to dict
-        # also, keep in mind that iter_dir will only be used twice: for tocs & doclib
-        # RESUME HERE
-        paths = list(self.iter_dir(['pdfs', 'dwgs'], rxlib.match))
+        rx = re.compile(r'^[-A-Z0-9/]+', re.I)
+        self.tocs = {}
+        for path, fname in self.iter_dir('tocs', pat='*TOC.indd'):
+            self.tocs[fname[:-5]] = f'{path}{sep}{fname}'
+        self.lib = {}
+        for path, fname in self.iter_dir('pdfs', 'dwgs', pat='*.pdf'):
+            fmatch = rx.match(fname)
+            if fmatch:
+                self.lib[fmatch.group()] = f'{path}{sep}{fname}'
     
-    def iter_dir(self, dpath, pattern='*'):
-        steps = (step[::2] for step in walk(self.dirs.get(dpath, dpath)))
-        return {f'{path}{sep}{f}':f for path, files in steps
-                                    for f in fnfilter(files, pattern)}
+    def iter_dir(self, *args, pat='*'):
+        dirs = [self.dirs(a) for a in args]
+        steps = (step for d in dirs for step in walk(d))
+        for path, folds, files in steps:
+            files = fnfilter(files, '[!.]*')
+            folds[:] = [fold for fold in folds if not fold.startswith('.')]
+            yield from ((path, f) for f in fnfilter(files, pat))
     
 
 class FormFrame(Frame):
