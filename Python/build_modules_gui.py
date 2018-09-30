@@ -1,10 +1,9 @@
-# 2018-09-28 00:56:49 #
+# 2018-09-29 12:50:43 #
 from tkinter import BooleanVar, filedialog, IntVar, StringVar, Tk
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Style, Treeview
 from os import walk, remove, sep
 from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
 from fnmatch import filter as fnfilter
-from io import BytesIO
 import re
 
 class BuildModulesApp(Tk):
@@ -160,78 +159,6 @@ class Module:
         for child in self.docs:
             pdf.append(child)
         pdf.write(out_path)
-    
-
-class PDFParser:
-    def __init__(self, path):
-        self.pdf = Reader(path)
-        self.pages = self.pdf.pages
-    
-    def get_text(self):
-        for page in self.pages:
-            datab = page.getContents().getData()
-            self.parse(datab)
-        return self.text
-    
-    def parse(self, bites):
-        # ActualText<FEFF0009>>> is a tab!
-        # review intext optimization options & next_literal functionality
-        # while using BytesIO, can nest while loops like w/ hex str portion
-        # RESUME
-        
-        def is_operator(stream, *args):
-            for op in args:
-                if stream.read(len(op) + 2).strip(whitespace) == op:
-                    return True
-                else:
-                    stream.seek(-len(op) - 2, 1)
-            return False
-        
-        append_text = self.text.append
-        whitespace = b' \t\n\r\x0b\f'
-        intext = False
-        next_literal = False
-        depth = 0
-        stream = BytesIO(bites)
-        while True:
-            char = stream.read(1)
-            if not char:
-                break
-            if intext:
-                if not depth:
-                    if is_operator(stream, b'TD', b'Td', b'T*', b'\'', b'"'):
-                        append_text(b'\n')
-                    elif char == b'<':
-                        charh = stream.read(1)
-                        hex_chars = b''
-                        while charh not in b'<>':
-                            hex_chars += charh
-                            charh = stream.read(1)
-                        if len(hex_chars) % 2 != 0:
-                            hex_chars += b'0'
-                        for h1, h2 in zip(hex_chars[0::2], hex_chars[1::2]):
-                            charh = int(h1 + h2, 16)
-                            if charh < 127:
-                                append_text(chr(charh))
-                        continue
-                    elif is_operator(stream, b'TJ', b'Tj'):
-                        append_text(b' ')
-                if not depth and is_operator(stream, b'ET'):
-                    intext = False
-                    append_text(b'\n')
-                elif char == b'(' and not depth and not next_literal:
-                    depth += 1
-                elif char == b')' and depth == 1 and not next_literal:
-                    depth = 0
-                elif depth:
-                    if char == b'\\' and not next_literal:
-                        next_literal = True
-                    else:
-                        if char.isascii():
-                            append_text(char)
-                        next_literal = False
-            if not intext and is_operator(stream, b'BT'):
-                intext = True
     
 
 if __name__ == '__main__':
