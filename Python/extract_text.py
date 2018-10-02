@@ -1,134 +1,85 @@
-# 2018-09-30 01:35:09 #
+# 2018-10-01 20:09:47 #
 from PyPDF2 import PdfFileReader as Reader
-from io import BytesIO
+import string
 import re
 
 class PDFParser:
-    def __init__(self, path):
-        self.pdf = Reader(path)
-        self.pages = self.pdf.pages
-        self.text = bytearray()
-        self.addtext = self.text.extend
-        self.hex_digits = b'0123456789abcdefABCDEF'
+    escapes = {'n': '\n', 'r': '\r', 't': '\t'}
+    hexes = {}
+    printable = set(string.printable)
+    hexdigits = set(string.hexdigits)
     
-    def get_text(self, page=None):
-        parse_func = self.parse_page
-        # parse_func = self.parse
-        if page != None:
-            parse_func(self.pages[page])
-        else:
-            list(map(parse_func, self.pages))
-        self.text = self.text.decode()
-        self.text = re.sub(r'-\s+', '', self.text)
-        self.text = re.sub(r'\s*\t\s*', '\t', self.text)
-        self.text = re.sub(r'\s*\n\s*', '\n', self.text)
-        self.text = re.sub(r'\n(?=\w{1,3}\n)([A-Z]{1,3})?', ' ', self.text)
-        self.text = re.sub(r' {2,}', ' ', self.text)
-        return self.text
-    
-    def dump_page(self, page):
-        return self.pages[page].extractText()
+    def get_text(self, pdf):
+        self.pos = 0
+        pages = Reader(pdf).pages
+        text = '\n'.join(''.join(self.parse(page)) for page in pages)
+        text = re.sub(r'\\(\d{1,3})', self.fromoct, text)
+        text = re.sub(r'\s*\n\s*', '\n', text)
+        text = re.sub(r'(?<=\S)-\s+', '', text)
+        text = re.sub(r' {2,}', ' ', text)
+        return text
     
     def parse(self, page):
-        stream = BytesIO(page.getContents().getData())
-        operators = [b'ET', b'TD', b'Td', b'T*', b'\'', b'"']
-        operator_chars = b''.join(operators)
-        hopper = bytearray()
-        intext = False
-        while True:
-            char = stream.read(1)
-            if intext:
-                if char == b'<':
-                    self.parse_hex(stream)
-                elif char == b'(':
-                    self.parse_str(stream)
-            if char.isspace() and len(hopper):
-                if not intext and hopper == b'BT':
-                    intext = True
-                if intext and hopper in operators:
-                    self.addtext(b'\n')
-                    if hopper == b'ET':
-                        intext = False
-                hopper.clear()
-            elif char in operator_chars:
-                hopper.extend(char)
-    
-    def parse_page(self, page):
-        content = page.getContents().getData()
-        stream = BytesIO(content)
-        ws = b' \t\n\r\x0b\f'
-        self.streamlen = len(content)
-        while True:
-            bt = content.find(b'BT', stream.tell())
-            if bt == -1:
-                break
-            if (bt == 0 or content[bt - 1] in ws) and content[bt + 2] in ws:
-                stream.seek(bt, 0)
-                self.parse_text_object(stream)
-    
-    def parse_text_object(self, stream):
-        # Excluding T* and TD operators because of how InDesign seemed
-        # to use them. The parsing results were more accurate without them.
-        operators = [b'ET', b'Td', b'Tj', b'TJ', b'\'', b'"']
-        operator_chars = b''.join(operators)
-        hopper = bytearray()
-        while stream.tell() < self.streamlen:
-            char = stream.read(1)
-            if char == b'<':
-                self.parse_hex(stream)
-            elif char == b'(':
-                self.parse_str(stream)
-            elif char.isspace():
-                if hopper in operators:
-                    self.addtext(b' ' if hopper in b'Tj TJ' else b'\n')
-                    if hopper == b'ET':
-                        break
-                hopper.clear()
-            elif char in operator_chars:
-                hopper.extend(char)
-    
-    def parse_hex(self, stream):
-        hexbytes = bytearray(stream.read(1))
-        while hexbytes[-1] in self.hex_digits:
-            hexbytes.extend(stream.read(1))
-        hexbytes.pop()
-        if len(hexbytes):
-            hexstr = hexbytes.decode() + ('0' if len(hexbytes) % 2 else '')
-            if hexstr.startswith('FEFF'):
-                hexstr = bytearray.fromhex(hexstr).decode('utf-16')
+        data = page.getContents().getData().decode()
+        tokens = re.compile(r'\(|(?<!<)<(?!<)|([\d.]+)?\s(Td|TD|Tm|T\*\'|")\b')
+        tm = '0'
+        token = tokens.search(data)
+        while token:
+            tok = token[0]
+            self.pos = token.end()
+            if tok[0].isdigit():
+                if token[2] == 'Tm' and token[1] != tm:
+                    tm = token[1]
+                    yield '\n'
+                elif token[2] in 'TdTD' and token[1] != '0':
+                    yield '\n'
+            elif tok == '(':
+                yield from self.parse_str(data)
+            elif tok == '<':
+                yield from self.parse_hex(data)
             else:
-                hexstr = bytearray.fromhex(hexstr).decode()
-            if hexstr.isascii():
-                self.addtext(hexstr.encode())
+                yield '\n'
+            token = tokens.search(data, self.pos)
     
-    def parse_str(self, stream):
-        tokens = {b'(': 1, b')': -1}
-        escapes = {b'n': b'\n', b'r': b'\r', b't': b'\t'}
+    def parse_str(self, data):
         token_sum = 0
         while True:
-            char = stream.read(1)
-            if char == b')' and token_sum == 0:
-                break
-            if char == b'\\':
-                char = stream.read(1)
-                if char in escapes:
-                    char = escapes[char]
+            char = data[self.pos]
+            if char in '()':
+                if char == ')' and token_sum == 0:
+                    break
+                else:
+                    token_sum += 1 if char == '(' else -1
+            if char == '\\':
+                self.pos += 1
+                char = data[self.pos]
+                if char in '\n\r' and data[self.pos + 1] in '\n\r':
+                    self.pos += 1
                 elif char.isdigit():
-                    char += stream.read(2)
-                    while not char.isdigit():
-                        char = char[:-1]
-                    stream.seek(len(char) - 3, 1)
-                    char = chr(int(char, 8)).encode()
-                    self.addtext(char if char.isascii() else b' ')
-                elif char in b'\n\r':
-                    char = stream.read(1)
-                    if char not in b'\n\r':
-                        stream.seek(-1, 1)
-            else:
-                token_sum += tokens.get(char, 0)
-            self.addtext(char)
+                    char = '\\' + char
+                else:
+                    char = self.escapes.get(char, char)
+            self.pos += 1
+            yield char
+    
+    def parse_hex(self, data):
+        remainder = {0: '', 1: '0'}
+        hchars = data[self.pos:data.find('>', self.pos)]
+        self.pos += len(hchars)
+        if hchars not in self.hexes and set(hchars) < self.hexdigits:
+            hexstr = hchars + remainder[len(hchars) % 2]
+            code = 'utf-16' if hexstr.startswith('FEFF') else 'utf-8'
+            hexstr = bytes.fromhex(hexstr).decode(code)
+            if set(hexstr) < self.printable:
+                self.hexes[hchars] = hexstr
+        yield self.hexes.get(hchars, '')
+    
+    @staticmethod
+    def fromoct(match):
+        c = chr(int(match[1], 8))
+        return c if c in string.printable else ' '
 
 if __name__ == '__main__':
-    parser = PDFParser('/home/erik/Downloads/build_modules/PDF Spec/SS0351-13 TOC.pdf')
-    print(parser.get_text(2))
-    # print(parser.dump_page(2))
+    parser = PDFParser()
+    results = parser.get_text('/home/erik/Downloads/build_modules/PDF Spec/SS0351-13 TOC.pdf')
+    print(results)
