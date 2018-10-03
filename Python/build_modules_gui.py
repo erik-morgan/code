@@ -1,7 +1,8 @@
-# 2018-10-01 22:25:29 #
+# 2018-10-02 23:34:08 #
 from tkinter import BooleanVar, filedialog, IntVar, StringVar, Tk
-from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Style, Treeview
-from os import walk, remove, sep
+from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Progressbar, Scrollbar, Style, Treeview
+from tkinter.font import nametofont
+from os import exists, remove, sep, walk
 from PyPDF2 import PdfFileReader as Reader, PdfFileMerger as Merger
 from fnmatch import filter as fnfilter
 import string
@@ -21,28 +22,44 @@ class BuildModulesApp(Tk):
         self.form.pack(expand=True, fill='both')
     
     def build_modules(self):
-        self.dirs = self.form.dirs
-        self.rmtocs = self.form.rmtocs.get()
-        self.form.destroy()
         self.build_libs()
+        self.form.destroy()
         self.prog = ProgressFrame(self, self.tocs)
         self.prog.pack(expand=True, fill='both')
-        Module.parser = PDFParser()
+        builder = ModuleBuilder()
+        builder.dest = self.dirs['dest'] + sep
+        for toc, toc_path in self.tocs.items():
+            missing = []
+            build_paths = builder.scrape(toc, toc_path)
+            if build_paths:
+                for n, name in enumerate(build_paths):
+                    build_paths[n] = self.lib.get(name)
+                    if name not in self.lib:
+                        missing.append(name)
+                if all(build_paths):
+                    builder.build(build_paths)
+                    status = 'Build Complete!'
+                else:
+                    status = 'Missing: ' + ', '.join(missing)
+            else:
+                status = 'Error reading TOC'
+            self.prog.update(toc, status)
     
     def build_libs(self):
         # SET LIBS TO CLASS ATTRIBUTE OF MODULE CLASS
-        rx = re.compile(r'^[-A-Z0-9/]+', re.I)
+        self.dirs = self.form.dirs
+        self.rmtocs = self.form.rmtocs.get()
         self.tocs = {}
         for path, fname in self.iter_dir('tocs', pat='*TOC.pdf'):
             self.tocs[fname[:-5]] = f'{path}{sep}{fname}'
         self.lib = {}
         for path, fname in self.iter_dir('pdfs', 'dwgs', pat='*.pdf'):
-            fmatch = rx.match(fname)
+            fmatch = re.match(r'^[-A-Z0-9/]+', fname, flags=re.I)
             if fmatch:
-                self.lib[fmatch.group()] = f'{path}{sep}{fname}'
+                self.lib[fmatch[0].replace('/', '-')] = f'{path}{sep}{fname}'
     
     def iter_dir(self, *args, pat='*'):
-        dirs = [self.dirs(a) for a in args]
+        dirs = [self.dirs[a] for a in args]
         steps = (step for d in dirs for step in walk(d))
         for path, folds, files in steps:
             files = fnfilter(files, '[!.]*')
@@ -107,61 +124,66 @@ class ProgressFrame(Frame):
         self.tocs = tocs
         pbval = IntVar()
         self.pb = Progressbar(self, maximum=len(tocs), variable=pbval)
-        self.pb.pack(expand=True, fill='x', pady=(0, 16))
+        self.pb.grid(column=0, row=0, columnspan=2, pady=(0, 16), sticky='nesw')
         self.pbval = property(pbval.get, pbval.set)
         self.build_table()
         self.close = Button(self, text='Close', command=self.master.destroy)
-        self.close.grid(column=0, row=2, pady=16)
-        self.layout()
-    
-    def layout(self):
-        self['width'] = self.master.winfo_reqwidth()
-        self['height'] = self.master.winfo_reqheight()
-        # charw = nametofont('TkDefaultFont').measure('0')
-        # ACTUALLY, DO THIS:
-        # TRY USING TWO LISTBOXES, SIDE-BY-SIDE, INSIDE OF A FRAME
-        # TREEVIEW IS TOO HARD TO CONFIGURE, SIZE-WISE
+        self.close.grid(column=0, row=3, columnspan=2, pady=16)
     
     def build_table(self):
-        self.table = Treeview(self, height=len(self.tocs),
-                              selectmode='none', show='headings')
-        self.table.column('tocs', )
+        charw = nametofont('TkDefaultFont').measure('0')
+        minw = len(max(self.tocs, key=len)) * charw + 16
+        xsb = Scrollbar(self, orient='vertical', command=self.tree.xview)
+        ysb = Scrollbar(self, orient='horizontal', command=self.tree.yview)
+        self.table = Treeview(self, height=len(self.tocs), selectmode='none',
+                              show='headings', columns=('tocs', 'status'),
+                              xscrollcommand=xsb.set, yscrollcommand=ysb.set)
+        self.table.column('tocs', minwidth=minw, stretch=False)
         self.table.heading('tocs', text='TOCs')
-        self.table.column('status', )
+        self.table.column('status', minwidth=minw)
         self.table.heading('status', text='Status')
-        self.table.pack(expand=True, fill='both')
         for toc in self.tocs:
             self.table.insert('', 'end', toc, values=(toc, ''))
+        self.table.grid(column=0, row=1, sticky='nesw')
+        xsb.grid(column=0, row=2, columnspan=2, sticky='ew')
+        ysb.grid(column=1, row=1, sticky='ns')
     
-    def update(self, status, iid):
+    def update(self, iid, status):
         self.table.set(iid, 'status', status)
         self.pbval += 1
         if self.pbval == self.pb.maximum:
             self.close.configure(state='normal')
 
-class Module:
-    def __init__(self, toc):
-        self.path = toc
-        self.dqid = re.match(r'^[^. ]+', toc.rpartition(sep)[2]).group()
-        self.docs = [self.dqid]
+class ModuleBuilder:
+    def __init__(self):
+        self.parser = PDFParser()
+        self.draws = re.compile(r'^(?:\d-)?(?:[A-Z]{1,2}[- ]?)?\d{4,}[-\w]*(?=\s)', re.I|re.M)
     
-    def scrape(self):
+    def scrape(self, name, path):
+        self.name = name
+        docs = [re.match(r'^[^. ]+', name)[0]]
         try:
-            # remember illustrations too
-            txt = self.parser.get_text(self.path)
-            txt = re.sub(r' (?=\d{5})', '', txt.split('Assembly Drawing')[1])
-            for draw in drawre.finditer(txt):
-                if draw not in self.docs:
-                    self.docs.append(draw[0])
+            txt = self.parser.get_text(path).upper()
         except:
-            # idk what to do here
+            # what if it is a non-searchable pdf?
+            return []
+        if 'ILLUSTRATION' in txt:
+            txt = txt.split('ILLUSTRATION')[1]
+        elif 'ASSEMBLY DRAWING' in txt:
+            txt = txt.split('ASSEMBLY DRAWING')[1]
+        docs.extend(self.draws.findall(txt))
+        return docs
     
-    def build(self, out_path):
-        # return True/False, so if False, controller knows to ask for missing files
-        if exists(out_path):
-            os.remove(out_path)
+    def build(self, files):
+        out_path = self.dest + self.name
+        num = 1
+        ext = '.pdf'
+        while exists(f'{out_path}{ext}')
+            num += 1
+            ext = f'.{num}.pdf'
+        out_path += ext
         pdf = Merger()
-        for child in self.docs:
+        for f in files:
             pdf.append(child)
         pdf.write(out_path)
     
