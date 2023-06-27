@@ -1,0 +1,23 @@
+#Connect to MS Online
+
+Connect-MsolService
+Connect-AzureAD
+
+#Create New Password Profile and New User Account, setting usage location (important) and office location
+#$passwd = ConvertTo-SecureString "Welcome2023!@#"
+$PasswordProfile = New-Object -TypeName Microsoft.Open.AzureAD.Model.PasswordProfile
+$PasswordProfile.Password = "Welcome2023!@#"
+$PasswordProfile.ForceChangePasswordNextLogin = $true
+$newuser = New-AzureADUser -DisplayName "Erik Test" -PasswordProfile $PasswordProfile -UserPrincipalName "eriktest@domain.com" -AccountEnabled $true -MailNickName "eriktest" -UsageLocation "US"
+
+#Add an E5 license to the new user account
+
+Set-MsolUserLicense -UserPrincipalName "eriktest@domain.com" -AddLicenses "domain:SPE_E5"
+
+#Get Object ID of Manager
+
+$mgrid = (Get-AzureADUser -ObjectId "erik@domain.com").ObjectId
+
+#Set Manager (-ObjectId Specifies the ID (as a UPN or ObjectId) of a user in Azure AD. -RefObjectId Specifies the ID of the Azure AD object to assign as owner/manager/member.
+
+Set-AzureADUserManager -ObjectId $newuser.ObjectId -RefObjectId $mgrid
